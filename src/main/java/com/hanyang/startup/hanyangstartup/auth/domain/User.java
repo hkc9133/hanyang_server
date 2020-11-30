@@ -1,7 +1,6 @@
 package com.hanyang.startup.hanyangstartup.auth.domain;
 
 import lombok.*;
-import sun.jvm.hotspot.debugger.cdbg.EnumType;
 
 @Getter
 @Setter
