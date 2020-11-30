@@ -17,12 +17,12 @@
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>INFO</level>
             </filter>
-            <file>/home/jenkins/rida-server/logs/rida-server.log</file>
+            <file>/home/jenkins/hanyaung/logs/hanyaung.log</file>
             <encoder>
                 <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
             </encoder>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/home/jenkins/rida-server/logs/old/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <fileNamePattern>/home/jenkins/hanyaung/logs/old/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                 <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                     <maxFileSize>100mb</maxFileSize>
                 </timeBasedFileNamingAndTriggeringPolicy>
@@ -35,12 +35,12 @@
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>ERROR</level>
             </filter>
-            <file>/home/jenkins/rida-server/logs/rida-server-error.log</file>
+            <file>/home/jenkins/hanyaung/logs/hanyaung-error.log</file>
             <encoder>
                 <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
             </encoder>
             <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <fileNamePattern>/home/jenkins/rida-server/logs/old/%d{yyyy-MM-dd}-error.%i.log</fileNamePattern>
+                <fileNamePattern>/home/jenkins/hanyaung/logs/old/%d{yyyy-MM-dd}-error.%i.log</fileNamePattern>
                 <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                     <maxFileSize>100mb</maxFileSize>
                 </timeBasedFileNamingAndTriggeringPolicy>
