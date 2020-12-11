@@ -14,4 +14,5 @@ public class RequestSocialData {
     private String name;
     private String email;
     private String type;
+    private Role role;
 }

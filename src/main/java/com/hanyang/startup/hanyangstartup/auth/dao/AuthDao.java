@@ -21,7 +21,6 @@ public class AuthDao {
     public User findByIdAndType(HashMap<String,Object> map ){
         return sqlSession.selectOne("auth.findByIdAndType",map);
     }
-
     public void signUpSocialUser(User user){
         sqlSession.insert("auth.signUpSocialUser",user);
     }

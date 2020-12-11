@@ -6,10 +6,17 @@
     </select>
 
     <select id="findByIdAndType" resultType="com.hanyang.startup.hanyangstartup.auth.domain.User" parameterType="hashMap">
-        SELECT * from users where user_id = #{id} and type = #{type}
+        SELECT * from users
+        <where>
+            AND user_id = #{id}
+            AND type = #{type}
+            <if test="password != null and password != ''">
+                AND user_password = #{password}
+            </if>
+        </where>
     </select>
 
     <insert id="signUpSocialUser" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User">
-        insert into users(user_id,user_email, user_name,type,role) value(#{userId}, #{social.email},#{userName},#{social.type},"ROLE_USER")
+        insert into users(user_id,user_password, user_email, user_name,type,role,apply_role) values(#{userId},#{userPassword}, #{social.email},#{userName},#{social.type},"ROLE_USER",#{role})
     </insert>
 </mapper>

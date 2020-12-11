@@ -45,12 +45,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/signup/**").permitAll()
-                .antMatchers("/auth/login/naver").permitAll()
-                .antMatchers("/auth/test").permitAll()
+                .antMatchers("/auth/login/**").permitAll()
+                .antMatchers("/auth/test").hasRole("USER")
                 .antMatchers("/user/verify/**").permitAll()
                 .antMatchers("/oauth/**").permitAll()
                 .antMatchers("/test/user").hasRole("USER")
                 .antMatchers("/test/admin").hasRole("ADMIN")
+                .antMatchers("/test").permitAll()
+                .antMatchers("/auth/test/email").permitAll()
+//                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/admin/**").permitAll()
+                .antMatchers("/board/**").hasRole("USER")
+                .antMatchers("/space_rental").hasRole("ADMIN")
+//                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -73,11 +80,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration configuration = new CorsConfiguration();
         // - (3)
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://127.0.0.1:3000");
+        configuration.addAllowedOrigin("http://localhost:8080");
+        configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With, " +
-                "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
+//        configuration.setExposedHeaders(Arrays.asList("Access-Control-Allow-Headers", "Authorization, x-xsrf-token, Access-Control-Allow-Headers, Origin, Accept, X-Requested-With", "Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"));
         configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

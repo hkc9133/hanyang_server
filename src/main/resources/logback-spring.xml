@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <springProfile name="LOCAL">
+    <springProfile name="local">
         <appender name="LOCAL_CONSOLE_POLICY" class="ch.qos.logback.core.ConsoleAppender">
             <layout class="ch.qos.logback.classic.PatternLayout">
                 <Pattern>%d{HH:mm:ss.SSS} [%-5level] [%thread] [%logger{36}] - %m%n</Pattern>
@@ -12,7 +12,7 @@
         <!-- ex> namespase가 "sql.testMapper.my" 인 경우 맨 앞에 sql만 사용하면 sql로 시작되는 모든 namespace mapper 쿼리가 표시됨  -->
         <logger name="sql" level="DEBUG"></logger>
     </springProfile>
-    <springProfile name="PROD">
+    <springProfile name="prod">
         <appender name="INFO_FILE_POLICY" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>INFO</level>
@@ -30,7 +30,7 @@
             </rollingPolicy>
         </appender>
     </springProfile>
-    <springProfile name="PROD">
+    <springProfile name="prod">
         <appender name="ERROR_FILE_POLICY" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
                 <level>ERROR</level>
@@ -50,13 +50,13 @@
     </springProfile>
 
     <root level="DEBUG">
-        <springProfile name="LOCAL">
+        <springProfile name="local">
             <appender-ref ref="LOCAL_CONSOLE_POLICY"/>
         </springProfile>
         <!--        <springProfile name="PROD">-->
         <!--            <appender-ref ref="INFO_FILE_POLICY"/>-->
         <!--        </springProfile>-->
-        <springProfile name="PROD">
+        <springProfile name="prod">
             <appender-ref ref="INFO_FILE_POLICY"/>
             <appender-ref ref="ERROR_FILE_POLICY"/>
         </springProfile>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="board">
+
+<!--    게시판-->
+    <insert id="createBoard" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
+        insert into board_config(board_en_name,board_kr_name) values(#{boardEnName},#{boardKrName})
+    </insert>
+
+    <update id="updateBoard" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
+        UPDATE board_config SET
+        board_en_name = #{boardEnName}
+        board_kr_name = #{boardKrName}
+        where board_en_name = #{boardEnName}
+    </update>
+
+    <select id="getBoard" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
+        select * from board_config
+        <where>
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+        </where>
+    </select>
+
+    <select id="getBoardList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
+        select * from board_config
+    </select>
+<!--    게시판-->
+
+
+
+<!--    카테고리-->
+    <insert id="createBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
+        insert into board_category(category_en_name,category_kr_name,board_en_name) values(#{categoryEnName},#{categoryKrName},#{boardEnName})
+    </insert>
+
+    <update id="updateBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
+        UPDATE board_category SET
+        category_en_name = #{categoryEnName}
+        category_kr_name = #{categoryKrName}
+        is_active = #{isActive}
+        where category_id = #{categoryId}
+    </update>
+
+    <select id="getBoardCategoryList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
+        select * from board_category
+        <where>
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+        </where>
+    </select>
+
+    <select id="getBoardCategory" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
+        select * from board_category
+        <where>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+        </where>
+    </select>
+<!--    카테고리-->
+
+
+<!--    컨텐츠-->
+    <insert id="createBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        insert into board_content(title,content,thumbnail_img,category_id,writer_id) values(#{title},#{content}, #{thumbnailImg},#{categoryId},#{writerId})
+    </insert>
+
+    <update id="updateBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        UPDATE board_content SET
+        title = #{categoryEnName}
+        content = #{categoryKrName}
+        thumbnail_img = #{categoryKrName}
+        where content_id = #{contentId}
+    </update>
+
+    <select id="getBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        SELECT * from board_content where content_id = #{contentId}
+    </select>
+
+    <update id="updateBoardContentCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        UPDATE board_content set view_cnt = view_cnt + 1 where content_id = #{contentId}
+    </update>
+
+    <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        SELECT *
+        FROM
+        (
+        select
+        @num:=@num+1 rownum,
+        E.*
+        from
+        (SELECT @num:=0) D,
+        (
+        SELECT
+        *
+        FROM board_content
+        <where>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{category_id}
+            </if>
+            <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
+                AND ${searchFiled} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        )  E
+        ORDER BY content_id DESC
+        )  Z
+        <where>
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                Z.rownum between #{startRowNo} and #{endRowNo}
+            </if>
+        </where>
+    </select>
+<!--    컨텐츠-->
+</mapper>

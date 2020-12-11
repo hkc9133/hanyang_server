@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,6 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Enumeration;
 
 @Slf4j
 @Component
@@ -47,6 +49,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 //        final String jwtToken = httpServletRequest.getHeader("Authorization").substring("Bearer ".length());
 
         final Cookie jwtToken = cookieUtil.getCookie(httpServletRequest,JwtUtil.ACCESS_TOKEN_NAME);
+
+        Enumeration headerNames = httpServletRequest.getHeaderNames();
+        while(headerNames.hasMoreElements()) {
+            String name = (String)headerNames.nextElement();
+            String value = httpServletRequest.getHeader(name);
+            System.out.println(name + " = " +value);
+        }
 
         System.out.println("시");
         System.out.println(jwtToken);
@@ -112,6 +121,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }catch(ExpiredJwtException e){
+
+        }catch(UsernameNotFoundException e){
 
         }
 

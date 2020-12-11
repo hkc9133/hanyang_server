@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="spaceRental">
+
+    <!--    장소-->
+    <insert id="createPlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        insert into rental_place(is_active,place_name) value(#{isActive},#{placeName})
+    </insert>
+
+    <update id="updatePlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        UPDATE rental_place SET
+        is_active = #{isActive}
+        place_name = #{placeName}
+        where place_id = #{placeId}
+    </update>
+
+    <select id="getPlace" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        select * from rental_place WHERE place_id = #{placeId}
+    </select>
+
+    <select id="getPlaceList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        select * from rental_place
+    </select>
+
+    <delete id="deletePlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        DELETE FROM rental_place WHERE place_id = #{placeId}
+    </delete>
+    <!--    장소-->
+
+
+    <!--    룸-->
+    <insert id="createRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+        INSERT INTO rental_room(place_id,room_name,is_active, capacity, possible_day, room_img, room_desc, rental_role, holiday_available)
+        VALUE (#{placeId},#{roomName},#{isActive}, #{capacity}, #{possibleDay}, #{roomImg}, #{roomDesc}, #{rentalRole}, #{holidayAvailable})
+    </insert>
+
+    <update id="updateRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+        UPDATE rental_room SET
+        place_id = #{placeId},
+        room_name = #{roomName},
+        is_active = #{isActive},
+        capacity = #{capacity},
+        possible_day = #{possibleDay},
+        room_img = #{roomImg},
+        room_desc = #{roomDesc},
+        rental_role = #{rentalRole},
+        holiday_available = #{holidayAvailable}
+        where room_id = #{roomId}
+    </update>
+
+    <select id="getRoom" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+        select * from rental_room WHERE room_id = #{roomId}
+    </select>
+
+    <select id="getRoomList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+        select * from rental_room
+    </select>
+
+    <delete id="deleteRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+        DELETE FROM rental_room WHERE room_id = #{roomId}
+    </delete>
+    <!--    룸-->
+
+
+
+    <!--    시간-->
+    <select id="getRoomTimeDuplicateCheck" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        <![CDATA[
+            SELECT * from rental_room_time
+            WHERE room_id = #{roomId}
+            AND time BETWEEN STR_TO_DATE(#{time}, '%H:%i') AND STR_TO_DATE(#{time}, '%H:%i') + INTERVAL #{rentalTime} HOUR
+            AND time + INTERVAL rental_time HOUR - INTERVAL 1 SECOND BETWEEN STR_TO_DATE(#{time}, '%H:%i') AND STR_TO_DATE(#{time}, '%H:%i') + INTERVAL #{rentalTime} HOUR
+        ]]>
+    </select>
+    <insert id="createRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        INSERT INTO rental_room_time(room_id,time,capacity,rental_time)
+        VALUE (#{roomId},#{time},#{capacity},#{rentalTime})
+    </insert>
+
+    <update id="updateRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        UPDATE rental_room_time SET
+        room_id = #{roomId},
+        time = #{time},
+        capacity = #{capacity},
+        where time_id = #{timeId}
+    </update>
+
+    <select id="getRoomTimeList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        select * from rental_room_time
+        <where>
+            <if test="roomId != null">
+                AND room_id = #{roomId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getAvailableRoomTimeList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        SELECT *,(
+            SELECT IF(count(*) > 0 , TRUE, FALSE)
+            FROM rental_schedule
+            WHERE room_id = #{roomId}
+            and rental_date = #{searchDate}
+            and rental_start_time BETWEEN t.time AND t.time + INTERVAL t.rental_time HOUR
+            AND rental_end_time - INTERVAL 1 SECOND  BETWEEN t.time AND t.time + INTERVAL t.rental_time HOUR
+            ) AS is_duplicate
+        from rental_room_time AS t
+        WHERE room_id = #{roomId}
+        ORDER BY time
+    </select>
+
+    <delete id="deleteRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+        DELETE FROM rental_room_time WHERE time_id = #{timeId}
+    </delete>
+    <!--    시간-->
+
+<!--    스케쥴 시작-->
+    <select id="getScheduleDuplicateCheck" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        <![CDATA[
+            SELECT * from rental_schedule
+            WHERE room_id = #{roomId}
+            AND rental_date = #{rentalDate}
+            AND rental_start_time BETWEEN STR_TO_DATE(#{rentalStartTime}, '%H:%i') AND STR_TO_DATE(#{rentalEndTime}, '%H:%i')
+            AND rental_end_time - INTERVAL 1 SECOND BETWEEN STR_TO_DATE(#{rentalStartTime}, '%H:%i') AND STR_TO_DATE(#{rentalEndTime}, '%H:%i')
+        ]]>
+    </select>
+
+    <insert id="addRentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        insert into rental_schedule(room_id,rental_date, rental_start_time, rental_end_time,user_id, person_count,purpose) value(#{roomId},#{rentalDate},#{rentalStartTime},#{rentalEndTime},#{userId},#{personCount},#{purpose})
+    </insert>
+
+<!--    스케쥴 끝-->
+
+</mapper>
