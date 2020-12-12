@@ -48,6 +48,9 @@ public class AuthService {
         newUser.setRole(socialData.getRole());
         newUser.setSocial(new SocialData(socialData.getId(),socialData.getEmail(),socialData.getType()));
 
+        System.out.println("==========");
+        System.out.println(newUser);
+        System.out.println("==========");
         authDao.signUpSocialUser(newUser);
         try{
             emailService.sendWelComeEmail(newUser.getSocial().getEmail(),newUser);
@@ -65,7 +68,10 @@ public class AuthService {
         map.put("id", socialData.getId());
         map.put("type", socialData.getType());
         return authDao.findByIdAndType(map);
+    }
 
+    public User findByUserId(String userId){
+        return authDao.findByUserId(userId);
     }
 
     @Transactional

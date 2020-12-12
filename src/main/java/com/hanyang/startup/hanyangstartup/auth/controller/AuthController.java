@@ -63,6 +63,10 @@ public class AuthController {
 
     @PostMapping("/signup/social")
     public Response signSocialUser(@RequestBody RequestSocialData socialData,HttpServletResponse res){
+
+        System.out.println("=======!!!");
+        System.out.println(socialData);
+        System.out.println("=======!!!");
         Response response;
         try{
             Map<String,Object> map = new HashMap<>();
@@ -75,10 +79,10 @@ public class AuthController {
             Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
             redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
 
-//            res.addCookie(accessToken);
-//            res.addCookie(refreshToken);
-            map.put("token",token);
-            map.put("role",user.getRole());
+            res.addCookie(accessToken);
+            res.addCookie(refreshToken);
+//            map.put("token",token);
+//            map.put("role",user.getRole());
 
 
             response = new Response("success","성공적으로 회원가입을 완료했습닌다.",map,200);
@@ -173,16 +177,32 @@ public class AuthController {
         return response;
     }
 
-    @PostMapping("/test")
+    @PostMapping("/check")
     public Response authTest(Principal principal, HttpServletRequest req, HttpServletResponse res){
         Response response;
 
+        User user = authService.findByUserId(principal.getName());
+        Map<String,Object> map = new HashMap<>();
+//        final User user = authService.get
+
+        final String token = jwtUtil.generateToken(user);
+        final String refreshJwt = jwtUtil.generateRefreshToken(user);
+        Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
+        Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
+        redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
+
+        res.addCookie(accessToken);
+        res.addCookie(refreshToken);
+
+        map.put("token",token);
+        map.put("role",user.getRole());
+
         try{
 
-            response = new Response("success", "로그인에 성공했습니다.","성공",200);
+            response = new Response("success", "인증 성공","성공",200);
         }catch(Exception e){
             e.printStackTrace();
-            response =  new Response("error", "로그인에 실패했습니다.", e.getMessage(),400);
+            response =  new Response("error", "인증 실패.", e.getMessage(),400);
         }
         return response;
     }
