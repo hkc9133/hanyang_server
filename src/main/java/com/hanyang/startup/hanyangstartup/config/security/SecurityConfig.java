@@ -87,6 +87,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://127.0.0.1:3000");
         configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://127.0.0.1:8080");
+        configuration.addAllowedOrigin("http://210.103.188.119");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
 
