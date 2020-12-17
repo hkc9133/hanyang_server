@@ -24,4 +24,9 @@ public class AuthDao {
     public void signUpSocialUser(User user){
         sqlSession.insert("auth.signUpSocialUser",user);
     }
+
+    public void updateLastLogin(User user){
+        sqlSession.update("auth.updateLastLogin",user);
+    }
+
 }

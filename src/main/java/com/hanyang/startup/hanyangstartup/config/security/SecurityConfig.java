@@ -51,11 +51,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/oauth/**").permitAll()
                 .antMatchers("/test/user").hasRole("USER")
                 .antMatchers("/test/admin").hasRole("ADMIN")
-                .antMatchers("/test").permitAll()
+                .antMatchers("/test/**").permitAll()
                 .antMatchers("/auth/test/email").permitAll()
 //                .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/admin/**").permitAll()
-                .antMatchers("/board/**").hasRole("USER")
+                .antMatchers("/board/**").permitAll()
                 .antMatchers("/space_rental").hasRole("USER")
 //                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
@@ -66,7 +66,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override // ignore check swagger resource
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**");
+                "/swagger-ui.html", "/webjars/**", "/swagger/**","/resource/**");
     }
 
     @Bean
@@ -85,6 +85,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://127.0.0.1:3000");
+        configuration.addAllowedOrigin("https://localhost:3001");
+        configuration.addAllowedOrigin("https://127.0.0.1:3001");
         configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedOrigin("http://210.103.188.119");

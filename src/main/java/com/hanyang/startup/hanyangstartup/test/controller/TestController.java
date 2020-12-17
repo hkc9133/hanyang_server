@@ -25,6 +25,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import com.itextpdf.text.Document;
@@ -48,6 +51,19 @@ public class TestController {
 
     @Autowired
     private EncodingUtil encodingUtil;
+
+    @GetMapping("/sns_result")
+    public void redirectWithUsingRedirectView(HttpServletRequest req,HttpServletResponse res) throws IOException{
+
+//        RedirectView redirectView = new RedirectView("http://localhost:3000/");
+//        redirectView.setExposeModelAttributes(false);
+//        System.out.println("리다이렉트");
+//        System.out.println(req.getRequestURL());
+//        System.out.println(redirectView);
+//        System.out.println("리다이렉트");
+        res.sendRedirect("http://localhost:3000/");
+//        return redirectView;
+    }
 
     @GetMapping
     public byte[] imageJoinTest (HttpServletRequest req, HttpServletResponse res) throws FileNotFoundException, IOException, DocumentException {

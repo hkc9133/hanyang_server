@@ -106,12 +106,13 @@ public class AuthController {
             Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
             redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
 
-//            res.addCookie(accessToken);
+//            res.addCookie(accessToken)user;
 //            res.addCookie(refreshToken);
 
-            map.put("token",token);
-            map.put("role",loginUser.getRole());
-            response = new Response("success", "로그인에 성공했습니다.", map,200);
+//            map.put("token",token);
+//            map.put("role",loginUser.getRole());
+            loginUser.setUserPassword("");
+            response = new Response("success", "로그인에 성공했습니다.", loginUser,200);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -136,8 +137,8 @@ public class AuthController {
             res.addCookie(accessToken);
             res.addCookie(refreshToken);
 
-            map.put("token",token);
-            map.put("role",user.getRole());
+//            map.put("token",token);
+//            map.put("role",user.getRole());
 
 //            Collection<String> headers = res.getHeaders(HttpHeaders.SET_COOKIE);
 //            System.out.println("해");
@@ -147,7 +148,9 @@ public class AuthController {
 //                res.setHeader(HttpHeaders.SET_COOKIE,header+"; "+"SameSite=None;");
 //            }
 
-            response = new Response("success", "로그인에 성공했습니다.", map,200);
+            user.setUserPassword("");
+
+            response = new Response("success", "로그인에 성공했습니다.", user,200);
         }catch (NotFoundException e){
             response =  new Response("error", "회원가입 필요", socialData,401);
         }
@@ -194,17 +197,37 @@ public class AuthController {
         res.addCookie(accessToken);
         res.addCookie(refreshToken);
 
-        map.put("token",token);
-        map.put("role",user.getRole());
+        user.setUserPassword("");
 
         try{
 
-            response = new Response("success", "인증 성공","성공",200);
+            response = new Response("success", "인증 성공",user,200);
         }catch(Exception e){
             e.printStackTrace();
             response =  new Response("error", "인증 실패.", e.getMessage(),400);
         }
         return response;
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(Principal principal, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+
+        try {
+            Cookie[] cookies = req.getCookies(); // 모든 쿠키의 정보를 cookies에 저장
+            if(cookies != null){ // 쿠키가 한개라도 있으면 실행
+                for(int i=0; i< cookies.length; i++){
+                    System.out.println(cookies[i].getName());
+                    cookies[i].setMaxAge(0); // 유효시간을 0으로 설정
+                    cookies[i].setPath("/");
+                    res.addCookie(cookies[i]); // 응답 헤더에 추가
+                }
+            }
+
+            return new ResponseEntity<>(new Response("success", "로그아웃 완료",null,200), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new Response("error", "로그인에 실패",null,500), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/test/email")

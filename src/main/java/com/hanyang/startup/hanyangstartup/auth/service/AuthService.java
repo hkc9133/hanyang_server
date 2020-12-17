@@ -85,6 +85,8 @@ public class AuthService {
 
         if (user == null) throw new NotFoundException("멤버가 없습니다");
 
+        authDao.updateLastLogin(loginUser);
+
         return loginUser;
 
     }
@@ -97,6 +99,8 @@ public class AuthService {
         User user = authDao.findByIdAndType(map);
 
         if (user == null) throw new NotFoundException("멤버가 없습니다");
+
+        authDao.updateLastLogin(user);
 
         return user;
 

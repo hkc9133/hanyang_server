@@ -19,4 +19,8 @@
     <insert id="signUpSocialUser" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User">
         insert into users(user_id,user_password, user_email, user_name,type,role,apply_role) values(#{userId},#{userPassword}, #{social.email},#{userName},#{social.type},"ROLE_USER",#{role})
     </insert>
+
+    <update id="updateLastLogin" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User">
+        UPDATE users SET last_login = current_timestamp() where user_id = #{userId}
+    </update>
 </mapper>
