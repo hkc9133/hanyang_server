@@ -1,5 +1,6 @@
 package com.hanyang.startup.hanyangstartup.config.security;
 
+import com.hanyang.startup.hanyangstartup.util.JwtUtil;
 import com.hanyang.startup.hanyangstartup.util.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -90,6 +91,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedOrigin("http://210.103.188.119");
+        configuration.addExposedHeader(JwtUtil.ACCESS_TOKEN_NAME);
+        configuration.addExposedHeader("User-Id");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
 

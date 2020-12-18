@@ -81,8 +81,8 @@ public class AuthController {
 
             res.addCookie(accessToken);
             res.addCookie(refreshToken);
-//            map.put("token",token);
-//            map.put("role",user.getRole());
+            map.put("token",token);
+            map.put("user",user);
 
 
             response = new Response("success","성공적으로 회원가입을 완료했습닌다.",map,200);
@@ -106,13 +106,15 @@ public class AuthController {
             Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
             redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
 
-//            res.addCookie(accessToken)user;
-//            res.addCookie(refreshToken);
+//            res.addHeader(JwtUtil.ACCESS_TOKEN_NAME,token);
 
-//            map.put("token",token);
-//            map.put("role",loginUser.getRole());
+            res.addCookie(accessToken);
+            res.addCookie(refreshToken);
+
+            map.put("user",user);
+            map.put("token",token);
             loginUser.setUserPassword("");
-            response = new Response("success", "로그인에 성공했습니다.", loginUser,200);
+            response = new Response("success", "로그인에 성공했습니다.", map,200);
         }
         catch(Exception e){
             e.printStackTrace();
@@ -130,27 +132,24 @@ public class AuthController {
 
             final String token = jwtUtil.generateToken(user);
             final String refreshJwt = jwtUtil.generateRefreshToken(user);
+
             Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
             Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
             redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
 
+//            res.addHeader(JwtUtil.ACCESS_TOKEN_NAME,token);
+//
             res.addCookie(accessToken);
             res.addCookie(refreshToken);
 
-//            map.put("token",token);
-//            map.put("role",user.getRole());
+            user.setUserPassword("");
+            map.put("token",token);
+            map.put("user",user);
 
-//            Collection<String> headers = res.getHeaders(HttpHeaders.SET_COOKIE);
-//            System.out.println("해");
-//            for(String header:headers){
-//                System.out.println("해도둘");
-//                System.out.println(header);
-//                res.setHeader(HttpHeaders.SET_COOKIE,header+"; "+"SameSite=None;");
-//            }
 
             user.setUserPassword("");
 
-            response = new Response("success", "로그인에 성공했습니다.", user,200);
+            response = new Response("success", "로그인에 성공했습니다.", map,200);
         }catch (NotFoundException e){
             response =  new Response("error", "회원가입 필요", socialData,401);
         }
@@ -192,10 +191,10 @@ public class AuthController {
         final String refreshJwt = jwtUtil.generateRefreshToken(user);
         Cookie accessToken = cookieUtil.createCookie(JwtUtil.ACCESS_TOKEN_NAME, token);
         Cookie refreshToken = cookieUtil.createCookie(JwtUtil.REFRESH_TOKEN_NAME, refreshJwt);
-        redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
+//        redisUtil.setDataExpire(refreshJwt, user.getUserId(), JwtUtil.REFRESH_TOKEN_VALIDATION_SECOND);
 
-        res.addCookie(accessToken);
-        res.addCookie(refreshToken);
+//        res.addCookie(accessToken);
+//        res.addCookie(refreshToken);
 
         user.setUserPassword("");
 
@@ -223,6 +222,8 @@ public class AuthController {
                     res.addCookie(cookies[i]); // 응답 헤더에 추가
                 }
             }
+
+            res.setHeader(JwtUtil.ACCESS_TOKEN_NAME,"");
 
             return new ResponseEntity<>(new Response("success", "로그아웃 완료",null,200), HttpStatus.OK);
         } catch (Exception e) {
