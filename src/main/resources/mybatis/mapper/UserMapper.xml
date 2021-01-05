@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+
+    <select id="getUserList" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User" resultType="com.hanyang.startup.hanyangstartup.auth.domain.User">
+<!--        SELECT *-->
+<!--        FROM-->
+<!--        (-->
+<!--        select-->
+<!--        @num:=@num+1 rownum,-->
+<!--        E.*-->
+<!--        from-->
+<!--        (SELECT @num:=0) D,-->
+<!--        (-->
+<!--        SELECT user_id, user_email, user_name, type,role,reg_date,apply_role,last_login,status-->
+<!--        from users-->
+<!--        <where>-->
+<!--            <if test="type != null">-->
+<!--                AND type = #{type}-->
+<!--            </if>-->
+<!--            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">-->
+<!--                AND ${searchField} like '%' #{searchValue} '%'-->
+<!--            </if>-->
+<!--            <if test="startDate != null">-->
+<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
+<!--            </if>-->
+<!--            <if test="endDate != null">-->
+<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        )  E-->
+<!--        )  Z-->
+<!--        <where>-->
+<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
+<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
+<!--            </if>-->
+<!--        </where>-->
+
+        SELECT ROW_NUMBER() OVER (ORDER BY a.last_login) rownum, user_id, user_email, user_name, type,role,reg_date,apply_role,last_login,status
+        from users as a
+        <where>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        order by a.last_login desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getUserListCnt" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User" resultType="java.lang.Integer">
+        SELECT count(*) FROM users
+        <where>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+    </select>
+
+</mapper>

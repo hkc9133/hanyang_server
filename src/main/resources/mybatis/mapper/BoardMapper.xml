@@ -9,8 +9,10 @@
 
     <update id="updateBoard" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
         UPDATE board_config SET
-        board_en_name = #{boardEnName}
-        board_kr_name = #{boardKrName}
+        board_en_name = #{boardEnName},
+        board_kr_name = #{boardKrName},
+        category_id = #{categoryId},
+        board_desc = #{boardDesc}
         where board_en_name = #{boardEnName}
     </update>
 
@@ -23,8 +25,67 @@
         </where>
     </select>
 
-    <select id="getBoardList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
-        select * from board_config
+    <select id="getBoardList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig">
+<!--        SELECT *-->
+<!--        FROM-->
+<!--        (-->
+<!--        select-->
+<!--        @num:=@num+1 rownum,-->
+<!--        E.*-->
+<!--        from-->
+<!--        (SELECT @num:=0) D,-->
+<!--        (-->
+<!--        SELECT * from board_config-->
+<!--        <where>-->
+<!--            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">-->
+<!--                AND ${searchField} like '%' #{searchValue} '%'-->
+<!--            </if>-->
+<!--            <if test="startDate != null">-->
+<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
+<!--            </if>-->
+<!--            <if test="endDate != null">-->
+<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        )  E-->
+<!--        )  Z-->
+<!--        <where>-->
+<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
+<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
+<!--            </if>-->
+<!--        </where>-->
+
+        SELECT ROW_NUMBER() OVER (ORDER BY a.reg_date) rownum, * from board_config as a
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        order by a.reg_date desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getBoardListCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="java.lang.Integer">
+        SELECT count(*) FROM board_config
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
     </select>
 <!--    게시판-->
 
@@ -43,14 +104,24 @@
         where category_id = #{categoryId}
     </update>
 
+<!--    <select id="getBoardCategoryCodeList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategoryCode">-->
+<!--        select * from board_category_code-->
+<!--        <where>-->
+<!--            <if test="categoryId != null and categoryId != ''">-->
+<!--                AND category_id = #{categoryId}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+
     <select id="getBoardCategoryList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
         select * from board_category
         <where>
-            <if test="boardEnName != null and boardEnName != ''">
-                AND board_en_name = #{boardEnName}
-            </if>
+<!--            <if test="boardEnName != null and boardEnName != ''">-->
+<!--                AND board_en_name = #{boardEnName}-->
+<!--            </if>-->
         </where>
     </select>
+
 
     <select id="getBoardCategory" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">
         select * from board_category
@@ -67,8 +138,11 @@
 
 
 <!--    컨텐츠-->
-    <insert id="createBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        insert into board_content(title,content,thumbnail_img,category_id,writer_id) values(#{title},#{content}, #{thumbnailImg},#{categoryId},#{writerId})
+    <insert id="addBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        insert into board_content(board_en_name,title,content,thumbnail_img,category_code_id,writer_id) values(#{boardEnName},#{title},#{content}, #{thumbnailImg},#{categoryCodeId},#{writerId})
+        <selectKey keyProperty="contentId" resultType="Integer" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
     </insert>
 
     <update id="updateBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
@@ -87,25 +161,24 @@
         UPDATE board_content set view_cnt = view_cnt + 1 where content_id = #{contentId}
     </update>
 
-    <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        SELECT *
-        FROM
-        (
-        select
-        @num:=@num+1 rownum,
-        E.*
-        from
-        (SELECT @num:=0) D,
-        (
-        SELECT
-        *
-        FROM board_content
+    <select id="getBoardContentListCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="java.lang.Integer">
+        SELECT count(*) FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
         <where>
-            <if test="categoryId != null and categoryId != ''">
-                AND category_id = #{category_id}
+            <if test="boardEnName != null and boardEnName != ''">
+                AND a.board_en_name = #{boardEnName}
             </if>
-            <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">
-                AND ${searchFiled} like '%' #{searchValue} '%'
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
             </if>
             <if test="startDate != null">
                 AND <![CDATA[date(reg_date) >= #{startDate}]]>
@@ -114,14 +187,138 @@
                 AND <![CDATA[date(reg_date) <= #{endDate}]]>
             </if>
         </where>
-        )  E
-        ORDER BY content_id DESC
-        )  Z
+    </select>
+
+    <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+            SELECT ROW_NUMBER() OVER (ORDER BY a.content_id) rownum, a.*, b.category_code_name,b.color, c.user_name FROM board_content AS a
+            left join board_category_code AS b
+            ON a.category_code_id = b.category_code_id
+            left join users AS c
+            ON a.writer_id = c.user_id
         <where>
-            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
-                Z.rownum between #{startRowNo} and #{endRowNo}
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        order by a.content_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getBoardContentPrev" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        SELECT * FROM board_content
+        <where>
+            AND board_en_name = #{boardEnName}
+<!--            <if test="categoryId != null and categoryId != ''">-->
+<!--                AND category_id = #{categoryId}-->
+<!--            </if>-->
+<!--            <if test="categoryCodeId != null and categoryCodeId != ''">-->
+<!--                AND b.category_code_id = #{categoryCodeId}-->
+<!--            </if>-->
+<!--            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">-->
+<!--                AND ${searchField} like '%' #{searchValue} '%'-->
+<!--            </if>-->
+<!--            <if test="startDate != null">-->
+<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
+<!--            </if>-->
+<!--            <if test="endDate != null">-->
+<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
+<!--            </if>-->
+            and content_id in (
+                select * from (
+                    <![CDATA[select content_id from board_content where content_id < #{contentId} order by content_id desc limit 1]]>
+                ) as t
+            );
+        </where>
+    </select>
+    <select id="getBoardContentNext" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        SELECT * FROM board_content
+        <where>
+            AND board_en_name = #{boardEnName}
+            <!--            <if test="categoryId != null and categoryId != ''">-->
+            <!--                AND category_id = #{categoryId}-->
+            <!--            </if>-->
+            <!--            <if test="categoryCodeId != null and categoryCodeId != ''">-->
+            <!--                AND b.category_code_id = #{categoryCodeId}-->
+            <!--            </if>-->
+            <!--            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">-->
+            <!--                AND ${searchField} like '%' #{searchValue} '%'-->
+            <!--            </if>-->
+            <!--            <if test="startDate != null">-->
+            <!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
+            <!--            </if>-->
+            <!--            <if test="endDate != null">-->
+            <!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
+            <!--            </if>-->
+            and content_id in (
+                select * from (
+                <![CDATA[select content_id from board_content where content_id > #{contentId} order by content_id limit 1]]>
+                ) as t
+            );
+        </where>
+    </select>
+
+<!--    컨텐츠-->
+
+
+    <select id="getBoardCategoryCodeList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategoryCode">
+        select * from board_category_code
+        left join board_category
+        on board_category_code.category_id = board_category.category_id
+        <where>
+            <if test="categoryId != null and categoryId != ''">
+                AND board_category_code.category_id = #{categoryId}
             </if>
         </where>
     </select>
-<!--    컨텐츠-->
+
+
+<!--    댓글-->
+    <insert id="addReply" parameterType="com.hanyang.startup.hanyangstartup.board.domain.Reply">
+        insert into board_reply(content_id,parent_id,parent_reply_id,reply_content,reply_writer) values(#{contentId},#{parentId},#{parentReplyId},#{replyContent},#{replyWriter})
+    </insert>
+
+    <select id="getReplyList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.Reply" resultType="com.hanyang.startup.hanyangstartup.board.domain.Reply">
+        SELECT *, (select user_name from board_reply as r  left join  users on users.user_id = r.reply_writer  where reply_id = a.parent_reply_id) as user_name
+        FROM board_reply as a
+        <where>
+            <if test="contentId != null and contentId != ''">
+                AND content_id = #{contentId}
+            </if>
+        </where>
+        ORDER BY IF(ISNULL(parent_id), reply_id, parent_id), parent_reply_id
+    </select>
+
+    <update id="updateReply" parameterType="com.hanyang.startup.hanyangstartup.board.domain.Reply">
+        UPDATE board_reply
+        SET reply_content = #{replyContent}, reg_date = now()
+        WHERE reply_id = #{replyId}
+        AND reply_writer = #{replyWriter}
+    </update>
+
+    <update id="deleteReply" parameterType="com.hanyang.startup.hanyangstartup.board.domain.Reply">
+        UPDATE board_reply
+        SET status = 'D'
+        WHERE reply_id = #{replyId}
+        AND reply_writer = #{replyWriter}
+    </update>
+<!--    댓글-->
+
+
 </mapper>

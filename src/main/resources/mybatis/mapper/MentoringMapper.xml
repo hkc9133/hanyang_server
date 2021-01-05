@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mentoring">
+
+    <select id="getCounselFieldCode" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselFiledCode">
+        select * from counsel_field_code
+    </select>
+
+    <select id="getProgressItem" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.ProgressItem">
+        select * from counsel_apply_form_progress_item
+    </select>
+    <select id="getSortationItem" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.SortationItem">
+        select * from counsel_apply_form_sortation_item
+    </select>
+    <select id="getWayItem" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.WayItem">
+        select * from counsel_apply_form_way_item
+    </select>
+
+    <select id="getMentor" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        select * from mentors
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+            <if test="mentorStatus != null">
+                AND mentor_status = #{mentorStatus}
+            </if>
+        </where>
+    </select>
+
+    <insert id="applyMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        insert into mentors(user_id,mentor_introduction,mentor_career,mentor_name,mentor_company,mentor_phone_number,mentor_keyword,mentor_email,mentor_position,mentor_field)
+        VALUES(#{userId},#{mentorIntroduction},#{mentorCareerStr},#{mentorName},#{mentorCompany},#{mentorPhoneNumber},#{mentorKeywordStr},#{mentorEmail},#{mentorPosition},#{mentorFieldStr})
+
+        <selectKey keyProperty="mentorId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="getCounselFieldMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" resultType="java.lang.Integer">
+        select field_id from counsel_field_mentor
+        <where>
+            <if test="mentorId != null and mentorId != ''">
+                AND mentor_id = #{mentorId}
+            </if>
+        </where>
+    </select>
+
+    <insert id="addCounselFieldMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        insert into counsel_field_mentor(mentor_id,field_id)
+        VALUES
+        <foreach collection="mentorFieldList" item="field" separator=" , " >
+            (#{mentorId}, #{field})
+        </foreach>
+    </insert>
+
+    <insert id="applyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        insert into counsel_apply_form(user_id,title,content,form_progress_item,form_sortation_item,form_way_item,mentee_name,mentee_email,mentee_phone_number)
+        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{formSortationItem},#{formWayItem},#{menteeName},#{menteeEmail},#{menteePhoneNumber})
+        <selectKey keyProperty="formId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <insert id="addCounselFieldMentee" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        insert into counsel_field_mentee(form_id,field_id)
+        VALUES
+        <foreach collection="counselFieldIdList" item="field" separator=" , " >
+            (#{formId}, #{field})
+        </foreach>
+    </insert>
+
+    <select id="getCounselApplyListCnt" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="java.lang.Integer">
+        SELECT count(*) FROM counsel_apply_form
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCounselApplyList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+<!--        SELECT *-->
+<!--        FROM-->
+<!--        (-->
+<!--        select-->
+<!--        @num:=@num+1 rownum,-->
+<!--        E.*-->
+<!--        from-->
+<!--        (SELECT @num:=0) D,-->
+<!--        (-->
+<!--        SELECT * from counsel_apply_form-->
+<!--        <where>-->
+<!--            <if test="userId != null and userId != ''">-->
+<!--                AND user_id = #{userId}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        )  E-->
+<!--        ORDER BY form_id DESC-->
+<!--        )  Z-->
+<!--        <where>-->
+<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
+<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
+<!--            </if>-->
+<!--        </where>-->
+
+        SELECT ROW_NUMBER() OVER (ORDER BY a.form_id) rownum, a.* from counsel_apply_form as a
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+        </where>
+        order by a.form_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <!--    카테고리-->
+<!--    <insert id="createBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
+<!--        insert into board_category(user_id,mentor_introduction,profile_img,mentor_career,mentor_name,mentor_company,mentor_phone_number,mentor_keyword,mentor_email,mentor_position,mentor_field)-->
+<!--        VALUES(#{userId},#{mentorIntroduction},#{profileImg},#{mentorCareer},#{mentorName},#{mentorCompany},#{mentorPhoneNumber},#{mentorKeyword},#{mentorEmail},#{mentorPosition},#{mentorField})-->
+<!--    </insert>-->
+<!--    <update id="updateBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
+<!--        UPDATE board_category SET-->
+<!--            category_en_name = #{categoryEnName}-->
+<!--            category_kr_name = #{categoryKrName}-->
+<!--            is_active = #{isActive}-->
+<!--        where category_id = #{categoryId}-->
+<!--    </update>-->
+
+<!--    <select id="getBoardCategoryList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
+<!--        select * from board_category-->
+<!--        <where>-->
+<!--            <if test="boardEnName != null and boardEnName != ''">-->
+<!--                AND board_en_name = #{boardEnName}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+
+<!--    <select id="getBoardCategory" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
+<!--        select * from board_category-->
+<!--        <where>-->
+<!--            <if test="categoryId != null and categoryId != ''">-->
+<!--                AND category_id = #{categoryId}-->
+<!--            </if>-->
+<!--            <if test="boardEnName != null and boardEnName != ''">-->
+<!--                AND board_en_name = #{boardEnName}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+<!--    &lt;!&ndash;    카테고리&ndash;&gt;-->
+
+
+<!--    &lt;!&ndash;    컨텐츠&ndash;&gt;-->
+<!--    <insert id="createBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
+<!--        insert into board_content(title,content,thumbnail_img,category_id,writer_id) values(#{title},#{content}, #{thumbnailImg},#{categoryId},#{writerId})-->
+<!--    </insert>-->
+
+<!--    <update id="updateBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
+<!--        UPDATE board_content SET-->
+<!--            title = #{categoryEnName}-->
+<!--            content = #{categoryKrName}-->
+<!--            thumbnail_img = #{categoryKrName}-->
+<!--        where content_id = #{contentId}-->
+<!--    </update>-->
+
+<!--    <select id="getBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
+<!--        SELECT * from board_content where content_id = #{contentId}-->
+<!--    </select>-->
+
+<!--    <update id="updateBoardContentCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
+<!--        UPDATE board_content set view_cnt = view_cnt + 1 where content_id = #{contentId}-->
+<!--    </update>-->
+
+<!--    <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
+<!--        SELECT *-->
+<!--        FROM-->
+<!--        (-->
+<!--        select-->
+<!--        @num:=@num+1 rownum,-->
+<!--        E.*-->
+<!--        from-->
+<!--        (SELECT @num:=0) D,-->
+<!--        (-->
+<!--        SELECT-->
+<!--        *-->
+<!--        FROM board_content-->
+<!--        <where>-->
+<!--            <if test="categoryId != null and categoryId != ''">-->
+<!--                AND category_id = #{category_id}-->
+<!--            </if>-->
+<!--            <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">-->
+<!--                AND ${searchFiled} like '%' #{searchValue} '%'-->
+<!--            </if>-->
+<!--            <if test="startDate != null">-->
+<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
+<!--            </if>-->
+<!--            <if test="endDate != null">-->
+<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
+<!--            </if>-->
+<!--        </where>-->
+<!--        )  E-->
+<!--        ORDER BY content_id DESC-->
+<!--        )  Z-->
+<!--        <where>-->
+<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
+<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
+<!--            </if>-->
+<!--        </where>-->
+<!--    </select>-->
+    <!--    컨텐츠-->
+</mapper>

@@ -54,6 +54,7 @@ dependencies {
     compile group: 'com.itextpdf', name: 'itext-pdfa', version: '5.5.13.2'
 //    compile group: 'com.itextpdf', name: 'itext-xtra', version: '5.5.13.2'
     compile group: 'com.itextpdf.tool', name: 'xmlworker', version: '5.5.13.2'
+    compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.5'
 
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

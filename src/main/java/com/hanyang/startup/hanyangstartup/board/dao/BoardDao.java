@@ -1,9 +1,7 @@
 package com.hanyang.startup.hanyangstartup.board.dao;
 
 import com.hanyang.startup.hanyangstartup.auth.domain.User;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardCategory;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
+import com.hanyang.startup.hanyangstartup.board.domain.*;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,10 +24,12 @@ public class BoardDao {
     public BoardConfig getBoard(BoardConfig boardConfig){
         return sqlSession.selectOne("board.getBoard",boardConfig);
     }
-    public List<BoardConfig> getBoardList(){
-        return sqlSession.selectList("board.getBoardList");
+    public List<BoardConfig> getBoardList(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardList",boardConfig);
     }
-
+    public int getBoardListCnt(BoardConfig boardConfig){
+        return sqlSession.selectOne("board.getBoardListCnt",boardConfig);
+    }
 
     public void createBoardCategory(BoardCategory boardCategory){
         sqlSession.insert("board.createBoardCategory",boardCategory);
@@ -41,13 +41,13 @@ public class BoardDao {
     public BoardCategory getBoardCategory(BoardCategory boardCategory){
         return sqlSession.selectOne("board.getBoardCategory",boardCategory);
     }
-    public List<BoardCategory> getBoardCategoryList(BoardCategory boardCategory){
-        return sqlSession.selectList("board.getBoardCategoryList",boardCategory);
+    public List<BoardCategory> getBoardCategoryList(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardCategoryList",boardConfig);
     }
 
 
-    public void createBoardContent(BoardContent boardContent){
-        sqlSession.insert("board.createBoardContent",boardContent);
+    public void addBoardContent(BoardContent boardContent){
+        sqlSession.insert("board.addBoardContent",boardContent);
     }
     public void updateBoardContent(BoardContent boardContent){
         sqlSession.update("board.updateBoardContent",boardContent);
@@ -60,8 +60,41 @@ public class BoardDao {
         sqlSession.update("board.updateBoardContentCnt",boardContent);
     }
 
-    public List<BoardCategory> getBoardContentList(BoardContent boardContent){
-        return sqlSession.selectList("board.getBoardContentList",boardContent);
+    public List<BoardContent> getBoardContentList(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardContentList",boardConfig);
+    }
+
+    public BoardContent getBoardContentPrev(BoardContent boardContent){
+        return sqlSession.selectOne("board.getBoardContentPrev",boardContent);
+    }
+
+    public BoardContent getBoardContentNext(BoardContent boardContent){
+        return sqlSession.selectOne("board.getBoardContentNext",boardContent);
+    }
+
+    public int getBoardContentListCnt(BoardConfig boardConfig){
+        return sqlSession.selectOne("board.getBoardContentListCnt",boardConfig);
+    }
+
+
+    public List<BoardCategoryCode> getBoardCategoryCodeList(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardCategoryCodeList",boardConfig);
+    }
+
+    public void addReply(Reply reply){
+        sqlSession.insert("board.addReply",reply);
+    }
+
+    public List<Reply> getReplyList(Reply reply){
+        return sqlSession.selectList("board.getReplyList",reply);
+    }
+
+    public void updateReply(Reply reply){
+        sqlSession.update("board.updateReply",reply);
+    }
+
+    public void deleteReply(Reply reply){
+        sqlSession.update("board.deleteReply",reply);
     }
 
 }

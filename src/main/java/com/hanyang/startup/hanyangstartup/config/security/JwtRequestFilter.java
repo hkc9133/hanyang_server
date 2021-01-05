@@ -114,6 +114,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }catch(ExpiredJwtException e){
 
         }
+        catch(Exception e){
+
+        }
 
         filterChain.doFilter(httpServletRequest,httpServletResponse);
     }

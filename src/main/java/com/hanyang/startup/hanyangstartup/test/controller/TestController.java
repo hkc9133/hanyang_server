@@ -23,6 +23,7 @@ import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
@@ -51,6 +52,21 @@ public class TestController {
 
     @Autowired
     private EncodingUtil encodingUtil;
+
+
+    @PostMapping("/aaa")
+    public void abcd(HttpServletRequest req,HttpServletResponse res) throws IOException{
+
+//        RedirectView redirectView = new RedirectView("http://localhost:3000/");
+//        redirectView.setExposeModelAttributes(false);
+//        System.out.println("리다이렉트");
+//        System.out.println(req.getRequestURL());
+//        System.out.println(redirectView);
+//        System.out.println("리다이렉트");
+//        res.sendRedirect("http://localhost:3000/");
+//        return redirectView;
+
+    }
 
     @GetMapping("/sns_result")
     public void redirectWithUsingRedirectView(HttpServletRequest req,HttpServletResponse res) throws IOException{

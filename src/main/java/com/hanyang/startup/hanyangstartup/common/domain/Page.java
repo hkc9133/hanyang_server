@@ -1,7 +1,10 @@
 package com.hanyang.startup.hanyangstartup.common.domain;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @ToString
@@ -25,10 +28,23 @@ public class Page {
     private int endPageNo; // 끝 페이지 (페이징 네비 기준)
     private int totalCount; // 게시 글 전체 수
 
-    private String searchFiled;  //검색 조건
+    private String searchField;  //검색 조건
     private String searchValue;  //검색어
-    private Date startDate;
-    private Date endDate;
+
+    @Getter
+    @Setter
+    private LocalDateTime startDate;
+    @Getter
+    @Setter
+    private LocalDateTime endDate;
+
+    public int getRownum() {
+        return rownum;
+    }
+
+    public void setgetRownum(int rownum) {
+        this.rownum = rownum;
+    }
 
     public int getPageSize() {
         return pageSize;
@@ -127,12 +143,12 @@ public class Page {
         this.makePaging();
     }
 
-    public String getSearchFiled() {
-        return searchFiled;
+    public String getSearchField() {
+        return searchField;
     }
 
-    public void setSearchFiled(String searchFiled) {
-        this.searchFiled = searchFiled;
+    public void setSearchField(String searchField) {
+        this.searchField = searchField;
     }
 
     public String getSearchValue() {
@@ -187,7 +203,7 @@ public class Page {
 
 
         //--조회 시작 row, 조회 마지막 row 계산
-        int startRowNo = ( (pageNo-1) * pageSize ) + 1;
+        int startRowNo = ( (pageNo-1) * pageSize );
         int endRowNo = pageNo * pageSize;
         setStartRowNo( startRowNo );
         setEndRowNo( endRowNo );

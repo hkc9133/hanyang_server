@@ -4,6 +4,7 @@ import com.hanyang.startup.hanyangstartup.util.JwtUtil;
 import com.hanyang.startup.hanyangstartup.util.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,6 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/signup/**").permitAll()
                 .antMatchers("/auth/login/**").permitAll()
                 .antMatchers("/auth/test").hasRole("USER")
+                .antMatchers("/auth/check").hasAnyRole("USER","ADMIN","SD","MT","TC")
                 .antMatchers("/user/verify/**").permitAll()
                 .antMatchers("/oauth/**").permitAll()
                 .antMatchers("/test/user").hasRole("USER")
@@ -58,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/admin/**").permitAll()
                 .antMatchers("/board/**").permitAll()
                 .antMatchers("/space_rental").hasRole("USER")
-//                .antMatchers("/**").permitAll()
+                .antMatchers("/mentoring/**").permitAll()
+                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -67,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override // ignore check swagger resource
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**","/resource/**");
+                "/swagger-ui.html", "/webjars/**", "/swagger/**");
     }
 
     @Bean
@@ -92,6 +95,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedOrigin("http://210.103.188.119");
         configuration.addExposedHeader(JwtUtil.ACCESS_TOKEN_NAME);
+        configuration.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
         configuration.addExposedHeader("User-Id");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");

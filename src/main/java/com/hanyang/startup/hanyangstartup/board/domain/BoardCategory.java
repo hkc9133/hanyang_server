@@ -15,9 +15,10 @@ public class BoardCategory {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime regDate;
+    private String categoryName;
 
-    private String categoryEnName;
-    private String categoryKrName;
-    private String boardEnName;
-    private Boolean isActive;
+//    private String categoryEnName;
+//    private String categoryKrName;
+//    private String boardEnName;
+//    private Boolean isActive;
 }

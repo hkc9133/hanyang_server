@@ -1,18 +1,26 @@
 package com.hanyang.startup.hanyangstartup.board.service;
 
 import com.hanyang.startup.hanyangstartup.board.dao.BoardDao;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardCategory;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
+import com.hanyang.startup.hanyangstartup.board.domain.*;
+import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
+import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
+import com.hanyang.startup.hanyangstartup.resource.service.FileSaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BoardService {
     @Autowired
     private BoardDao boardDao;
+    @Autowired
+    private FileSaveService fileSaveService;
 
     //게시판 생성
     public void createBoard(BoardConfig boardConfig) {
@@ -31,8 +39,16 @@ public class BoardService {
     }
 
     //게시판 리스트
-    public List<BoardConfig> getBoardList() {
-        return boardDao.getBoardList();
+    public Map<String, Object> getBoardList(BoardConfig boardConfig) {
+        boardConfig.setPageSize(10);
+        boardConfig.setTotalCount(boardDao.getBoardListCnt(boardConfig));
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("page", boardConfig);
+        map.put("list", boardDao.getBoardList(boardConfig));
+
+        return map;
     }
 
 
@@ -52,14 +68,19 @@ public class BoardService {
     }
 
     //카테고리 리스트
-    public List<BoardCategory> getBoardCategoryList(BoardCategory boardCategory) {
-        return boardDao.getBoardCategoryList(boardCategory);
+    public List<BoardCategory> getBoardCategoryList(BoardConfig boardConfig) {
+        return boardDao.getBoardCategoryList(boardConfig);
     }
 
 
     //컨텐츠 생성
-    public void createBoardContent(BoardContent boardContent) {
-        boardDao.createBoardContent(boardContent);
+    @Transactional(rollbackFor = {Exception.class})
+    public void addBoardContent(BoardContent boardContent) {
+        boardDao.addBoardContent(boardContent);
+
+        for (MultipartFile file : boardContent.getFiles()) {
+            fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
+        }
     }
 
     //컨텐츠 수정
@@ -68,14 +89,69 @@ public class BoardService {
     }
 
     //컨텐츠 조회
-    public BoardContent getBoardContent(BoardContent boardContent) {
+    public Map<String, Object> getBoardContent(BoardContent boardContent) {
         //조회수 업데이트
         boardDao.updateBoardContentCnt(boardContent);
-        return boardDao.getBoardContent(boardContent);
+
+        AttachFile attachFile = new AttachFile();
+        attachFile.setContentId(boardContent.getContentId());
+        attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+        Map<String, Object> map = new HashMap<>();
+        BoardContent resultContent = boardDao.getBoardContent(boardContent);
+
+        Reply reply = new Reply();
+        reply.setContentId(resultContent.getContentId());
+
+        List<Reply> replyList = boardDao.getReplyList(reply);
+        map.put("content", resultContent);
+        map.put("reply", replyList);
+        map.put("prev", boardDao.getBoardContentPrev(resultContent));
+        map.put("next", boardDao.getBoardContentNext(resultContent));
+        map.put("files", fileSaveService.getAttachFileList(attachFile));
+        return map;
     }
 
     //컨텐츠 리스트
-    public List<BoardCategory> getBoardContentList(BoardContent boardContent) {
-        return boardDao.getBoardContentList(boardContent);
+    public Map<String, Object> getBoardContentList(BoardConfig boardConfig) {
+        boardConfig.setTotalCount(boardDao.getBoardContentListCnt(boardConfig));
+
+        Map<String, Object> map = new HashMap<>();
+        List<BoardContent> boardContentList = boardDao.getBoardContentList(boardConfig);
+
+        boardContentList.stream().map(boardContent -> {
+            AttachFile attachFile = new AttachFile();
+            attachFile.setContentId(boardContent.getContentId());
+            attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+
+            boardContent.setAttachFileList(fileSaveService.getAttachFileList(attachFile));
+            return boardContent;
+        }).collect(Collectors.toList());
+
+        map.put("page", boardConfig);
+        map.put("list", boardContentList);
+        map.put("cate", boardDao.getBoardCategoryCodeList(boardConfig));
+
+        return map;
+    }
+
+
+    public List<BoardCategoryCode> getBoardCategoryCodeList(BoardConfig boardConfig) {
+        return boardDao.getBoardCategoryCodeList(boardConfig);
+    }
+
+    public void addReply(Reply reply) {
+        boardDao.addReply(reply);
+    }
+
+    public List<Reply> getReplyList(Reply reply) {
+        return boardDao.getReplyList(reply);
+    }
+
+    public void updateReply(Reply reply) {
+        boardDao.updateReply(reply);
+    }
+
+    public void deleteReply(Reply reply) {
+        boardDao.deleteReply(reply);
     }
 }
