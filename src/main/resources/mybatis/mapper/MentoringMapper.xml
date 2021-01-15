@@ -16,21 +16,78 @@
         select * from counsel_apply_form_way_item
     </select>
 
-    <select id="getMentor" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
-        select * from mentors
+    <select id="getMentorListCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="java.lang.Integer">
+        select count(*) from mentors
         <where>
-            <if test="userId != null and userId != ''">
-                AND user_id = #{userId}
-            </if>
+<!--            <if test="userId != null and userId != ''">-->
+<!--                AND user_id = #{userId}-->
+<!--            </if>-->
             <if test="mentorStatus != null">
                 AND mentor_status = #{mentorStatus}
+            </if>
+<!--            <if test="categoryId != null and categoryId != ''">-->
+<!--                AND category_id = #{categoryId}-->
+<!--            </if>-->
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
             </if>
         </where>
     </select>
 
+    <select id="getMentor" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        SELECT *, mentor_career as mentor_career_str,mentor_keyword as mentor_keyword_str FROM mentors as m
+        LEFT JOIN attach_file as a
+        ON a.content_id = m.mentor_id and division = 'MENTOR_PROFILE_IMG'
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+            <if test="mentorId != null">
+                AND mentor_id = #{mentorId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        UPDATE mentors
+        <set>
+            <if test="mentorStatus != null">
+                mentor_status = #{mentorStatus},
+            </if>
+        </set>
+        WHERE mentor_id = #{mentorId}
+    </update>
+
+    <select id="getMentorList" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        SELECT ROW_NUMBER() OVER (ORDER BY a.mentor_id) rownum, a.*, b.user_name FROM mentors AS a
+        left join users AS b
+        ON a.user_id = b.user_id
+        left join counsel_field_mentor AS c
+        ON a.mentor_id = c.mentor_id
+        <where>
+            <if test="mentorFieldList!=null and mentorFieldList.size!=0">
+                c.field_id IN
+                <foreach collection="mentorFieldList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="mentorStatus != null">
+                AND mentor_status = #{mentorStatus}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+
+        order by a.mentor_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
     <insert id="applyMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
-        insert into mentors(user_id,mentor_introduction,mentor_career,mentor_name,mentor_company,mentor_phone_number,mentor_keyword,mentor_email,mentor_position,mentor_field)
-        VALUES(#{userId},#{mentorIntroduction},#{mentorCareerStr},#{mentorName},#{mentorCompany},#{mentorPhoneNumber},#{mentorKeywordStr},#{mentorEmail},#{mentorPosition},#{mentorFieldStr})
+        insert into mentors(user_id,mentor_introduction,mentor_career,mentor_name,mentor_company,mentor_phone_number,mentor_keyword,mentor_email,mentor_position)
+        VALUES(#{userId},#{mentorIntroduction},#{mentorCareerStr},#{mentorName},#{mentorCompany},#{mentorPhoneNumber},#{mentorKeywordStr},#{mentorEmail},#{mentorPosition})
 
         <selectKey keyProperty="mentorId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
@@ -55,8 +112,8 @@
     </insert>
 
     <insert id="applyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-        insert into counsel_apply_form(user_id,title,content,form_progress_item,form_sortation_item,form_way_item,mentee_name,mentee_email,mentee_phone_number)
-        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{formSortationItem},#{formWayItem},#{menteeName},#{menteeEmail},#{menteePhoneNumber})
+        insert into counsel_apply_form(user_id,title,content,form_progress_item,form_sortation_item,form_way_item,mentee_name,mentee_email,mentee_phone_number,hope_mentor)
+        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{formSortationItem},#{formWayItem},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor})
         <selectKey keyProperty="formId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -79,35 +136,78 @@
         </where>
     </select>
 
-    <select id="getCounselApplyList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-<!--        SELECT *-->
-<!--        FROM-->
-<!--        (-->
-<!--        select-->
-<!--        @num:=@num+1 rownum,-->
-<!--        E.*-->
-<!--        from-->
-<!--        (SELECT @num:=0) D,-->
-<!--        (-->
-<!--        SELECT * from counsel_apply_form-->
-<!--        <where>-->
-<!--            <if test="userId != null and userId != ''">-->
-<!--                AND user_id = #{userId}-->
-<!--            </if>-->
-<!--        </where>-->
-<!--        )  E-->
-<!--        ORDER BY form_id DESC-->
-<!--        )  Z-->
-<!--        <where>-->
-<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
-<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
-<!--            </if>-->
-<!--        </where>-->
 
-        SELECT ROW_NUMBER() OVER (ORDER BY a.form_id) rownum, a.* from counsel_apply_form as a
+    <select id="getCounselApply" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        SELECT a.*,m.mentor_name, m.user_id as mentor_user_id, p.item as form_progress_item_name, s.item as form_sortation_item_name, w.item as form_way_item_name, d.answer, d.reg_date as answer_date, d.way as answer_way, d.score,d.diary_id as diaryId
+        FROM counsel_apply_form as a
+        left join counsel_apply_form_progress_item as p
+        on p.item_id = a.form_progress_item
+        left join counsel_apply_form_sortation_item as s
+        on s.item_id = a.form_sortation_item
+        left join counsel_apply_form_way_item as w
+        on w.item_id = a.form_way_item
+        left join mentors as m
+        on m.mentor_id = a.hope_mentor
+        OR m.mentor_id = a.assign_mentor_id
+        left join mentoring_diary as d
+        on d.form_id = a.form_id
+        <where>
+            <if test="formId != null and formId != ''">
+                AND a.form_id = #{formId}
+            </if>
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="mentorUserId != null and mentorUserId != ''">
+                AND m.user_id = #{mentorUserId}
+            </if>
+        </where>
+        group by a.form_id
+    </select>
+
+    <update id="updateCounselApply" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        UPDATE counsel_apply_form
+        <set>
+            <if test="applyStatus != null">
+                apply_status = #{applyStatus},
+            </if>
+            <choose>
+
+                <when test="assignMentorId != null and assignMentorId != ''">
+                    assign_mentor_id = #{assignMentorId},
+                </when>
+
+                <otherwise>
+                    assign_mentor_id = null,
+                    apply_status = 'APPLY'
+                </otherwise>
+
+            </choose>
+        </set>
+        WHERE form_id = #{formId}
+    </update>
+
+    <update id="updateCounselApplyStatus" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        UPDATE counsel_apply_form
+        <set>
+            apply_status = #{applyStatus},
+            <if test="applyStatus.toString() == 'RETURN'">
+                assign_mentor_id = null
+            </if>
+        </set>
+        WHERE form_id = #{formId}
+    </update>
+
+    <select id="getCounselApplyList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        SELECT ROW_NUMBER() OVER (ORDER BY a.form_id) rownum, a.*,m.mentor_name,m.user_id as mentor_user_id from counsel_apply_form as a
+        LEFT JOIN mentors as m
+        on m.mentor_id = a.assign_mentor_id
         <where>
             <if test="userId != null and userId != ''">
-                AND user_id = #{userId}
+                AND a.user_id = #{userId}
+            </if>
+            <if test="mentorUserId != null and mentorUserId != ''">
+                AND m.user_id = #{mentorUserId}
             </if>
         </where>
         order by a.form_id desc
@@ -116,98 +216,57 @@
         </if>
     </select>
 
-    <!--    카테고리-->
-<!--    <insert id="createBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
-<!--        insert into board_category(user_id,mentor_introduction,profile_img,mentor_career,mentor_name,mentor_company,mentor_phone_number,mentor_keyword,mentor_email,mentor_position,mentor_field)-->
-<!--        VALUES(#{userId},#{mentorIntroduction},#{profileImg},#{mentorCareer},#{mentorName},#{mentorCompany},#{mentorPhoneNumber},#{mentorKeyword},#{mentorEmail},#{mentorPosition},#{mentorField})-->
-<!--    </insert>-->
-<!--    <update id="updateBoardCategory" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
-<!--        UPDATE board_category SET-->
-<!--            category_en_name = #{categoryEnName}-->
-<!--            category_kr_name = #{categoryKrName}-->
-<!--            is_active = #{isActive}-->
-<!--        where category_id = #{categoryId}-->
-<!--    </update>-->
-
-<!--    <select id="getBoardCategoryList" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
-<!--        select * from board_category-->
-<!--        <where>-->
-<!--            <if test="boardEnName != null and boardEnName != ''">-->
-<!--                AND board_en_name = #{boardEnName}-->
-<!--            </if>-->
-<!--        </where>-->
-<!--    </select>-->
-
-<!--    <select id="getBoardCategory" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardCategory">-->
-<!--        select * from board_category-->
-<!--        <where>-->
-<!--            <if test="categoryId != null and categoryId != ''">-->
-<!--                AND category_id = #{categoryId}-->
-<!--            </if>-->
-<!--            <if test="boardEnName != null and boardEnName != ''">-->
-<!--                AND board_en_name = #{boardEnName}-->
-<!--            </if>-->
-<!--        </where>-->
-<!--    </select>-->
-<!--    &lt;!&ndash;    카테고리&ndash;&gt;-->
+    <select id="getCounselFieldMentee" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselField">
+        select * from counsel_field_mentee as c
+        left join counsel_field_code as f
+        on f.field_id = c.field_id
+        <where>
+            <if test="formId != null and formId != ''">
+                AND form_id = #{formId}
+            </if>
+        </where>
+    </select>
 
 
-<!--    &lt;!&ndash;    컨텐츠&ndash;&gt;-->
-<!--    <insert id="createBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
-<!--        insert into board_content(title,content,thumbnail_img,category_id,writer_id) values(#{title},#{content}, #{thumbnailImg},#{categoryId},#{writerId})-->
-<!--    </insert>-->
+    <select id="getDiary" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary">
+        select * from mentoring_diary
+        <where>
+            <if test="formId != null and formId != ''">
+                AND form_id = #{formId}
+            </if>
+            <if test="diaryId != null and diaryId != ''">
+                AND diary_id = #{diaryId}
+            </if>
+            <if test="mentorId != null and mentorId != ''">
+                AND mentor_id = #{mentorId}
+            </if>
+        </where>
+    </select>
 
-<!--    <update id="updateBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
-<!--        UPDATE board_content SET-->
-<!--            title = #{categoryEnName}-->
-<!--            content = #{categoryKrName}-->
-<!--            thumbnail_img = #{categoryKrName}-->
-<!--        where content_id = #{contentId}-->
-<!--    </update>-->
+    <insert id="addDiary" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary">
+        insert into mentoring_diary(form_id,mentor_id,answer,way)
+        VALUES(#{formId},#{mentorId},#{answer},#{way})
 
-<!--    <select id="getBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
-<!--        SELECT * from board_content where content_id = #{contentId}-->
-<!--    </select>-->
+        <selectKey keyProperty="mentorId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
 
-<!--    <update id="updateBoardContentCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
-<!--        UPDATE board_content set view_cnt = view_cnt + 1 where content_id = #{contentId}-->
-<!--    </update>-->
+    <update id="updateDiary" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary">
+        UPDATE mentoring_diary
+        <set>
+            <if test="score != null">
+                score = #{score},
+            </if>
+        </set>
+        <where>
+            <if test="formId != null and formId != ''">
+                AND form_id = #{formId}
+            </if>
+            <if test="diaryId != null and diaryId != ''">
+                AND diary_id = #{diaryId}
+            </if>
+        </where>
+    </update>
 
-<!--    <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">-->
-<!--        SELECT *-->
-<!--        FROM-->
-<!--        (-->
-<!--        select-->
-<!--        @num:=@num+1 rownum,-->
-<!--        E.*-->
-<!--        from-->
-<!--        (SELECT @num:=0) D,-->
-<!--        (-->
-<!--        SELECT-->
-<!--        *-->
-<!--        FROM board_content-->
-<!--        <where>-->
-<!--            <if test="categoryId != null and categoryId != ''">-->
-<!--                AND category_id = #{category_id}-->
-<!--            </if>-->
-<!--            <if test="searchFiled != null and searchFiled != '' and searchValue != null and searchValue != ''">-->
-<!--                AND ${searchFiled} like '%' #{searchValue} '%'-->
-<!--            </if>-->
-<!--            <if test="startDate != null">-->
-<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
-<!--            </if>-->
-<!--            <if test="endDate != null">-->
-<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
-<!--            </if>-->
-<!--        </where>-->
-<!--        )  E-->
-<!--        ORDER BY content_id DESC-->
-<!--        )  Z-->
-<!--        <where>-->
-<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
-<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
-<!--            </if>-->
-<!--        </where>-->
-<!--    </select>-->
-    <!--    컨텐츠-->
 </mapper>

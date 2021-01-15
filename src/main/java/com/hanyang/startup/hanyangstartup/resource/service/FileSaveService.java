@@ -85,4 +85,7 @@ public class FileSaveService {
     public void updateAttachFile(List<AttachFile> attachFileList){
         fileSaveDao.updateAttachFile(attachFileList);
     }
+    public void deleteAttachFile(List<AttachFile> attachFileList){
+        fileSaveDao.deleteAttachFile(attachFileList);
+    }
 }

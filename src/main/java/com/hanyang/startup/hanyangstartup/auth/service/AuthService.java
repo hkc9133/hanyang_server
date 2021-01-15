@@ -9,6 +9,7 @@ import com.hanyang.startup.hanyangstartup.util.RedisUtil;
 import com.hanyang.startup.hanyangstartup.util.SaltUtil;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
@@ -46,7 +47,8 @@ public class AuthService {
         newUser.setUserEmail(socialData.getEmail());
         newUser.setUserName(socialData.getName());
         newUser.setRole(socialData.getRole());
-        newUser.setSocial(new SocialData(socialData.getId(),socialData.getEmail(),socialData.getType()));
+        newUser.setType(socialData.getType());
+//        newUser.setSocial(new SocialData(socialData.getId(),socialData.getEmail(),socialData.getType()));
 
         System.out.println("==========");
         System.out.println(newUser);
@@ -75,15 +77,19 @@ public class AuthService {
     }
 
     @Transactional
-    public User loginUser(User user) throws NotFoundException {
+    public User loginUser(User user) throws NotFoundException,Exception {
         HashMap<String,Object> map  = new HashMap<>();
         map.put("id",user.getUserId());
-        map.put("password",saltUtil.encodePassword(saltUtil.genSalt(),user.getUserPassword()));
-        map.put("type","normal");
+//        map.put("password",saltUtil.encodePassword(saltUtil.genSalt(),user.getUserPassword()));
+        map.put("type","NORMAL");
 
         User loginUser = authDao.findByIdAndType(map);
 
-        if (user == null) throw new NotFoundException("멤버가 없습니다");
+        if (loginUser == null) throw new NotFoundException("멤버가 없습니다");
+
+        if (!BCrypt.checkpw(user.getUserPassword(), loginUser.getUserPassword())) {
+            throw new Exception ("비밀번호가 틀립니다.");
+        }
 
         authDao.updateLastLogin(loginUser);
 

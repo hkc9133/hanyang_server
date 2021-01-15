@@ -1,6 +1,7 @@
 package com.hanyang.startup.hanyangstartup.board.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hanyang.startup.hanyangstartup.auth.domain.Role;
 import com.hanyang.startup.hanyangstartup.common.domain.Page;
 import lombok.*;
 
@@ -22,6 +23,7 @@ public class BoardConfig extends Page {
     private String boardDesc;
     private Boolean useFile;
     private Boolean useComment;
+    private String writeRole;
 
     private Integer categoryId;
     //검색용

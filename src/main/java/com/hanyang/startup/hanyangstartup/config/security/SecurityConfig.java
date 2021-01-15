@@ -94,6 +94,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://localhost:8080");
         configuration.addAllowedOrigin("http://127.0.0.1:8080");
         configuration.addAllowedOrigin("http://210.103.188.119");
+        configuration.addAllowedOrigin("http://49.50.167.168");
         configuration.addExposedHeader(JwtUtil.ACCESS_TOKEN_NAME);
         configuration.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
         configuration.addExposedHeader("User-Id");

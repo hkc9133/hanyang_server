@@ -13,9 +13,9 @@ public class SocialData {
 
     private String socialId;
     private String email;
-    private String type;
+    private UserType type;
 
-    public SocialData(String socialId, String email, String type) {
+    public SocialData(String socialId, String email, UserType type) {
         this.id = id;
         this.socialId = socialId;
         this.email = email;

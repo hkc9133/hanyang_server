@@ -29,8 +29,22 @@ public class MentoringDao {
     public List<WayItem> getWayItem(){
         return sqlSession.selectList("mentoring.getWayItem");
     }
-    public List<Mentor> getMentor(Mentor mentor){
-        return sqlSession.selectList("mentoring.getMentor",mentor);
+
+
+    public Mentor getMentor(Mentor mentor){
+        return sqlSession.selectOne("mentoring.getMentor",mentor);
+    }
+
+    public void updateMentor(Mentor mentor){
+        sqlSession.update("mentoring.updateMentor",mentor);
+    }
+
+    public Integer getMentorListCnt(Mentor mentor){
+        return sqlSession.selectOne("mentoring.getMentorListCnt",mentor);
+    }
+
+    public List<Mentor> getMentorList(Mentor mentor){
+        return sqlSession.selectList("mentoring.getMentorList",mentor);
     }
 
 
@@ -41,6 +55,7 @@ public class MentoringDao {
     public List<Integer> getCounselFieldMentor(Mentor mentor){
         return sqlSession.selectList("mentoring.getCounselFieldMentor",mentor);
     }
+
     public void addCounselFieldMentor(Mentor mentor){
         sqlSession.insert("mentoring.addCounselFieldMentor",mentor);
     }
@@ -52,11 +67,39 @@ public class MentoringDao {
         sqlSession.insert("mentoring.addCounselFieldMentee",counselApplyForm);
     }
 
+
+
+    public CounselApplyForm getCounselApply(CounselApplyForm counselApplyForm){
+        return sqlSession.selectOne("mentoring.getCounselApply",counselApplyForm);
+    }
+
+    public void updateCounselApplyStatus(CounselApplyForm counselApplyForm){
+        sqlSession.update("mentoring.updateCounselApplyStatus",counselApplyForm);
+    }
+
+    public void updateCounselApply(CounselApplyForm counselApplyForm){
+        sqlSession.update("mentoring.updateCounselApply",counselApplyForm);
+    }
+
     public List<CounselApplyForm> getCounselApplyList(CounselApplyForm counselApplyForm){
         return sqlSession.selectList("mentoring.getCounselApplyList",counselApplyForm);
     }
-
     public int getCounselApplyListCnt(CounselApplyForm counselApplyForm){
         return sqlSession.selectOne("mentoring.getCounselApplyListCnt",counselApplyForm);
+    }
+    public List<CounselField> getCounselFieldMentee(CounselApplyForm counselApplyForm){
+        return sqlSession.selectList("mentoring.getCounselFieldMentee",counselApplyForm);
+    }
+
+
+    public MentoringDiary getDiary(MentoringDiary mentoringDiary){
+        return sqlSession.selectOne("mentoring.getDiary",mentoringDiary);
+    }
+    public void addDiary(MentoringDiary mentoringDiary){
+        sqlSession.insert("mentoring.addDiary",mentoringDiary);
+    }
+
+    public void updateDiary(MentoringDiary mentoringDiary){
+        sqlSession.update("mentoring.updateDiary",mentoringDiary);
     }
 }

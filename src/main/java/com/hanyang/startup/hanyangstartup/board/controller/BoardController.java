@@ -139,8 +139,7 @@ public class BoardController {
         Response response;
         try {
             System.out.println("게시글 추가");
-//            boardContent.setWriterId(principal.getName());
-            boardContent.setWriterId("admin");
+            boardContent.setWriterId(principal.getName());
             boardService.addBoardContent(boardContent);
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);
@@ -157,8 +156,7 @@ public class BoardController {
         Response response;
         try {
             System.out.println("댓글 추가");
-//            boardContent.setWriterId(principal.getName());
-            reply.setReplyWriter("admin");
+            reply.setReplyWriter(principal.getName());
             boardService.addReply(reply);
             List<Reply> replyList = boardService.getReplyList(reply);
             response = new Response("success", null, replyList, 200);
@@ -176,9 +174,8 @@ public class BoardController {
 
         Response response;
         try {
-            System.out.println("댓글 추가");
-//            boardContent.setWriterId(principal.getName());
-            reply.setReplyWriter("admin");
+            System.out.println("댓글 수정");
+            reply.setReplyWriter(principal.getName());
             boardService.updateReply(reply);
             List<Reply> replyList = boardService.getReplyList(reply);
             response = new Response("success", null, replyList, 200);
@@ -197,7 +194,7 @@ public class BoardController {
         Response response;
         try {
 //            boardContent.setWriterId(principal.getName());
-            reply.setReplyWriter("admin");
+            reply.setReplyWriter(principal.getName());
             boardService.deleteReply(reply);
             List<Reply> replyList = boardService.getReplyList(reply);
             response = new Response("success", null, replyList, 200);

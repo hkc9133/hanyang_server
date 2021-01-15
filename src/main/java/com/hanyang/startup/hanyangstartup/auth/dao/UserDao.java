@@ -13,6 +13,13 @@ public class UserDao {
     @Autowired
     protected SqlSessionTemplate sqlSession;
 
+    public User getUser(User user){
+        return sqlSession.selectOne("user.getUser",user);
+    }
+    public void updateUser(User user){
+        sqlSession.update("user.updateUser",user);
+    }
+
     public List<BoardConfig> getUserList(User user){
         return sqlSession.selectList("user.getUserList",user);
     }

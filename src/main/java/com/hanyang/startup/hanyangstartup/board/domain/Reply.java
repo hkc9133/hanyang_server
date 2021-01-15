@@ -20,6 +20,9 @@ public class Reply extends Page {
     private String status;
     private LocalDateTime regDate;
 
-    //대댓글일때 상위 댓글의 작성자 이름
+    //작성자 이름
     private String userName;
+    //대댓글일때 상위 댓글의 작성자 이름
+    private String toName;
+
 }

@@ -8,10 +8,7 @@ import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -33,13 +30,46 @@ public class AdminUserController {
             user.setSearchField(searchField);
             user.setSearchValue(searchValue);
 
-            System.out.println("~~~~");
-            System.out.println(user);
-
-
             Map<String,Object> map = userService.getUserList(user);
 
             response = new Response("success", null, map, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @GetMapping(value = "/{userId}")
+    public ResponseEntity<Response> getUser(@PathVariable("userId") String userId) {
+        Response response;
+        try {
+            User user = new User();
+
+            user.setUserId(userId);
+
+            Map<String,Object> map = userService.getUser(user);
+
+            response = new Response("success", null, map, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping
+    public ResponseEntity<Response> updateUser(@RequestBody User user) {
+        Response response;
+        try {
+
+
+            userService.updateUser(user);
+
+            response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

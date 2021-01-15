@@ -3,7 +3,7 @@
 <mapper namespace="attach_file">
 
     <insert id="addAttachFile" parameterType="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
-        INSERT INTO attach_file(content_id, status, file_size, division, file_origin_name, file_name, file_path, file_extension) values(#{contentId},#{status}, #{fileSize},#{division},#{fileOriginName},#{fileName},#{filePath},#{fileExtension})
+        INSERT INTO attach_file(content_id, file_size, division, file_origin_name, file_name, file_path, file_extension) values(#{contentId}, #{fileSize},#{division},#{fileOriginName},#{fileName},#{filePath},#{fileExtension})
         <selectKey keyProperty="fileId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -34,6 +34,9 @@
             <if test="division != null">
                 AND division = #{division}
             </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
         </where>
     </select>
 
@@ -52,5 +55,15 @@
                 </if>
             </where>
         </foreach>
+    </update>
+
+    <update  id="deleteAttachFile" parameterType="java.util.List">
+        UPDATE attach_file
+        SET status = 'D'
+        WHERE file_id IN
+        <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
+              #{item.fileId}
+        </foreach>
+
     </update>
 </mapper>

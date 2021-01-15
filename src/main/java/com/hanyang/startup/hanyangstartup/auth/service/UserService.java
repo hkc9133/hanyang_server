@@ -13,18 +13,32 @@ import java.util.Map;
 public class UserService {
 
     @Autowired
-    private UserDao userdao;
+    private UserDao userDao;
 
-    //컨텐츠 리스트
     public Map<String,Object> getUserList(User user) {
         user.setPageSize(10);
-        user.setTotalCount(userdao.getUserListCnt(user));
+        user.setTotalCount(userDao.getUserListCnt(user));
 
         Map<String,Object> map = new HashMap<>();
 
         map.put("page",user);
-        map.put("list",userdao.getUserList(user));
+        map.put("list",userDao.getUserList(user));
 
         return map;
     }
+
+    public Map<String,Object> getUser(User user) {
+        Map<String,Object> map = new HashMap<>();
+
+        User searchUser = userDao.getUser(user);
+        searchUser.setUserPassword("");
+        map.put("user",searchUser);
+
+        return map;
+    }
+    public void updateUser(User user) {
+        userDao.updateUser(user);
+
+    }
+
 }

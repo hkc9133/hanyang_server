@@ -3,39 +3,6 @@
 <mapper namespace="user">
 
     <select id="getUserList" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User" resultType="com.hanyang.startup.hanyangstartup.auth.domain.User">
-<!--        SELECT *-->
-<!--        FROM-->
-<!--        (-->
-<!--        select-->
-<!--        @num:=@num+1 rownum,-->
-<!--        E.*-->
-<!--        from-->
-<!--        (SELECT @num:=0) D,-->
-<!--        (-->
-<!--        SELECT user_id, user_email, user_name, type,role,reg_date,apply_role,last_login,status-->
-<!--        from users-->
-<!--        <where>-->
-<!--            <if test="type != null">-->
-<!--                AND type = #{type}-->
-<!--            </if>-->
-<!--            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">-->
-<!--                AND ${searchField} like '%' #{searchValue} '%'-->
-<!--            </if>-->
-<!--            <if test="startDate != null">-->
-<!--                AND <![CDATA[date(reg_date) >= #{startDate}]]>-->
-<!--            </if>-->
-<!--            <if test="endDate != null">-->
-<!--                AND <![CDATA[date(reg_date) <= #{endDate}]]>-->
-<!--            </if>-->
-<!--        </where>-->
-<!--        )  E-->
-<!--        )  Z-->
-<!--        <where>-->
-<!--            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">-->
-<!--                Z.rownum between #{startRowNo} and #{endRowNo}-->
-<!--            </if>-->
-<!--        </where>-->
-
         SELECT ROW_NUMBER() OVER (ORDER BY a.last_login) rownum, user_id, user_email, user_name, type,role,reg_date,apply_role,last_login,status
         from users as a
         <where>
@@ -75,5 +42,27 @@
             </if>
         </where>
     </select>
+
+    <select id="getUser" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User" resultType="com.hanyang.startup.hanyangstartup.auth.domain.User">
+        SELECT * FROM users
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateUser" parameterType="com.hanyang.startup.hanyangstartup.auth.domain.User">
+        update users
+        <set>
+            <if test="userName != null and userName !=''">
+                user_name = #{userName}
+            </if>
+            <if test="role != null">
+                role = #{role}
+            </if>
+        </set>
+        where user_id = #{userId}
+    </update>
 
 </mapper>

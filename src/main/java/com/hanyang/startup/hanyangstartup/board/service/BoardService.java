@@ -4,12 +4,14 @@ import com.hanyang.startup.hanyangstartup.board.dao.BoardDao;
 import com.hanyang.startup.hanyangstartup.board.domain.*;
 import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
+import com.hanyang.startup.hanyangstartup.resource.domain.FILE_STATUS;
 import com.hanyang.startup.hanyangstartup.resource.service.FileSaveService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,13 +80,31 @@ public class BoardService {
     public void addBoardContent(BoardContent boardContent) {
         boardDao.addBoardContent(boardContent);
 
-        for (MultipartFile file : boardContent.getFiles()) {
-            fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
+        if(boardContent.getFiles() != null){
+            for (MultipartFile file : boardContent.getFiles()) {
+                fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
+            }
         }
     }
 
     //컨텐츠 수정
+    @Transactional(rollbackFor = {Exception.class})
     public void updateBoardContent(BoardContent boardContent) {
+        List<Integer> removeFiles = boardContent.getRemoveFiles();
+        if(removeFiles != null){
+            List<AttachFile> attachFileList = new ArrayList<>();
+            for (Integer file : removeFiles) {
+                AttachFile attachFile = new AttachFile();
+                attachFile.setFileId(file.intValue());
+                attachFileList.add(attachFile);
+            }
+            fileSaveService.deleteAttachFile(attachFileList);
+        }
+        if(boardContent.getFiles() != null){
+            for (MultipartFile file : boardContent.getFiles()) {
+                fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
+            }
+        }
         boardDao.updateBoardContent(boardContent);
     }
 
@@ -96,6 +116,7 @@ public class BoardService {
         AttachFile attachFile = new AttachFile();
         attachFile.setContentId(boardContent.getContentId());
         attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+        attachFile.setStatus(FILE_STATUS.A);
         Map<String, Object> map = new HashMap<>();
         BoardContent resultContent = boardDao.getBoardContent(boardContent);
 
@@ -122,6 +143,7 @@ public class BoardService {
             AttachFile attachFile = new AttachFile();
             attachFile.setContentId(boardContent.getContentId());
             attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+            attachFile.setStatus(FILE_STATUS.A);
 
             boardContent.setAttachFileList(fileSaveService.getAttachFileList(attachFile));
             return boardContent;

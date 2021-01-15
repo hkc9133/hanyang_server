@@ -2,10 +2,7 @@ package com.hanyang.startup.hanyangstartup.board.controller;
 
 import com.hanyang.startup.hanyangstartup.auth.domain.RequestSocialData;
 import com.hanyang.startup.hanyangstartup.auth.domain.User;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardCategory;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardCategoryCode;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
-import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
+import com.hanyang.startup.hanyangstartup.board.domain.*;
 import com.hanyang.startup.hanyangstartup.board.service.BoardService;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.util.JwtUtil;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,6 +204,119 @@ public class AdminBoardController {
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
 //        return response;
+    }
+
+    @GetMapping(value = "/content/{contentId}")
+    public ResponseEntity<Response> getBoardContent(@PathVariable("contentId") Integer contentId) {
+
+        Response response;
+        try {
+            BoardContent boardContent = new BoardContent();
+
+            boardContent.setContentId(contentId);
+
+            Map<String,Object> map = boardService.getBoardContent(boardContent);
+            response = new Response("success", null, map, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/content")
+    public ResponseEntity<Response> addBoardContent(BoardContent boardContent, Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("게시글 추가");
+            boardContent.setWriterId(principal.getName());
+            boardService.addBoardContent(boardContent);
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/content/edit")
+    public ResponseEntity<Response> updateBoardContent(BoardContent boardContent, Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("게시글 수정");
+//            boardContent.setWriterId(principal.getName());
+            boardContent.setWriterId(principal.getName());
+            boardService.updateBoardContent(boardContent);
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/reply")
+    public ResponseEntity<Response> addReply(@RequestBody Reply reply, Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("댓글 추가");
+//            boardContent.setWriterId(principal.getName());
+            reply.setReplyWriter(principal.getName());
+            boardService.addReply(reply);
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("success", null, replyList, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("error", null, replyList, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping(value = "/reply")
+    public ResponseEntity<Response> updateReply(@RequestBody Reply reply, Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("댓글 수정");
+//            boardContent.setWriterId(principal.getName());
+            reply.setReplyWriter(principal.getName());
+            boardService.updateReply(reply);
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("success", null, replyList, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("error", null, replyList, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/reply/delete")
+    public ResponseEntity<Response> deleteReply(@RequestBody Reply reply, Principal principal) {
+
+        Response response;
+        try {
+//            boardContent.setWriterId(principal.getName());
+            reply.setReplyWriter(principal.getName());
+            boardService.deleteReply(reply);
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("success", null, replyList, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            List<Reply> replyList = boardService.getReplyList(reply);
+            response = new Response("error", null, replyList, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
     }
 
 

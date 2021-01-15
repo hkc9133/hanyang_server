@@ -1,4 +1,4 @@
-package com.hanyang.startup.hanyangstartup.startupEvent.domain;
+package com.hanyang.startup.hanyangstartup.notice.domain;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class StartupEventCategoryCode {
+public class NoticeCategoryCode {
     private int categoryCodeId;
     private String categoryCodeName;
 }

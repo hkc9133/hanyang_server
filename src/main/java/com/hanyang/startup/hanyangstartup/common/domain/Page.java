@@ -17,7 +17,7 @@ public class Page {
     private int pageBlock; //페이징 네비[블록] 사이즈
 
     private int present_page;
-    private int pageNo;  // 페이지 번호
+    private Integer pageNo;  // 페이지 번호
     private int startRowNo; //조회 시작 row 번호
     private int endRowNo; //조회 마지막 now 번호
     private int firstPageNo; // 첫 번째 페이지 번호
@@ -33,10 +33,10 @@ public class Page {
 
     @Getter
     @Setter
-    private LocalDateTime startDate;
+    private String startDate;
     @Getter
     @Setter
-    private LocalDateTime endDate;
+    private String endDate;
 
     public int getRownum() {
         return rownum;
@@ -62,11 +62,11 @@ public class Page {
         this.pageBlock = pageBlock;
     }
 
-    public int getPageNo() {
+    public Integer getPageNo() {
         return pageNo;
     }
 
-    public void setPageNo(int pageNo) {
+    public void setPageNo(Integer pageNo) {
         this.pageNo = pageNo;
     }
 

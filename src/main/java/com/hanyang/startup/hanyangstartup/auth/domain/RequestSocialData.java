@@ -13,6 +13,6 @@ public class RequestSocialData {
     private String id;
     private String name;
     private String email;
-    private String type;
+    private UserType type;
     private Role role;
 }

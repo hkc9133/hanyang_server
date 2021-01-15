@@ -9,6 +9,7 @@ import lombok.*;
 @ToString
 public class CounselField {
     private int fieldId;
+    private String fieldName;
     private int mentorId;
     private int formId;
 

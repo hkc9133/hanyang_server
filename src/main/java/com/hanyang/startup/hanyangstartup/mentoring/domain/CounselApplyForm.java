@@ -24,18 +24,36 @@ public class CounselApplyForm extends Page {
     private int formProgressItem;
     private int formSortationItem;
     private int formWayItem;
+    private String formProgressItemName;
+    private String formSortationItemName;
+    private String formWayItemName;
     private String formWayItemStr;
     private String menteeName;
     private String menteeEmail;
     private Integer hopeMentor;
+    private Integer assignMentorId;
     private String menteePhoneNumber;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime regDate;
     private APPLY_STATUS applyStatus;
+    private List<APPLY_STATUS> deactivateApplyStatusList;
 
     private List<AttachFile> attachFileList;
     private List<Integer> uploadResultList;
 
+    private List<CounselField> counselFieldList;
     private List<Integer> counselFieldIdList;
+
+    private String mentorName;
+    private String mentorUserId;
+    private Integer mentorId;
+
+    //일지
+    private Integer diaryId;
+    private String answer;
+    private String answerWay;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+    private LocalDateTime answerDate;
+    private Integer score;
 
 }
