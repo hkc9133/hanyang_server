@@ -52,6 +52,10 @@ public class MentoringDao {
         sqlSession.insert("mentoring.applyMentor",mentor);
     }
 
+    public void updateMentorProfile(Mentor mentor){
+        sqlSession.update("mentoring.updateMentorProfile",mentor);
+    }
+
     public List<Integer> getCounselFieldMentor(Mentor mentor){
         return sqlSession.selectList("mentoring.getCounselFieldMentor",mentor);
     }
@@ -59,6 +63,10 @@ public class MentoringDao {
     public void addCounselFieldMentor(Mentor mentor){
         sqlSession.insert("mentoring.addCounselFieldMentor",mentor);
     }
+    public void removeCounselFieldMentor(Mentor mentor){
+        sqlSession.delete("mentoring.removeCounselFieldMentor",mentor);
+    }
+
 
     public void applyCounsel(CounselApplyForm counselApplyForm){
         sqlSession.insert("mentoring.applyCounsel",counselApplyForm);

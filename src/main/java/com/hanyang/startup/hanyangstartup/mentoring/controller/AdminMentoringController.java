@@ -9,6 +9,7 @@ import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -80,20 +81,28 @@ public class AdminMentoringController {
     }
 
     @PutMapping("/mentor")
-    public ResponseEntity<Response> updateMentor(@RequestBody Mentor mentor){
+    @ResponseBody
+    public ResponseEntity<Response> updateMentorProfile(@ModelAttribute Mentor mentor,Principal principal){
         Response response;
+//        if(bindingResult.hasErrors()){
+//            bindingResult.getAllErrors().forEach(v ->{
+//                System.out.println(v.toString());
+//            });
+//        }
         try {
 
-            mentoringService.updateMentor(mentor);
+            mentor.setUserId(principal.getName());
+
+            mentoringService.updateMentorProfile(mentor);
 
             response = new Response("success", null, null, 200);
-
             return new ResponseEntity(response, HttpStatus.OK);
         }
         catch(Exception e){
             e.printStackTrace();
             response = new Response("fail", null, null, 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+
         }
     }
 

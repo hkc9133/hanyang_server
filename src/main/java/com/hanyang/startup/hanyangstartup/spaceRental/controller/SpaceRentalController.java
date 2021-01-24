@@ -1,7 +1,10 @@
 package com.hanyang.startup.hanyangstartup.spaceRental.controller;
 
+import com.hanyang.startup.hanyangstartup.auth.domain.User;
+import com.hanyang.startup.hanyangstartup.auth.service.AuthService;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.common.exception.CustomException;
+import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom;
 import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime;
 import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule;
 import com.hanyang.startup.hanyangstartup.spaceRental.service.SpaceRentalService;
@@ -24,15 +27,20 @@ public class SpaceRentalController {
 
     @Autowired
     private SpaceRentalService spaceRentalService;
+    @Autowired
+    private AuthService authService;
 
 
     //공간 예약 관련 모든 정보 조회
     @GetMapping
-    public Response getSpaceRentalInfoAll(HttpServletRequest req, HttpServletResponse res){
+    public Response getSpaceRentalInfoAll(HttpServletRequest req, HttpServletResponse res,Principal principal){
         Response response;
         try {
 
-            Map<String, Object> map = spaceRentalService.getSpaceRentalInfoList();
+            User user = authService.findByUserId(principal.getName());
+            RentalRoom rentalRoom = new RentalRoom();
+            rentalRoom.setRentalRole(user.getRole().toString());
+            Map<String, Object> map = spaceRentalService.getSpaceRentalInfoList(rentalRoom);
 
             response = new Response("success", null, map, 200);
         }
@@ -127,12 +135,9 @@ public class SpaceRentalController {
     }
 
     @PostMapping("/schedule/apply")
-    public ResponseEntity<Response>  addRentalSchedule(@RequestBody RentalSchedule rentalSchedule, Principal principal, HttpServletRequest req, HttpServletResponse res){
+    public ResponseEntity<Response>  addRentalSchedule(@RequestBody RentalSchedule rentalSchedule, Principal principal, HttpServletRequest req, HttpServletResponse res)throws Exception{
         Response response;
         try {
-
-            System.out.println(rentalSchedule);
-
             rentalSchedule.setUserId(principal.getName());
             spaceRentalService.addRentalSchedule(rentalSchedule);
 
@@ -149,7 +154,56 @@ public class SpaceRentalController {
             response =  new Response("error", null, e.getMessage(),400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
-//        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/schedule/apply/update")
+    public ResponseEntity<Response>  updateRentalSchedule(@RequestBody RentalSchedule rentalSchedule, Principal principal, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+            rentalSchedule.setUserId(principal.getName());
+            spaceRentalService.updateRentalSchedule(rentalSchedule);
+
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response =  new Response("error", null, e.getMessage(),400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/schedule/apply")
+    public Response getRentalScheduleList(@RequestParam(value = "page", defaultValue = "1") Integer page,Principal principal, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+            RentalSchedule rentalSchedule = new RentalSchedule();
+            rentalSchedule.setPageNo(page);
+            rentalSchedule.setUserId(principal.getName());
+            Map<String, Object> map =  spaceRentalService.getRentalScheduleList(rentalSchedule);
+            response = new Response("success", null, map, 200);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response =  new Response("error", null, e.getMessage(),400);
+        }
+        return response;
+    }
+    @GetMapping("/schedule/apply/{scheduleId}")
+    public Response getRentalSchedule(@PathVariable("scheduleId") int scheduleId,Principal principal, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+            RentalSchedule rentalSchedule = new RentalSchedule();
+            rentalSchedule.setScheduleId(scheduleId);
+            rentalSchedule.setUserId(principal.getName());
+            RentalSchedule result =  spaceRentalService.getRentalSchedule(rentalSchedule);
+            response = new Response("success", null, result, 200);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response =  new Response("error", null, e.getMessage(),400);
+        }
+        return response;
     }
 
 

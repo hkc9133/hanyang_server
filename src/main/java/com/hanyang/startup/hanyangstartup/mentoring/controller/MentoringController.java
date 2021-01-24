@@ -8,6 +8,7 @@ import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -86,15 +87,15 @@ public class MentoringController {
 
 
 
-    @GetMapping("/mentor")
-    public ResponseEntity<Response> getMentor(Principal principal){
+    @GetMapping("/mentor/check")
+    public ResponseEntity<Response> getMentorCheck(Principal principal){
         Response response;
         try {
             Mentor mentor = new Mentor();
 //            mentor.setUserId(principal.getName());
             mentor.setUserId(principal.getName());
 
-            if(mentoringService.getMentorList(mentor).size() > 0){
+            if(mentoringService.getMentor(mentor) != null){
                 response = new Response("success", null, null, 409);
 
             }else{
@@ -110,15 +111,35 @@ public class MentoringController {
         }
     }
 
+    @GetMapping("/mentor")
+    public ResponseEntity<Response> getMentor(Principal principal){
+        Response response;
+        try {
+            Mentor mentor = new Mentor();
+            mentor.setUserId(principal.getName());
+
+            response = new Response("success", null, mentoringService.getMentor(mentor), 409);
+
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping("/mentor/list")
-    public ResponseEntity<Response> getMentorList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "6") Integer pageSize, @RequestParam(value = "counselField", defaultValue = "") Integer counselField,Principal principal){
+    public ResponseEntity<Response> getMentorList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",required = false) Integer pageSize, @RequestParam(value = "counselField", defaultValue = "") Integer counselField,Principal principal){
         Response response;
         try {
 
             Mentor mentor = new Mentor();
             mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
             mentor.setPageNo(page);
-            mentor.setPageSize(pageSize);
+            if(pageSize != null){
+                mentor.setPageSize(pageSize);
+            }
             if(counselField != null){
                 List<Integer> counselFieldList = new ArrayList<>();
                 counselFieldList.add(counselField);
@@ -146,6 +167,32 @@ public class MentoringController {
             mentor.setUserId(principal.getName());
 
             mentoringService.applyMentor(mentor);
+
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @PostMapping("/mentor/update")
+    @ResponseBody
+    public ResponseEntity<Response> updateMentorProfile(@ModelAttribute Mentor mentor,BindingResult bindingResult, Principal principal){
+        Response response;
+//        if(bindingResult.hasErrors()){
+//            bindingResult.getAllErrors().forEach(v ->{
+//                System.out.println(v.toString());
+//            });
+//        }
+        try {
+
+            mentor.setUserId(principal.getName());
+
+            mentoringService.updateMentorProfile(mentor);
 
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);

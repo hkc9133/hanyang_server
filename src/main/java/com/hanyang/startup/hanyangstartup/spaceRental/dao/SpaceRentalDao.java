@@ -16,9 +16,13 @@ public class SpaceRentalDao {
     @Autowired
     protected SqlSessionTemplate sqlSession;
 
+    public List<RentalPlace> getPlaceInfoAll(RentalPlace rentalPlace){
+        return sqlSession.selectList("spaceRental.getPlaceInfoAll",rentalPlace);
+    }
+
 //    공간 시작
-    public void createPlace(RentalPlace rentalPlace){
-        sqlSession.insert("spaceRental.createPlace",rentalPlace);
+    public void addPlace(RentalPlace rentalPlace){
+        sqlSession.insert("spaceRental.addPlace",rentalPlace);
     }
     public void updatePlace(RentalPlace boardCategory){
         sqlSession.update("spaceRental.updatePlace",boardCategory);
@@ -66,8 +70,8 @@ public class SpaceRentalDao {
     public void createRoomTime(RentalRoomTime rentalRoomTime){
         sqlSession.insert("spaceRental.createRoomTime",rentalRoomTime);
     }
-    public void updateRoomTime(RentalRoomTime rentalRoomTime){
-        sqlSession.update("spaceRental.updateRoomTime",rentalRoomTime);
+    public void updateRoomTime(List<RentalRoomTime> rentalRoomTimeList){
+        sqlSession.update("spaceRental.updateRoomTime",rentalRoomTimeList);
     }
     public List<RentalRoomTime> getRoomTimeList(RentalRoomTime rentalRoomTime){
         return sqlSession.selectList("spaceRental.getRoomTimeList",rentalRoomTime);
@@ -80,6 +84,9 @@ public class SpaceRentalDao {
     public int deleteRoomTime(RentalRoomTime rentalRoomTime){
         return sqlSession.delete("spaceRental.deleteRoomTime",rentalRoomTime);
     }
+//    public void deleteRoomTimeWithRoomId(RentalRoomTime rentalRoomTime){
+//        sqlSession.delete("spaceRental.deleteRoomTimeWithRoomId",rentalRoomTime);
+//    }
 //    룸 시간 끝
 
     //스케쥴 시작
@@ -89,6 +96,23 @@ public class SpaceRentalDao {
     public void addRentalSchedule(RentalSchedule rentalSchedule){
         sqlSession.insert("spaceRental.addRentalSchedule",rentalSchedule);
     }
+
+    public void updateRentalSchedule(RentalSchedule rentalSchedule){
+        sqlSession.update("spaceRental.updateRentalSchedule",rentalSchedule);
+    }
+
+    public int getRentalScheduleListCnt(RentalSchedule rentalSchedule){
+        return sqlSession.selectOne("spaceRental.getRentalScheduleListCnt",rentalSchedule);
+    }
+
+    public List<RentalSchedule> getRentalScheduleList(RentalSchedule rentalSchedule){
+        return sqlSession.selectList("spaceRental.getRentalScheduleList",rentalSchedule);
+    }
+
+    public RentalSchedule getRentalSchedule(RentalSchedule rentalSchedule){
+        return sqlSession.selectOne("spaceRental.getRentalSchedule",rentalSchedule);
+    }
+
 
     //스케쥴 끝
 

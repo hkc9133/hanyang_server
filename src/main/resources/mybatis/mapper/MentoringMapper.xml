@@ -17,19 +17,23 @@
     </select>
 
     <select id="getMentorListCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="java.lang.Integer">
-        select count(*) from mentors
+        select count(distinct(a.mentor_id)) from mentors as a
+        left join users AS b
+        ON a.user_id = b.user_id
+        left join counsel_field_mentor AS c
+        ON a.mentor_id = c.mentor_id
         <where>
-<!--            <if test="userId != null and userId != ''">-->
-<!--                AND user_id = #{userId}-->
-<!--            </if>-->
+            <if test="mentorFieldList!=null and mentorFieldList.size!=0">
+                c.field_id IN
+                <foreach collection="mentorFieldList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="mentorStatus != null">
                 AND mentor_status = #{mentorStatus}
             </if>
-<!--            <if test="categoryId != null and categoryId != ''">-->
-<!--                AND category_id = #{categoryId}-->
-<!--            </if>-->
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
-                AND ${searchField} like '%' #{searchValue} '%'
+                AND a.${searchField} like '%' #{searchValue} '%'
             </if>
         </where>
     </select>
@@ -37,7 +41,7 @@
     <select id="getMentor" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
         SELECT *, mentor_career as mentor_career_str,mentor_keyword as mentor_keyword_str FROM mentors as m
         LEFT JOIN attach_file as a
-        ON a.content_id = m.mentor_id and division = 'MENTOR_PROFILE_IMG'
+        ON a.content_id = m.mentor_id and division = 'MENTOR_PROFILE_IMG' AND status = 'A'
         <where>
             <if test="userId != null and userId != ''">
                 AND user_id = #{userId}
@@ -59,7 +63,7 @@
     </update>
 
     <select id="getMentorList" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
-        SELECT ROW_NUMBER() OVER (ORDER BY a.mentor_id) rownum, a.*, b.user_name FROM mentors AS a
+        SELECT ROW_NUMBER() OVER (ORDER BY a.mentor_id) rownum, a.*, a.mentor_keyword as mentor_keyword_str,a.mentor_career as mentor_career_str, b.user_name FROM mentors AS a
         left join users AS b
         ON a.user_id = b.user_id
         left join counsel_field_mentor AS c
@@ -78,7 +82,7 @@
                 AND a.${searchField} like '%' #{searchValue} '%'
             </if>
         </where>
-
+        group by a.mentor_id
         order by a.mentor_id desc
         <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
             limit #{startRowNo}, #{pageSize}
@@ -93,6 +97,22 @@
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
+
+    <update id="updateMentorProfile" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        UPDATE mentors
+        <set>
+            mentor_introduction = #{mentorIntroduction},
+            mentor_career = #{mentorCareerStr},
+            mentor_name = #{mentorName},
+            mentor_company = #{mentorCompany},
+            mentor_phone_number = #{mentorPhoneNumber},
+            mentor_keyword = #{mentorKeywordStr},
+            mentor_email = #{mentorEmail},
+            mentor_position = #{mentorPosition},
+            is_best = #{isBest},
+        </set>
+        WHERE user_id = #{userId}
+    </update>
 
     <select id="getCounselFieldMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" resultType="java.lang.Integer">
         select field_id from counsel_field_mentor
@@ -111,6 +131,15 @@
         </foreach>
     </insert>
 
+    <delete id="removeCounselFieldMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        delete from counsel_field_mentor
+        <where>
+            <if test="mentorId != null and mentorId != ''">
+                AND mentor_id = #{mentorId}
+            </if>
+        </where>
+    </delete>
+
     <insert id="applyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
         insert into counsel_apply_form(user_id,title,content,form_progress_item,form_sortation_item,form_way_item,mentee_name,mentee_email,mentee_phone_number,hope_mentor)
         VALUES(#{userId},#{title},#{content},#{formProgressItem},#{formSortationItem},#{formWayItem},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor})
@@ -128,10 +157,15 @@
     </insert>
 
     <select id="getCounselApplyListCnt" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="java.lang.Integer">
-        SELECT count(*) FROM counsel_apply_form
+        SELECT count(*) FROM counsel_apply_form as a
+        LEFT JOIN mentors as m
+        on m.mentor_id = a.assign_mentor_id
         <where>
             <if test="userId != null and userId != ''">
-                AND user_id = #{userId}
+                AND a.user_id = #{userId}
+            </if>
+            <if test="mentorUserId != null and mentorUserId != ''">
+                AND m.user_id = #{mentorUserId}
             </if>
         </where>
     </select>

@@ -1,6 +1,9 @@
 package com.hanyang.startup.hanyangstartup.spaceRental.service;
 
 import com.hanyang.startup.hanyangstartup.common.exception.CustomException;
+import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
+import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
+import com.hanyang.startup.hanyangstartup.resource.service.FileSaveService;
 import com.hanyang.startup.hanyangstartup.spaceRental.dao.SpaceRentalDao;
 import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace;
 import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom;
@@ -8,7 +11,10 @@ import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime;
 import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +25,19 @@ public class SpaceRentalService {
     @Autowired
     private SpaceRentalDao spaceRentalDao;
 
-    public Map<String,Object> getSpaceRentalInfoList(){
+    @Autowired
+    private FileSaveService fileSaveService;
+
+
+    public List<RentalPlace> getPlaceInfoAll(RentalPlace rentalPlace){
+        return spaceRentalDao.getPlaceInfoAll(rentalPlace);
+
+    }
+    public Map<String,Object> getSpaceRentalInfoList(RentalRoom rentalRoom){
         Map<String,Object> map = new HashMap<>();
 
         map.put("place", spaceRentalDao.getPlaceList(null));
-        map.put("room", spaceRentalDao.getRoomList(null));
+        map.put("room", spaceRentalDao.getRoomList(rentalRoom));
 
 
         return map;
@@ -31,11 +45,40 @@ public class SpaceRentalService {
     }
 
     //    공간 시작
-    public void createPlace(RentalPlace rentalPlace){
-        spaceRentalDao.createPlace(rentalPlace);
+    @Transactional(rollbackFor = {Exception.class})
+    public void addPlace(RentalPlace rentalPlace){
+
+        spaceRentalDao.addPlace(rentalPlace);
+
+        if(rentalPlace.getAddAttachFileList() != null){
+            for (MultipartFile newFile: rentalPlace.getAddAttachFileList()) {
+                fileSaveService.fileSave(newFile, rentalPlace.getPlaceId(), FILE_DIVISION.PLACE_IMG);
+            }
+        }
     }
-    public void updatePlace(RentalPlace boardCategory){
-        spaceRentalDao.updatePlace(boardCategory);
+    @Transactional(rollbackFor = {Exception.class})
+    public void updatePlace(RentalPlace rentalPlace){
+
+        if(rentalPlace.getRemoveFiles() != null){
+            List<AttachFile> attachFileList = new ArrayList<>();
+
+            //파일 삭제
+            for (int fileId: rentalPlace.getRemoveFiles()) {
+                AttachFile attachFile = new AttachFile();
+                attachFile.setFileId(fileId);
+                attachFileList.add(attachFile);
+
+            }
+            fileSaveService.deleteAttachFile(attachFileList);
+        }
+
+        //파일 추가
+        if(rentalPlace.getAddAttachFileList() != null){
+            for (MultipartFile newFile: rentalPlace.getAddAttachFileList()) {
+                fileSaveService.fileSave(newFile, rentalPlace.getPlaceId(), FILE_DIVISION.PLACE_IMG);
+            }
+        }
+        spaceRentalDao.updatePlace(rentalPlace);
     }
 
     public RentalPlace getPlace(RentalPlace rentalPlace){
@@ -45,27 +88,75 @@ public class SpaceRentalService {
         return spaceRentalDao.getPlaceList(rentalPlace);
     }
 
-    public int deletePlace(RentalPlace rentalPlace){
-        return spaceRentalDao.deletePlace(rentalPlace);
+    public void deletePlace(RentalPlace rentalPlace){
+        spaceRentalDao.deletePlace(rentalPlace);
     }
     //    공간 끝
 
     //    룸 시작
+    @Transactional(rollbackFor = {Exception.class})
     public void createRoom(RentalRoom rentalRoom){
-        String possibleDayStr = "";
-        int index = 0;
-        List<Integer> possibleDayList = rentalRoom.getPossibleDayArray();
-        for (Integer possibleDay:possibleDayList) {
-            possibleDayStr += possibleDay.toString();
-            if(!(possibleDayList.size()-1 == index)){
-                possibleDayStr += ";";
-            }
-            index++;
-        }
-        rentalRoom.setPossibleDay(possibleDayStr);
+
         spaceRentalDao.createRoom(rentalRoom);
+
+        //파일 추가
+        if(rentalRoom.getAddAttachFileList() != null){
+            for (MultipartFile newFile: rentalRoom.getAddAttachFileList()) {
+                fileSaveService.fileSave(newFile, rentalRoom.getRoomId(), FILE_DIVISION.ROOM_IMG);
+            }
+        }
+
+
+        //타임 추가
+        if(rentalRoom.getAddRentalRoomTimeList() != null){
+            for (RentalRoomTime rentalRoomTime: rentalRoom.getAddRentalRoomTimeList()) {
+                rentalRoomTime.setRoomId(rentalRoom.getRoomId());
+                spaceRentalDao.createRoomTime(rentalRoomTime);
+            }
+        }
+
     }
+
+    @Transactional(rollbackFor = {Exception.class})
     public void updateRoom(RentalRoom rentalRoom){
+
+        if(rentalRoom.getRemoveFiles() != null){
+            List<AttachFile> attachFileList = new ArrayList<>();
+
+            //파일 삭제
+            for (int fileId: rentalRoom.getRemoveFiles()) {
+                AttachFile attachFile = new AttachFile();
+                attachFile.setFileId(fileId);
+                attachFileList.add(attachFile);
+
+            }
+            fileSaveService.deleteAttachFile(attachFileList);
+        }
+
+        //파일 추가
+        if(rentalRoom.getAddAttachFileList() != null){
+            for (MultipartFile newFile: rentalRoom.getAddAttachFileList()) {
+                fileSaveService.fileSave(newFile, rentalRoom.getRoomId(), FILE_DIVISION.ROOM_IMG);
+            }
+        }
+
+        //타임 삭제
+        if(rentalRoom.getRemoveRentalRoomTimeList() != null){
+            for (Integer timeId: rentalRoom.getRemoveRentalRoomTimeList()) {
+                RentalRoomTime rentalRoomTime = new RentalRoomTime();
+                rentalRoomTime.setTimeId(timeId);
+                spaceRentalDao.deleteRoomTime(rentalRoomTime);
+            }
+        }
+
+        //타임 추가
+        if(rentalRoom.getAddRentalRoomTimeList() != null){
+            for (RentalRoomTime rentalRoomTime: rentalRoom.getAddRentalRoomTimeList()) {
+                spaceRentalDao.createRoomTime(rentalRoomTime);
+            }
+        }
+
+        spaceRentalDao.updateRoomTime(rentalRoom.getRentalRoomTimeList());
         spaceRentalDao.updateRoom(rentalRoom);
     }
 
@@ -76,8 +167,8 @@ public class SpaceRentalService {
         return spaceRentalDao.getRoomList(rentalRoom);
     }
 
-    public int deleteRoom(RentalRoom rentalRoom){
-        return spaceRentalDao.deleteRoom(rentalRoom);
+    public void deleteRoom(RentalRoom rentalRoom){
+        spaceRentalDao.deleteRoom(rentalRoom);
     }
     //    룸 끝
 
@@ -88,8 +179,8 @@ public class SpaceRentalService {
         }
         spaceRentalDao.createRoomTime(rentalRoomTime);
     }
-    public void updateRoomTime(RentalRoomTime rentalRoomTime){
-        spaceRentalDao.updateRoomTime(rentalRoomTime);
+    public void updateRoomTime(List<RentalRoomTime> rentalRoomTimeList){
+        spaceRentalDao.updateRoomTime(rentalRoomTimeList);
     }
     public List<RentalRoomTime> getRoomTimeList(RentalRoomTime rentalRoomTime){
         List<RentalRoomTime> rentalRoomTimeList = spaceRentalDao.getRoomTimeList(rentalRoomTime);
@@ -106,13 +197,32 @@ public class SpaceRentalService {
 //    룸 시간 끝
 
     //스케쥴 시작
+
+
+    public Map<String, Object> getRentalScheduleList(RentalSchedule rentalSchedule){
+        rentalSchedule.setTotalCount(spaceRentalDao.getRentalScheduleListCnt(rentalSchedule));
+        List<RentalSchedule> rentalScheduleList = spaceRentalDao.getRentalScheduleList(rentalSchedule);
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("page", rentalSchedule);
+        map.put("list", rentalScheduleList);
+
+        return map;
+    }
+
+    public RentalSchedule getRentalSchedule(RentalSchedule rentalSchedule){
+        return spaceRentalDao.getRentalSchedule(rentalSchedule);
+    }
+
     public void addRentalSchedule(RentalSchedule rentalSchedule){
         if(spaceRentalDao.getScheduleDuplicateCheck(rentalSchedule).size() > 0){
             throw new CustomException.RentalScheduleDuplicate("이미 예약된 일정입니다");
         }
-
         spaceRentalDao.addRentalSchedule(rentalSchedule);
-
+    }
+    public void updateRentalSchedule(RentalSchedule rentalSchedule){
+        spaceRentalDao.updateRentalSchedule(rentalSchedule);
     }
     //스케쥴 끝
 }

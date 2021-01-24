@@ -46,8 +46,19 @@ public class MentoringService {
         Mentor resultMentor = mentoringDao.getMentor(mentor);
 
         resultMentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(mentor));
-        resultMentor.setMentorCareer(Arrays.asList(resultMentor.getMentorCareerStr().split(";").clone()));
-        resultMentor.setMentorKeyword(Arrays.asList(resultMentor.getMentorKeywordStr().split(";").clone()));
+
+
+        if(resultMentor.getMentorCareerStr() != null){
+            resultMentor.setMentorCareer(Arrays.asList(resultMentor.getMentorCareerStr().split(";").clone()));
+        }else{
+            resultMentor.setMentorCareer(new ArrayList<>());
+        }
+
+        if(resultMentor.getMentorKeywordStr() != null){
+            resultMentor.setMentorKeyword(Arrays.asList(resultMentor.getMentorKeywordStr().split(";").clone()));
+        }else{
+            resultMentor.setMentorKeyword(new ArrayList<>());
+        }
 
         Map<String, Object> map = new HashMap<>();
 
@@ -74,17 +85,24 @@ public class MentoringService {
 
     public Map<String, Object> getMentorList(Mentor mentor){
 
-        System.out.println("$$$$");
-        System.out.println(mentor);
-
         if(mentor.getPageNo() != null){
             mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
         }
         List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
 
         mentorList.stream().map(item-> {
-            List<Integer> counselFieldList  = mentoringDao.getCounselFieldMentor(item);
-            item.setMentorFieldList(counselFieldList);
+            if(item.getMentorCareerStr() != null){
+                item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
+            }else{
+                item.setMentorCareer(new ArrayList<>());
+            }
+
+            if(item.getMentorKeywordStr() != null){
+                item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
+            }else{
+                item.setMentorKeyword(new ArrayList<>());
+            }
+            item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
             return item;
         }).collect(Collectors.toList());
 
@@ -196,6 +214,61 @@ public class MentoringService {
         mentoringDao.addCounselFieldMentor(mentor);
 
         fileSaveService.fileSave(mentor.getProfileImg(),mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public void updateMentorProfile(Mentor mentor){
+
+//        String fieldStr = "";
+//        for (Integer field: mentor.getMentorFieldList()) {
+//            fieldStr += field.toString() + ";";
+//        }
+//        mentor.setMentorFieldStr(fieldStr);
+
+        String keywordStr = "";
+        for (String keyword: mentor.getMentorKeyword()) {
+            keywordStr += keyword + ";";
+        }
+
+        //빈문자열이 들어가서 초기화
+        if(keywordStr == ""){
+            keywordStr = null;
+        }
+        mentor.setMentorKeywordStr(keywordStr);
+
+        String careerStr = "";
+        for (String career: mentor.getMentorCareer()) {
+            careerStr += career + ";";
+        }
+
+        //빈문자열이 들어가서 초기화
+        if(careerStr == ""){
+            careerStr = null;
+        }
+        mentor.setMentorCareerStr(careerStr);
+
+        mentoringDao.updateMentorProfile(mentor);
+
+        mentoringDao.removeCounselFieldMentor(mentor);
+
+        if(mentor.getMentorFieldList().size() > 0){
+            mentoringDao.addCounselFieldMentor(mentor);
+        }
+
+        if(mentor.getProfileImg() != null){
+            List<AttachFile> attachFileList = new ArrayList<>();
+
+            //이미지가 없었다면
+            if(mentor.getFileId() != null){
+                AttachFile attachFile = new AttachFile();
+                attachFile.setFileId(mentor.getFileId());
+                attachFileList.add(attachFile);
+
+                fileSaveService.deleteAttachFile(attachFileList);
+            }
+
+            fileSaveService.fileSave(mentor.getProfileImg(),mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
+        }
     }
 
     @Transactional(rollbackFor = {Exception.class})

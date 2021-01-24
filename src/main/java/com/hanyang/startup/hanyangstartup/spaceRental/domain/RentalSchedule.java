@@ -1,8 +1,10 @@
 package com.hanyang.startup.hanyangstartup.spaceRental.domain;
 
+import com.hanyang.startup.hanyangstartup.common.domain.Page;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Getter
@@ -10,7 +12,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class RentalSchedule {
+public class RentalSchedule extends Page {
     private int scheduleId;
     private int roomId;
     private LocalDate rentalDate;
@@ -19,7 +21,16 @@ public class RentalSchedule {
     private String userId;
     private int personCount;
     private String purpose;
-    private String progressStatus;
+    private RENTAL_STATUS status;
 
-    private LocalDate regDate;
+    private LocalDateTime regDate;
+    private String reservationNum;
+
+
+    //조회
+    private String userName;
+    private String placeName;
+    private String roomName;
+    private int capacity;
+
 }

@@ -31,8 +31,10 @@ public class Mentor extends Page {
     private MENTOR_STATUS mentorStatus;
 
     private String currentCareer;
+    private Boolean isBest;
 
     //멘토 상세보기
+    private Integer fileId;
     private String filePath;
     private String fileName;
     private String fileExtension;

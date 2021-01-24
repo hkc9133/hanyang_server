@@ -62,7 +62,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup/social")
-    public Response signSocialUser(@RequestBody RequestSocialData socialData,HttpServletResponse res){
+    public ResponseEntity<Response> signSocialUser(@RequestBody RequestSocialData socialData,HttpServletResponse res){
 
         System.out.println("=======!!!");
         System.out.println(socialData);
@@ -86,11 +86,12 @@ public class AuthController {
 
 
             response = new Response("success","성공적으로 회원가입을 완료했습닌다.",map,200);
+            return new ResponseEntity(response, HttpStatus.OK);
         }catch(Exception e){
             e.printStackTrace();
             response = new Response("error","회원가입 실패",e.getMessage(),400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
-        return response;
     }
 
     @PostMapping("/login")

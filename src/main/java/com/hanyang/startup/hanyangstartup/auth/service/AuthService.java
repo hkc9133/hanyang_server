@@ -55,13 +55,12 @@ public class AuthService {
         System.out.println("==========");
         authDao.signUpSocialUser(newUser);
         try{
-            emailService.sendWelComeEmail(newUser.getSocial().getEmail(),newUser);
+            emailService.sendWelComeEmail(newUser.getUserEmail(),newUser);
 
         }catch (MessagingException e){
             System.out.println("메일 발송 실패");
             e.printStackTrace();
         }
-        System.out.println("가입함");
         return newUser;
     }
 

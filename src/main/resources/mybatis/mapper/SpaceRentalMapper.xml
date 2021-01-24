@@ -2,36 +2,107 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="spaceRental">
 
+    <resultMap id="AttachFileMap" type="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
+        <id property="fileId" column="file_id"/>
+        <result property="contentId" column="content_id"/>
+        <result property="status" column="status"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="division" column="division"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileOriginName" column="file_origin_name"/>
+        <result property="fileExtension" column="file_extension"/>
+    </resultMap>
+
+    <resultMap id="RentalRoomTimeMap" type="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
+<!--        <id property="roomId" column="room_id" />-->
+        <id property="timeId" column="time_id" />
+        <result property="roomId" column="room_id" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+    </resultMap>
+
+
+    <resultMap id="RentalRoomMap" type="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
+            <id property="roomId" column="room_id"/>
+            <result property="roomName" column="room_name"/>
+            <result property="placeId" column="place_id"/>
+            <result property="capacity" column="capacity"/>
+            <result property="possibleDay" column="possible_day"/>
+            <result property="roomImg" column="room_img"/>
+            <result property="roomDesc" column="room_desc"/>
+            <result property="rentalRole" column="rental_role"/>
+            <result property="isActive" column="is_active"/>
+            <result property="isHoliday" column="is_holiday"/>
+            <collection property="roomAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>
+            <collection property="rentalRoomTimeList" javaType="java.util.ArrayList" resultMap="RentalRoomTimeMap"/>
+    </resultMap>
+
+    <resultMap id="RentalPlaceMap" type="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        <id property="placeId" column="place_id" />
+        <result property="isActive" column="is_active"/>
+        <result property="placeName" column="place_name"/>
+        <result property="placeDesc" column="place_desc"/>
+        <collection property="placeAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>
+        <collection property="rentalRoomList" javaType="java.util.ArrayList" resultMap="RentalRoomMap"/>
+    </resultMap>
+
+    <select id="getPlaceInfoAll" resultMap="RentalPlaceMap">
+        select * from rental_place as place
+        left join rental_room as r ON r.place_id = place.place_id
+        left join rental_room_time as t on t.room_id = r.room_id
+        order by place.place_id, r.room_id, t.start_time
+    </select>
+
     <!--    장소-->
-    <insert id="createPlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
-        insert into rental_place(is_active,place_name) value(#{isActive},#{placeName})
+    <insert id="addPlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        insert into rental_place(is_active,place_name,place_desc) value(#{isActive},#{placeName},#{placeDesc})
+        <selectKey keyProperty="placeId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
     </insert>
 
     <update id="updatePlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
-        UPDATE rental_place SET
-        is_active = #{isActive}
-        place_name = #{placeName}
+        UPDATE rental_place
+        <set>
+            is_active = #{isActive},
+            place_name = #{placeName},
+            place_desc = #{placeDesc}
+        </set>
         where place_id = #{placeId}
     </update>
 
-    <select id="getPlace" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
-        select * from rental_place WHERE place_id = #{placeId}
+    <select id="getPlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace" resultMap="RentalPlaceMap">
+        select * from rental_place as place
+        LEFT JOIN attach_file as a
+        ON a.content_id = place.place_id and division = 'PLACE_IMG' AND status = 'A'
+        left join rental_room as r ON r.place_id = place.place_id
+        where place.place_id = #{placeId}
     </select>
 
     <select id="getPlaceList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
-        select * from rental_place
+        select * from rental_place where is_active = true
     </select>
 
     <delete id="deletePlace" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
-        DELETE FROM rental_place WHERE place_id = #{placeId}
+        DELETE p,r,t FROM rental_place as p
+        LEFT JOIN rental_room as r
+        ON p.place_id = r.place_id
+        LEFT JOIN rental_room_time as t
+        ON r.room_id = t.room_id
+        WHERE p.place_id = #{placeId}
     </delete>
     <!--    장소-->
 
 
     <!--    룸-->
     <insert id="createRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
-        INSERT INTO rental_room(place_id,room_name,is_active, capacity, possible_day, room_img, room_desc, rental_role, holiday_available)
-        VALUE (#{placeId},#{roomName},#{isActive}, #{capacity}, #{possibleDay}, #{roomImg}, #{roomDesc}, #{rentalRole}, #{holidayAvailable})
+        INSERT INTO rental_room(place_id,room_name,is_active, capacity, possible_day,room_desc, rental_role, is_holiday)
+        VALUE
+            (#{placeId},#{roomName},#{isActive}, #{capacity}, #{possibleDay}, #{roomDesc}, #{rentalRole}, #{isHoliday})
+        <selectKey keyProperty="roomId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
     </insert>
 
     <update id="updateRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
@@ -44,20 +115,37 @@
         room_img = #{roomImg},
         room_desc = #{roomDesc},
         rental_role = #{rentalRole},
-        holiday_available = #{holidayAvailable}
+        is_holiday = #{isHoliday}
         where room_id = #{roomId}
     </update>
 
-    <select id="getRoom" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
-        select * from rental_room WHERE room_id = #{roomId}
+    <select id="getRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom" resultMap="RentalRoomMap">
+        select * from rental_room as room
+        LEFT JOIN attach_file as a
+        ON a.content_id = room.room_id and division = 'ROOM_IMG' AND status = 'A'
+        left join rental_room_time as t ON room.room_id = t.room_id
+        WHERE room.room_id = #{roomId}
     </select>
 
     <select id="getRoomList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
         select * from rental_room
+        <where>
+            <if test="placeId !=null and  placeId != ''">
+                place_id = #{placeId}
+            </if>
+            <if test="rentalRole !=null and  rentalRole != ''">
+                rental_role like '%${rentalRole}%'
+            </if>
+            and is_active = true
+        </where>
+
     </select>
 
     <delete id="deleteRoom" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom">
-        DELETE FROM rental_room WHERE room_id = #{roomId}
+        DELETE r,t FROM rental_room as r
+        LEFT JOIN rental_room_time as t
+        ON r.room_id = t.room_id
+        where r.room_id = #{roomId}
     </delete>
     <!--    룸-->
 
@@ -68,21 +156,24 @@
         <![CDATA[
             SELECT * from rental_room_time
             WHERE room_id = #{roomId}
-            AND time BETWEEN STR_TO_DATE(#{time}, '%H:%i') AND STR_TO_DATE(#{time}, '%H:%i') + INTERVAL #{rentalTime} HOUR
-            AND time + INTERVAL rental_time HOUR - INTERVAL 1 SECOND BETWEEN STR_TO_DATE(#{time}, '%H:%i') AND STR_TO_DATE(#{time}, '%H:%i') + INTERVAL #{rentalTime} HOUR
+            AND time BETWEEN STR_TO_DATE(#{startTime}, '%H:%i') AND STR_TO_DATE(#{endTime}, '%H:%i')
+            AND STR_TO_DATE(#{endTime}, '%H:%i') - INTERVAL 1 SECOND BETWEEN STR_TO_DATE(#{startTime}, '%H:%i') AND STR_TO_DATE(#{endTime}, '%H:%i')
         ]]>
     </select>
     <insert id="createRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
-        INSERT INTO rental_room_time(room_id,time,capacity,rental_time)
-        VALUE (#{roomId},#{time},#{capacity},#{rentalTime})
+        INSERT INTO rental_room_time(room_id,start_time,end_time)
+        VALUE (#{roomId},#{startTime},#{endTime})
     </insert>
 
-    <update id="updateRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
-        UPDATE rental_room_time SET
-        room_id = #{roomId},
-        time = #{time},
-        capacity = #{capacity},
-        where time_id = #{timeId}
+    <update id="updateRoomTime" parameterType="java.util.ArrayList">
+        <foreach item="item" collection="list" separator=";">
+            UPDATE rental_room_time
+            <set>
+                start_time = #{item.startTime},
+                end_time = #{item.endTime},
+            </set>
+            where time_id = #{item.timeId}
+        </foreach>
     </update>
 
     <select id="getRoomTimeList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
@@ -96,21 +187,25 @@
 
     <select id="getAvailableRoomTimeList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
         SELECT *,(
-            SELECT IF(count(*) > 0 , TRUE, FALSE)
+            SELECT IF(count(*) > 0, TRUE, FALSE)
             FROM rental_schedule
             WHERE room_id = #{roomId}
+            and status != 'CANCEL'
             and rental_date = #{searchDate}
-            and rental_start_time BETWEEN t.time AND t.time + INTERVAL t.rental_time HOUR
-            AND rental_end_time - INTERVAL 1 SECOND  BETWEEN t.time AND t.time + INTERVAL t.rental_time HOUR
+            and rental_start_time BETWEEN t.start_time AND t.end_time
+            AND rental_end_time - INTERVAL 1 SECOND  BETWEEN t.start_time AND t.end_time
             ) AS is_duplicate
         from rental_room_time AS t
         WHERE room_id = #{roomId}
-        ORDER BY time
+        ORDER BY start_time
     </select>
 
     <delete id="deleteRoomTime" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">
         DELETE FROM rental_room_time WHERE time_id = #{timeId}
     </delete>
+<!--    <delete id="deleteRoomTimeWithRoomId" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime">-->
+<!--        DELETE FROM rental_room_time WHERE room_id = #{roomId}-->
+<!--    </delete>-->
     <!--    시간-->
 
 <!--    스케쥴 시작-->
@@ -119,14 +214,98 @@
             SELECT * from rental_schedule
             WHERE room_id = #{roomId}
             AND rental_date = #{rentalDate}
+            AND status != 'CANCEL'
             AND rental_start_time BETWEEN STR_TO_DATE(#{rentalStartTime}, '%H:%i') AND STR_TO_DATE(#{rentalEndTime}, '%H:%i')
             AND rental_end_time - INTERVAL 1 SECOND BETWEEN STR_TO_DATE(#{rentalStartTime}, '%H:%i') AND STR_TO_DATE(#{rentalEndTime}, '%H:%i')
         ]]>
     </select>
 
+    <select id="getRentalScheduleListCnt" resultType="java.lang.Integer" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        SELECT count(*) FROM rental_schedule AS s
+--         left join users AS u
+--         ON s.user_id = u.user_id
+--         left join rental_room AS r
+--         ON r.room_id = s.room_id
+--         left join rental_place AS p
+--         ON r.place_id = p.place_id
+        <where>
+            <if test="userId != null and userId != ''">
+                AND s.user_id = #{userId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+    </select>
+
+    <select id="getRentalScheduleList" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        SELECT ROW_NUMBER() OVER (ORDER BY s.schedule_id) rownum, s.*, u.user_name,p.place_name, r.room_name  FROM rental_schedule AS s
+        left join users AS u
+        ON s.user_id = u.user_id
+        left join rental_room AS r
+        ON r.room_id = s.room_id
+        left join rental_place AS p
+        ON r.place_id = p.place_id
+        <where>
+            <if test="userId != null and userId != ''">
+                AND s.user_id = #{userId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+        order by s.schedule_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getRentalSchedule" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        SELECT ROW_NUMBER() OVER (ORDER BY s.schedule_id) rownum, s.*, u.user_name,p.place_name, r.room_name, r.capacity as capacity   FROM rental_schedule AS s
+        left join users AS u
+        ON s.user_id = u.user_id
+        left join rental_room AS r
+        ON r.room_id = s.room_id
+        left join rental_place AS p
+        ON r.place_id = p.place_id
+        <where>
+            <if test="userId != null and userId != ''">
+                AND s.user_id = #{userId}
+            </if>
+            <if test="scheduleId != null and scheduleId != ''">
+                AND s.schedule_id = #{scheduleId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+    </select>
+
     <insert id="addRentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
-        insert into rental_schedule(room_id,rental_date, rental_start_time, rental_end_time,user_id, person_count,purpose) value(#{roomId},#{rentalDate},#{rentalStartTime},#{rentalEndTime},#{userId},#{personCount},#{purpose})
+        insert into rental_schedule(room_id,rental_date, rental_start_time, rental_end_time,user_id, person_count,purpose,reservation_num) value(#{roomId},#{rentalDate},#{rentalStartTime},#{rentalEndTime},#{userId},#{personCount},#{purpose},CONCAT(DATE_FORMAT(now(),'%Y%m%d%H%i%s'),#{roomId}))
     </insert>
+
+    <update id="updateRentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
+        UPDATE rental_schedule
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="personCount != null and personCount != ''">
+                person_count = #{personCount},
+            </if>
+            <if test="purpose != null and purpose != ''">
+                purpose = #{purpose},
+            </if>
+        </set>
+        <where>
+            and schedule_id = #{scheduleId}
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </update>
+
 
 <!--    스케쥴 끝-->
 

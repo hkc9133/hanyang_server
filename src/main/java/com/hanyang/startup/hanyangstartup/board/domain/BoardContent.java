@@ -26,7 +26,7 @@ public class BoardContent  extends Page {
     private Integer categoryCodeId;
     private String fileExtension;
     private int viewCnt;
-    private Boolean isNotice;
+    private Boolean isNotice = false;
 
 
     private MultipartFile[] files;
