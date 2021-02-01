@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="popup">
+
+    <resultMap id="PopupMap" type="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        <id property="popupId" column="popup_id" />
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="afterTime" column="after_time"/>
+        <result property="leftPosition" column="left_position"/>
+        <result property="topPosition" column="top_position"/>
+        <result property="width" column="width"/>
+        <result property="height" column="height"/>
+        <result property="isPc" column="is_pc"/>
+        <result property="isMobile" column="is_mobile"/>
+        <result property="start" column="start"/>
+        <result property="end" column="end"/>
+        <result property="regDate" column="reg_date"/>
+        <collection property="AttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>
+    </resultMap>
+
+    <resultMap id="AttachFileMap" type="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
+        <id property="fileId" column="file_id"/>
+        <result property="contentId" column="content_id"/>
+        <result property="status" column="status"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="division" column="division"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileOriginName" column="file_origin_name"/>
+        <result property="fileExtension" column="file_extension"/>
+    </resultMap>
+
+    <insert id="addPopup" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        insert into popup(title,content,after_time,left_position,top_position,width,height,is_pc,is_mobile,start,end) value(#{title},#{content},#{afterTime},#{leftPosition},#{topPosition},#{width},#{height},#{isPc},#{isMobile},#{start},#{end})
+        <selectKey keyProperty="popupId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <update id="updatePopup" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        UPDATE popup
+        <set>
+            title = #{title},
+            content = #{content},
+            after_time = #{afterTime},
+            left_position = #{leftPosition},
+            top_position = #{topPosition},
+            width = #{width},
+            height = #{height},
+            is_pc = #{isPc},
+            is_mobile = #{isMobile},
+            start = #{start},
+            end = #{end},
+        </set>
+        where popup_id = #{popupId}
+    </update>
+
+    <select id="getPopup" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup" resultType="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        select * from popup as popup
+--                           LEFT JOIN attach_file as a
+--                                     ON a.content_id = popup.popup_id and division = 'POPUP_IMG' AND status = 'A'
+        where popup.popup_id = #{popupId}
+    </select>
+
+    <select id="getPopupList" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup" resultType="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        SELECT ROW_NUMBER() OVER (ORDER BY p.popup_id) rownum, p.* from popup as p
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="today != null">
+                #{today} BETWEEN p.start AND p.end
+            </if>
+            <if test="start != null and end != null">
+                and p.start BETWEEN #{start} AND #{end}
+                and p.end BETWEEN #{start} AND #{end}
+            </if>
+        </where>
+        order by p.popup_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getPopupListCnt" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup" resultType="java.lang.Integer">
+        SELECT count(*) from popup as p
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="today != null">
+                #{today} BETWEEN p.start AND p.end;
+            </if>
+            <if test="start != null and end != null">
+                and p.start BETWEEN #{start} AND #{end}
+                and p.end BETWEEN #{start} AND #{end}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deletePopup" parameterType="com.hanyang.startup.hanyangstartup.popup.domain.Popup">
+        DELETE FROM popup
+        WHERE popup_id = #{popupId}
+    </delete>
+
+</mapper>

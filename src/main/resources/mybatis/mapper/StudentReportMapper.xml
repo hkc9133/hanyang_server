@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="student_report">
+
+    <resultMap id="StudentReportMap" type="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport">
+        <id property="studentReportId" column="student_report_id" />
+        <result property="userId" column="user_id"/>
+        <result property="studentName" column="student_name"/>
+        <result property="studentAttach" column="student_attach"/>
+        <result property="studentClassYear" column="student_class_year"/>
+        <result property="studentPhoneNum" column="student_phone_num"/>
+        <result property="studentEmail" column="student_email"/>
+        <result property="companyNum" column="company_num"/>
+        <result property="companyName" column="company_name"/>
+        <result property="companyOwner" column="company_owner"/>
+        <result property="companyKind" column="company_kind"/>
+        <result property="createDate" column="create_date"/>
+        <result property="businessItem" column="business_item"/>
+        <result property="sales" column="sales"/>
+        <result property="staffNum" column="staff_num"/>
+    </resultMap>
+
+
+    <insert id="addStudentReport" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport">
+        insert into student_report(user_id,student_name,student_attach,student_class_year,student_phone_num,student_email,company_num,
+        company_name,company_owner,company_kind,create_date,business_item,sales,staff_num)
+         value(#{userId},#{studentName},#{studentAttach},#{studentClassYear},#{studentPhoneNum},#{studentEmail},#{companyNum},#{companyName},#{companyOwner},#{companyKind},#{createDate},#{businessItem},#{sales},#{staffNum})
+        <selectKey keyProperty="studentReportId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <update id="updateStudentReport" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport">
+        UPDATE student_report
+        <set>
+            student_name = #{studentName},
+            student_attach = #{studentAttach},
+            student_class_year = #{studentClassYear},
+            student_phone_num = #{studentPhoneNum},
+            student_email = #{studentEmail},
+            company_num = #{companyNum},
+            company_name = #{companyName},
+            company_owner = #{companyOwner},
+            company_kind = #{companyKind},
+            create_date = #{createDate},
+            business_item = #{businessItem},
+            sales = #{sales},
+            staff_num = #{staffNum}
+        </set>
+        <where>
+            <if test="userId !=null and userId != ''">
+                user_id = #{userId}
+            </if>
+            and student_report_id = #{studentReportId}
+        </where>
+    </update>
+
+    <select id="getStudentReport" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport" resultMap="StudentReportMap">
+        select * from student_report as s
+        where s.student_report_id = #{studentReportId}
+    </select>
+
+    <select id="getStudentReportList" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport" resultMap="StudentReportMap">
+        SELECT ROW_NUMBER() OVER (ORDER BY s.student_report_id) rownum, s.* from student_report as s
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND s.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="createDate != null and createDate != ''">
+                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
+            </if>
+        </where>
+        order by s.student_report_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getStudentReportListCnt" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport" resultType="java.lang.Integer">
+        SELECT count(*) from student_report as p
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND s.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="createDate != null and createDate != ''">
+                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteStudentReport" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport">
+        DELETE FROM student_report
+        WHERE student_report_id = #{studentReportId}
+    </delete>
+
+</mapper>

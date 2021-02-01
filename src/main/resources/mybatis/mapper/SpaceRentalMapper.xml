@@ -47,6 +47,11 @@
         <collection property="rentalRoomList" javaType="java.util.ArrayList" resultMap="RentalRoomMap"/>
     </resultMap>
 
+    <select id="getStatusCount" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.StatusCount">
+        SELECT status,count(status) as count FROM hanyang.rental_schedule
+        group by status;
+    </select>
+
     <select id="getPlaceInfoAll" resultMap="RentalPlaceMap">
         select * from rental_place as place
         left join rental_room as r ON r.place_id = place.place_id
@@ -233,7 +238,24 @@
                 AND s.user_id = #{userId}
             </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
-                AND a.${searchField} like '%' #{searchValue} '%'
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="roomId != null and roomId != ''">
+                AND s.room_id = #{roomId}
+            </if>
+            <if test="status != null">
+                AND s.status = #{status}
+            </if>
+            <if test="regStartDate != null and regStartDate != '' and regEndDate != null and regEndDate != ''">
+                and s.reg_date BETWEEN #{regStartDate} AND #{regEndDate}
+            </if>
+            <if test="rentalStartDate != null and rentalStartDate != '' and rentalEndDate != null and rentalEndDate != ''">
+                and s.rental_date BETWEEN #{rentalStartDate} AND #{rentalEndDate}
+            </if>
+            <if test="date != null and date != ''">
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
             </if>
         </where>
     </select>
@@ -253,9 +275,26 @@
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
                 AND ${searchField} like '%' #{searchValue} '%'
             </if>
+            <if test="roomId != null and roomId != ''">
+                AND s.room_id = #{roomId}
+            </if>
+            <if test="status != null">
+                AND s.status = #{status}
+            </if>
+            <if test="regStartDate != null and regStartDate != '' and regEndDate != null and regEndDate != ''">
+                and s.reg_date BETWEEN #{regStartDate} AND #{regEndDate}
+            </if>
+            <if test="rentalStartDate != null and rentalStartDate != '' and rentalEndDate != null and rentalEndDate != ''">
+                and s.rental_date BETWEEN #{rentalStartDate} AND #{rentalEndDate}
+            </if>
+            <if test="date != null and date != ''">
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
+            </if>
         </where>
         order by s.schedule_id desc
-        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+        <if test="pageNo != null and pageNo !=-1 and pageNo != '' and date == null or date == ''">
             limit #{startRowNo}, #{pageSize}
         </if>
     </select>

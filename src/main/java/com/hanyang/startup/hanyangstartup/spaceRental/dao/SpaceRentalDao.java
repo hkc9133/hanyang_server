@@ -1,10 +1,7 @@
 package com.hanyang.startup.hanyangstartup.spaceRental.dao;
 
 import com.hanyang.startup.hanyangstartup.board.domain.BoardCategory;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule;
+import com.hanyang.startup.hanyangstartup.spaceRental.domain.*;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -19,6 +16,11 @@ public class SpaceRentalDao {
     public List<RentalPlace> getPlaceInfoAll(RentalPlace rentalPlace){
         return sqlSession.selectList("spaceRental.getPlaceInfoAll",rentalPlace);
     }
+
+    public List<StatusCount> getStatusCount(){
+        return sqlSession.selectList("spaceRental.getStatusCount");
+    }
+
 
 //    공간 시작
     public void addPlace(RentalPlace rentalPlace){

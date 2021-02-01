@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="startup_present">
+
+    <resultMap id="StartupPresentMap" type="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        <id property="startupPresentId" column="startup_present_id" />
+        <result property="companyName" column="company_name"/>
+        <result property="item" column="item"/>
+        <result property="keyword" column="keyword"/>
+        <result property="homepage" column="homepage"/>
+        <result property="group" column="group"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="fieldName" column="field_name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="regDate" column="reg_date"/>
+    </resultMap>
+
+    <resultMap id="AttachFileMap" type="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
+        <id property="fileId" column="file_id"/>
+        <result property="contentId" column="content_id"/>
+        <result property="status" column="status"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="division" column="division"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileOriginName" column="file_origin_name"/>
+        <result property="fileExtension" column="file_extension"/>
+    </resultMap>
+
+    <select id="getStartupPresentFieldList" resultType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresentField">
+        select * from startup_present_field_code
+    </select>
+
+    <insert id="addStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        insert into startup_present(company_name,item,keyword,homepage,group,field_id,create_date) value(#{companyName},#{item},#{keyword},#{homepage},#{group},#{fieldId},#{createDate})
+        <selectKey keyProperty="startupPresentId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <update id="updateStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        UPDATE startup_present
+        <set>
+            company_name = #{companyName},
+            item = #{item},
+            keyword = #{keyword},
+            homepage = #{homepage},
+            group = #{group},
+            field_id = #{fieldId},
+            create_date = #{createDate}
+        </set>
+        where startup_present_id = #{startupPresentId}
+    </update>
+
+    <select id="getStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultMap="StartupPresentMap">
+        select * from startup_present as s
+        LEFT JOIN startup_present_field_code as f
+        ON f.field_id = s.field_id
+        where s.startup_present_id = #{startupPresentId}
+    </select>
+
+    <select id="getStartupPresentList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultMap="StartupPresentMap">
+        SELECT ROW_NUMBER() OVER (ORDER BY s.startup_present_id) rownum, s.* from startup_present as s
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND s.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="group != null and group != ''">
+                and s.group = #{group}
+            </if>
+            <if test="fieldId != null and fieldId != ''">
+                and s.field_id = #{fieldId}
+            </if>
+            <if test="createDate != null and createDate != ''">
+                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
+            </if>
+        </where>
+        order by s.startup_present_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getStartupPresentListCnt" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultType="java.lang.Integer">
+        SELECT count(*) from startup_present as p
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND s.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="group != null and group != ''">
+                and s.group = #{group}
+            </if>
+            <if test="fieldId != null and fieldId != ''">
+                and s.field_id = #{fieldId}
+            </if>
+            <if test="createDate != null and createDate != ''">
+                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        DELETE FROM startup_present
+        WHERE startup_present_id = #{startupPresentId}
+    </delete>
+
+</mapper>

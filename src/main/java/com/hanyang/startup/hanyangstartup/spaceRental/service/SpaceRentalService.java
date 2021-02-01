@@ -5,10 +5,7 @@ import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
 import com.hanyang.startup.hanyangstartup.resource.service.FileSaveService;
 import com.hanyang.startup.hanyangstartup.spaceRental.dao.SpaceRentalDao;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule;
+import com.hanyang.startup.hanyangstartup.spaceRental.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +26,12 @@ public class SpaceRentalService {
     private FileSaveService fileSaveService;
 
 
+
+    public List<StatusCount> getStatusCount(){
+        return spaceRentalDao.getStatusCount();
+    }
     public List<RentalPlace> getPlaceInfoAll(RentalPlace rentalPlace){
         return spaceRentalDao.getPlaceInfoAll(rentalPlace);
-
     }
     public Map<String,Object> getSpaceRentalInfoList(RentalRoom rentalRoom){
         Map<String,Object> map = new HashMap<>();
@@ -202,6 +202,7 @@ public class SpaceRentalService {
     public Map<String, Object> getRentalScheduleList(RentalSchedule rentalSchedule){
         rentalSchedule.setTotalCount(spaceRentalDao.getRentalScheduleListCnt(rentalSchedule));
         List<RentalSchedule> rentalScheduleList = spaceRentalDao.getRentalScheduleList(rentalSchedule);
+
 
         Map<String, Object> map = new HashMap<>();
 

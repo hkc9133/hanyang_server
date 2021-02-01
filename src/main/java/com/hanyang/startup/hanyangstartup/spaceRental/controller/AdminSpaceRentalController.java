@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoom;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalRoomTime;
-import com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule;
+import com.hanyang.startup.hanyangstartup.spaceRental.domain.*;
 import com.hanyang.startup.hanyangstartup.spaceRental.service.SpaceRentalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +30,24 @@ public class AdminSpaceRentalController {
 
     private SpaceRentalService spaceRentalService;
 
+
+    @GetMapping("/status_count")
+    public ResponseEntity<Response> getStatusCount(HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+
+            RentalPlace rentalPlace = new RentalPlace();
+            List<StatusCount> rentalPlaceList =  spaceRentalService.getStatusCount();
+
+            response = new Response("success", null, rentalPlaceList, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
 
     //공간, 룸, 시간까지 모두 조회
     @GetMapping("/all")
@@ -96,11 +111,6 @@ public class AdminSpaceRentalController {
     @PostMapping("/place/edit")
     public ResponseEntity<Response> updatePlace(@ModelAttribute RentalPlace rentalPlace, HttpServletRequest req, HttpServletResponse res){
         Response response;
-//        if(bindingResult.hasErrors()){
-//            bindingResult.getAllErrors().forEach(v ->{
-//                System.out.println(v.toString());
-//            });
-//        }
         try {
 
             System.out.println("=====place 업데이트");
@@ -300,27 +310,27 @@ public class AdminSpaceRentalController {
 //    스케쥴
 
     @GetMapping("/schedule")
-    public Response getRentalScheduleList(@RequestParam(value = "page", defaultValue = "1") Integer page,@RequestParam(value = "status",required = false) String status,@RequestParam(value = "roomId",required = false) Integer roomId,
+    public Response getRentalScheduleList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "status",required = false) RENTAL_STATUS status, @RequestParam(value = "roomId",required = false) Integer roomId,
                                           @RequestParam(value = "regStartDate",required = false) String regStartDate,
                                           @RequestParam(value = "regEndDate",required = false) String regEndDate,
                                           @RequestParam(value = "rentalStartDate",required = false) String rentalStartDate,
                                           @RequestParam(value = "rentalEndDate",required = false) String rentalEndDate,
+                                          @RequestParam(value = "date", required = false) String date,
                                           Principal principal, HttpServletRequest req, HttpServletResponse res){
         Response response;
 
-        System.out.println("검색 조건==");
-        System.out.println(page);
-        System.out.println(roomId);
-        System.out.println(status);
-        System.out.println(regStartDate);
-        System.out.println(regEndDate);
-        System.out.println(rentalStartDate);
-        System.out.println(rentalEndDate);
 
         try {
             RentalSchedule rentalSchedule = new RentalSchedule();
             rentalSchedule.setPageNo(page);
-            rentalSchedule.setUserId(principal.getName());
+            rentalSchedule.setRoomId(roomId);
+            rentalSchedule.setStatus(status);
+            rentalSchedule.setRegStartDate(regStartDate);
+            rentalSchedule.setRegEndDate(regEndDate);
+            rentalSchedule.setRentalStartDate(rentalStartDate);
+            rentalSchedule.setRentalEndDate(rentalEndDate);
+            rentalSchedule.setDate(date);
+
             Map<String, Object> map =  spaceRentalService.getRentalScheduleList(rentalSchedule);
             response = new Response("success", null, map, 200);
         }
@@ -330,4 +340,20 @@ public class AdminSpaceRentalController {
         }
         return response;
     }
+    @PostMapping("/schedule/update/status")
+    public ResponseEntity<Response>  updateRentalSchedule(@RequestBody RentalSchedule rentalSchedule, Principal principal, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+            spaceRentalService.updateRentalSchedule(rentalSchedule);
+
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response =  new Response("error", null, e.getMessage(),400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

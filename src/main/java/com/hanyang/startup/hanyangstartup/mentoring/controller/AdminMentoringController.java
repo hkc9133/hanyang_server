@@ -41,7 +41,7 @@ public class AdminMentoringController {
     }
 
 
-    @PostMapping("/mentor")
+    @GetMapping("/mentor")
     public ResponseEntity<Response> getMentorList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize, Mentor mentor){
         Response response;
         try {
@@ -80,9 +80,9 @@ public class AdminMentoringController {
         }
     }
 
-    @PutMapping("/mentor")
+    @PostMapping("/mentor/update")
     @ResponseBody
-    public ResponseEntity<Response> updateMentorProfile(@ModelAttribute Mentor mentor,Principal principal){
+    public ResponseEntity<Response> updateMentorProfile(@ModelAttribute Mentor mentor,BindingResult bindingResult,Principal principal){
         Response response;
 //        if(bindingResult.hasErrors()){
 //            bindingResult.getAllErrors().forEach(v ->{
@@ -90,8 +90,6 @@ public class AdminMentoringController {
 //            });
 //        }
         try {
-
-            mentor.setUserId(principal.getName());
 
             mentoringService.updateMentorProfile(mentor);
 

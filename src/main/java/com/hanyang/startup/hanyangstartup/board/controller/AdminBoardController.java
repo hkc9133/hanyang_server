@@ -110,6 +110,8 @@ public class AdminBoardController {
         try {
 
             BoardConfig boardConfig = new BoardConfig();
+            boardConfig.setPageSize(100);
+            boardConfig.setPageNo(1);
             Map<String,Object> map = boardService.getBoardList(boardConfig);
             List<BoardCategory> boardCategoryList = boardService.getBoardCategoryList(boardConfig);
             List<BoardCategoryCode> boardCategoryCodeList = boardService.getBoardCategoryCodeList(boardConfig);

@@ -81,7 +81,6 @@ public class NoticeService {
     public Map<String,Object> getNoticeList(Notice notice) {
         notice.setTotalCount(noticeDao.getNoticeListCnt(notice));
 
-        System.out.println("노오티스");
         System.out.println(notice);
         Map<String,Object> map = new HashMap<>();
         List<Notice> noticeList = noticeDao.getNoticeList(notice);

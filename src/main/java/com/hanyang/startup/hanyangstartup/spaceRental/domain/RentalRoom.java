@@ -18,7 +18,7 @@ public class RentalRoom {
     private Integer roomId;
     private Integer placeId;
     private String roomName;
-    private Boolean isActive;
+    private Boolean isActive = false;
     private int capacity;
     private String possibleDay;
     private List<Integer> possibleDayArray;

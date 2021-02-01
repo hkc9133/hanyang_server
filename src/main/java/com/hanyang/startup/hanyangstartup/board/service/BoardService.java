@@ -42,7 +42,7 @@ public class BoardService {
 
     //게시판 리스트
     public Map<String, Object> getBoardList(BoardConfig boardConfig) {
-        boardConfig.setPageSize(10);
+//        boardConfig.setPageSize(10);
         boardConfig.setTotalCount(boardDao.getBoardListCnt(boardConfig));
 
         Map<String, Object> map = new HashMap<>();

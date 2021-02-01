@@ -11,4 +11,5 @@ public enum FILE_DIVISION {
     MENTOR_PROFILE_IMG,
     PLACE_IMG,
     ROOM_IMG,
+    POPUP_IMG,
 }

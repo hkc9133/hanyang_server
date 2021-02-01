@@ -165,7 +165,7 @@ public class Page {
 
         // 기본 값 설정
         if (this.totalCount == 0) return;
-        if (this.pageNo == 0) this.setPageNo(1);   //기본 페이지 번호
+        if (this.pageNo == null || this.pageNo == 0) this.setPageNo(1);   //기본 페이지 번호
         if (this.pageSize == 0) this.setPageSize(10); //기본 페이지 리스트 사이즈
         if (this.pageBlock == 0 ) this.setPageBlock(10); //기본 페이지 네비[블록] 사이즈
 

@@ -63,11 +63,13 @@
     </update>
 
     <select id="getMentorList" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
-        SELECT ROW_NUMBER() OVER (ORDER BY a.mentor_id) rownum, a.*, a.mentor_keyword as mentor_keyword_str,a.mentor_career as mentor_career_str, b.user_name FROM mentors AS a
+        SELECT ROW_NUMBER() OVER (ORDER BY a.mentor_id) rownum, a.*,f.*, a.mentor_keyword as mentor_keyword_str,a.mentor_career as mentor_career_str, b.user_name FROM mentors AS a
         left join users AS b
         ON a.user_id = b.user_id
         left join counsel_field_mentor AS c
         ON a.mentor_id = c.mentor_id
+        LEFT JOIN attach_file as f
+        ON f.content_id = a.mentor_id and f.division = 'MENTOR_PROFILE_IMG' AND f.status = 'A'
         <where>
             <if test="mentorFieldList!=null and mentorFieldList.size!=0">
                 c.field_id IN
@@ -111,7 +113,11 @@
             mentor_position = #{mentorPosition},
             is_best = #{isBest},
         </set>
-        WHERE user_id = #{userId}
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+        </where>
     </update>
 
     <select id="getCounselFieldMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" resultType="java.lang.Integer">

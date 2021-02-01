@@ -14,7 +14,7 @@ import java.time.LocalTime;
 @ToString
 public class RentalSchedule extends Page {
     private int scheduleId;
-    private int roomId;
+    private Integer roomId;
     private LocalDate rentalDate;
     private LocalTime rentalStartTime;
     private LocalTime rentalEndTime;
@@ -33,4 +33,11 @@ public class RentalSchedule extends Page {
     private String roomName;
     private int capacity;
 
+    private String regStartDate;
+    private String regEndDate;
+    private String rentalStartDate;
+    private String rentalEndDate;
+
+    //캘린더에서 사용
+    private String Date;
 }
