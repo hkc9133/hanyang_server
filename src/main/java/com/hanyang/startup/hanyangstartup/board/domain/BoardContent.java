@@ -27,6 +27,8 @@ public class BoardContent  extends Page {
     private String fileExtension;
     private int viewCnt;
     private Boolean isNotice = false;
+    private String sub01 = "";
+    private String sub02 = "";
 
 
     private MultipartFile[] files;

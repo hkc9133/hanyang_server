@@ -1,39 +1,89 @@
 <!DOCTYPE html>
-<html lang= "ko" xmlns:th="http://www.thymeleaf.org">
-    <head>
-<!--        <meta charset="UTF-8"/>-->
-<!--        <title>Document</title>-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+<style>
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font: 12pt "Tahoma";
+    }
 
-    </head>
-    <body>
-        <div class="book">
-            <div class="page">
-                <h1 style="text-align: center;font-size:70px;">
-                    위촉장
+    * {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+    }
+    .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 10mm 15mm;
+        margin: 10mm auto;
+        /*border: 1px #D3D3D3 solid;*/
+        border-radius: 5px;
+        background: white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    @media print {
+        html, body {
+            width: 210mm;
+            height: 297mm;
+        }
+
+        .page {
+            margin: 0;
+            border: initial;
+            border-radius: initial;
+            width: initial;
+            min-height: initial;
+            box-shadow: initial;
+            background: initial;
+            page-break-after: always;
+        }
+    }
+</style>
+<div class="book">
+    <div class="page">
+        <div class="subpage">
+            <div style="height: 5cm;">
+                <h1 style="text-align: center;font-size:50pt;">
+                    위 촉 장
                 </h1>
-                <div style="flex-direction: row;justify-content: flex-end;background-color: gray;display: flex;">
-                    <div style="width:8.5cm;height:7cm;background-color: blue">
-                        <div>
-                            <span>성명: 에네이</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="height: 6cm;">
-                    <p>
-                        귀하를 20  년  월  일부터 20  년   월   일까지 『            』으로 위촉합니다.
-                    </p>
-                </div>
-                <div style="height: 3.3cm;background-color: green;">
-                    <span th:text="${info.year}"></span>
-                </div>
-                <div style="text-align: center;width: 100%;">
-                    <h3 style="font-size: 30px;z-index: 20;">한양대학교</h3>
-                    <h3 style="font-size: 30px;z-index: 20;">대표자 이름</h3>
-                </div>
-                <div class="img">
-
-                </div>
             </div>
+            <div style="height: 5cm;padding-left: 4.3cm;">
+                <p style="font-size:18pt;">성 명 : <b>정영록</b></p>
+                <p style="font-size:18pt;">소 속 : <b>한경세무회계</b></p>
+                <p style="font-size:18pt;">직 위 : <b>대표회계사</b></p>
+            </div>
+            <div style="height: 5cm;padding-left: 4.3cm;">
+                <p style="padding:0.2cm 0;font-size: 17pt">위촉사항 : 한양대학교 창업지원단 창업멘토</p>
+                <p style="padding:0.2cm 0;font-size: 17pt">위촉기간 : 2020. 6. 1.~ 2021. 5. 31.</p>
+            </div>
+            <div style="height: 3cm;"></div>
+            <div style="text-align: center;">
+                <p>2020 년 6 월 1 일</p>
+            </div>
+            <div style="height: 0.5cm;"></div>
+            <div style="padding-left: 4.3cm;margin-top:4cm;">
+                <span style="font-size: 17pt;z-index: 20;">한양대학교</span><br/><span style="font-size: 17pt;z-index: 20;">창업지원단장</span>
+                <span style="font-size: 27pt;z-index: 20;margin-left: 1cm;">류 창 완</span><img src="stamp.jpg"
+                                                                                             style="width: 1.1cm;height: 1cm"/>
+            </div>
+            <div style="height: 3cm;"></div>
+            <div style="text-align: center;">
+                <img src="logo.png" style="width: 2.7cm;height: 1cm"/>
+            </div>
+
         </div>
-    </body>
+    </div>
+</div>
+</body>
 </html>

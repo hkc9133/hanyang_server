@@ -109,7 +109,7 @@ public class BoardController {
     }
 
     @GetMapping(value = "/content")
-    public ResponseEntity<Response> getBoardContentList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "boardEnName", required = false) String boardEnName, @RequestParam(value = "boardCategory", required = false) Integer boardCategory, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField) {
+    public ResponseEntity<Response> getBoardContentList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "boardEnName", required = true) String boardEnName, @RequestParam(value = "boardCategory", required = false) Integer boardCategory, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField) {
 
         Response response;
         try {
@@ -203,6 +203,31 @@ public class BoardController {
             e.printStackTrace();
             List<Reply> replyList = boardService.getReplyList(reply);
             response = new Response("error", null, replyList, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping(value = "/search")
+    public ResponseEntity<Response> getBoardContentSearch(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "boardEnName", required = false) String boardEnName, @RequestParam(value = "boardCategory", required = false) Integer boardCategory, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField) {
+
+        Response response;
+        try {
+            BoardConfig boardConfig = new BoardConfig();
+
+            boardConfig.setPageNo(page);
+            boardConfig.setPageSize(pageSize);
+            boardConfig.setBoardEnName(boardEnName);
+            boardConfig.setCategoryId(boardCategory);
+            boardConfig.setCategoryCodeId(categoryCodeId);
+            boardConfig.setSearchField(searchField);
+            boardConfig.setSearchValue(searchValue);
+
+            Map<String,Object> map = boardService.getBoardContentSearch(boardConfig);
+            response = new Response("success", null, map, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }

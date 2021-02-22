@@ -2,6 +2,8 @@ package com.hanyang.startup.hanyangstartup.board.service;
 
 import com.hanyang.startup.hanyangstartup.board.dao.BoardDao;
 import com.hanyang.startup.hanyangstartup.board.domain.*;
+import com.hanyang.startup.hanyangstartup.keyword.domain.Keyword;
+import com.hanyang.startup.hanyangstartup.keyword.service.KeywordService;
 import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_STATUS;
@@ -23,6 +25,8 @@ public class BoardService {
     private BoardDao boardDao;
     @Autowired
     private FileSaveService fileSaveService;
+    @Autowired
+    private KeywordService keywordService;
 
     //게시판 생성
     public void createBoard(BoardConfig boardConfig) {
@@ -154,6 +158,42 @@ public class BoardService {
         map.put("cate", boardDao.getBoardCategoryCodeList(boardConfig));
 
         return map;
+    }
+
+    public Map<String, Object> getBoardContentSearch(BoardConfig boardConfig) {
+        if(boardConfig.getSearchValue() != null && !boardConfig.getSearchValue().equals("")){
+            Keyword keyword = new Keyword();
+            keyword.setKeyword(boardConfig.getSearchValue());
+            keywordService.updateKeywordSearch(keyword);
+        }
+        boardConfig.setTotalCount(boardDao.getBoardContentListCnt(boardConfig));
+
+        Map<String, Object> map = new HashMap<>();
+        List<BoardContent> boardContentList = boardDao.getBoardContentList(boardConfig);
+//
+//        boardContentList.stream().map(boardContent -> {
+//            AttachFile attachFile = new AttachFile();
+//            attachFile.setContentId(boardContent.getContentId());
+//            attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+//            attachFile.setStatus(FILE_STATUS.A);
+//
+//            boardContent.setAttachFileList(fileSaveService.getAttachFileList(attachFile));
+//            return boardContent;
+//        }).collect(Collectors.toList());
+
+        BoardConfig cateBoardConfig = new BoardConfig();
+        cateBoardConfig.setPageSize(100);
+        cateBoardConfig.setPageNo(1);
+        map.put("boardList", this.getBoardList(cateBoardConfig).get("list"));
+        map.put("page", boardConfig);
+        map.put("list", boardContentList);
+        map.put("cate", boardDao.getBoardCategoryCodeList(boardConfig));
+
+        return map;
+    }
+
+    public void deleteBoardContent(BoardContent boardContent) {
+        boardDao.deleteBoardContent(boardContent);
     }
 
 

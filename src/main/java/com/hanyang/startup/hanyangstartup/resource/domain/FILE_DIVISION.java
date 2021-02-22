@@ -12,4 +12,6 @@ public enum FILE_DIVISION {
     PLACE_IMG,
     ROOM_IMG,
     POPUP_IMG,
+    STARTUP_LOGO,
+    PARTNER_LOGO
 }

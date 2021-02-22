@@ -22,6 +22,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.HashMap;
@@ -240,7 +241,7 @@ public class AuthController {
             System.out.println("메일 발송");
             emailService.sendWelComeEmail("hkc9133@naver.com", user);
 
-        }catch (MessagingException e){
+        }catch (MessagingException | UnsupportedEncodingException e){
             System.out.println("메일 발송 실패");
             e.printStackTrace();
         }

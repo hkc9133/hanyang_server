@@ -13,7 +13,9 @@
         SET board_en_name = #{boardEnName},
             board_kr_name = #{boardKrName},
             category_id   = #{categoryId},
-            board_desc    = #{boardDesc}
+            board_desc    = #{boardDesc},
+            sub_name_01    = #{subName01},
+            sub_name_02    = #{subName02}
         where board_en_name = #{boardEnName}
     </update>
 
@@ -141,8 +143,8 @@
 
     <!--    컨텐츠-->
     <insert id="addBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        insert into board_content(board_en_name,title,content,thumbnail_img,category_code_id,writer_id,is_notice)
-        values(#{boardEnName},#{title},#{content}, #{thumbnailImg},#{categoryCodeId},#{writerId},#{isNotice})
+        insert into board_content(board_en_name,title,content,thumbnail_img,category_code_id,writer_id,is_notice,sub01,sub02)
+        values(#{boardEnName},#{title},#{content}, #{thumbnailImg},#{categoryCodeId},#{writerId},#{isNotice},#{sub01},#{sub02})
         <selectKey keyProperty="contentId" resultType="Integer" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -159,7 +161,7 @@
 
     <update id="deleteBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
         UPDATE board_content
-        SET status = 'D',
+        SET status = 'D'
             where content_id = #{contentId}
     </update>
 
@@ -186,6 +188,7 @@
         left join users AS c
         ON a.writer_id = c.user_id
         <where>
+            and a.status = 'A'
             <if test="boardEnName != null and boardEnName != ''">
                 AND a.board_en_name = #{boardEnName}
             </if>
@@ -219,6 +222,7 @@
         ON a.writer_id = c.user_id
         <where>
                and is_notice = true
+               and a.status = 'A'
             <if test="boardEnName != null and boardEnName != ''">
                 AND board_en_name = #{boardEnName}
             </if>
@@ -251,6 +255,7 @@
         ON a.writer_id = c.user_id
         <where>
             and is_notice = false
+            and a.status = 'A'
             <if test="boardEnName != null and boardEnName != ''">
                 AND board_en_name = #{boardEnName}
             </if>

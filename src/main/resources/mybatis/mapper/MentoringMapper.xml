@@ -2,6 +2,40 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mentoring">
 
+    <resultMap id="WayMap" type="com.hanyang.startup.hanyangstartup.mentoring.domain.WayItem">
+        <id property="itemId" column="item_id"/>
+        <result property="item" column="item"/>
+    </resultMap>
+
+    <resultMap id="SortationMap" type="com.hanyang.startup.hanyangstartup.mentoring.domain.SortationItem">
+        <id property="itemId" column="item_id"/>
+        <result property="item" column="item"/>
+    </resultMap>
+
+    <resultMap id="CounselApplyMap" type="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
+        <id property="placeId" column="place_id" />
+        <result property="isActive" column="is_active"/>
+        <result property="placeName" column="place_name"/>
+        <result property="placeDesc" column="place_desc"/>
+        <collection property="wayItemList" javaType="java.util.ArrayList" resultMap="WayMap"/>
+        <collection property="sortationItemList" javaType="java.util.ArrayList" resultMap="SortationMap"/>
+    </resultMap>
+
+    <resultMap id="DiaryMap" type="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary">
+        <id property="diaryId" column="diary_id" />
+        <result property="score" column="score"/>
+        <result property="regDate" column="reg_date"/>
+        <result property="mentorId" column="mentor_id"/>
+        <result property="formId" column="form_id"/>
+        <result property="answer" column="answer"/>
+        <result property="way" column="way"/>
+        <result property="start" column="start"/>
+        <result property="end" column="end"/>
+        <result property="place" column="place"/>
+        <collection property="wayItemList" javaType="java.util.ArrayList" resultMap="WayMap"/>
+    </resultMap>
+
+
     <select id="getCounselFieldCode" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselFiledCode">
         select * from counsel_field_code
     </select>
@@ -50,6 +84,14 @@
                 AND mentor_id = #{mentorId}
             </if>
         </where>
+    </select>
+
+    <select id="getBestMentor" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
+        SELECT *, mentor_career as mentor_career_str,mentor_keyword as mentor_keyword_str FROM mentors as m
+        LEFT JOIN attach_file as a
+        ON a.content_id = m.mentor_id and division = 'MENTOR_PROFILE_IMG' AND status = 'A'
+        WHERE m.is_best = true
+        ORDER BY rand() limit 1
     </select>
 
     <update id="updateMentor" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
@@ -147,12 +189,37 @@
     </delete>
 
     <insert id="applyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-        insert into counsel_apply_form(user_id,title,content,form_progress_item,form_sortation_item,form_way_item,mentee_name,mentee_email,mentee_phone_number,hope_mentor)
-        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{formSortationItem},#{formWayItem},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor})
+        insert into counsel_apply_form(user_id,title,content,form_progress_item,field_id,mentee_name,mentee_email,mentee_phone_number,hope_mentor)
+        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{fieldId},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor})
         <selectKey keyProperty="formId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
+
+    <insert id="addCounselSortation" parameterType="java.util.List">
+        insert into counsel_apply_form_sortation(form_id, item_id)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=" , " >
+            (#{item.formId}, #{item.itemId})
+        </foreach>
+    </insert>
+
+    <insert id="addCounselWay" parameterType="java.util.List">
+        insert into counsel_apply_form_way(form_id, item_id)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=" , " >
+            (#{item.formId}, #{item.itemId})
+        </foreach>
+    </insert>
+
+    <insert id="addDiaryWay" parameterType="java.util.List">
+        insert into mentoring_diary_way(diary_id, item_id)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=" , " >
+            (#{item.formId}, #{item.itemId})
+        </foreach>
+    </insert>
+
 
     <insert id="addCounselFieldMentee" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor">
         insert into counsel_field_mentee(form_id,field_id)
@@ -161,6 +228,41 @@
             (#{formId}, #{field})
         </foreach>
     </insert>
+
+    <select id="getCounselSortationList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.SortationItem">
+        select * from counsel_apply_form_sortation as s
+        left join counsel_apply_form_sortation_item as i
+        on s.item_id = i.item_id
+        <where>
+            <if test="formId != null and formId != ''">
+                AND form_id = #{formId}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="getCounselWayList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.WayItem">
+        select * from counsel_apply_form_way as s
+        left join counsel_apply_form_way_item as i
+        on s.item_id = i.item_id
+        <where>
+            <if test="formId != null and formId != ''">
+                AND form_id = #{formId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getDiaryWayList" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.WayItem">
+        select * from mentoring_diary_way as s
+        left join counsel_apply_form_way_item as i
+        on s.item_id = i.item_id
+        <where>
+            <if test="diaryId != null and diaryId != ''">
+                AND diary_id = #{diaryId}
+            </if>
+        </where>
+    </select>
+
 
     <select id="getCounselApplyListCnt" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" resultType="java.lang.Integer">
         SELECT count(*) FROM counsel_apply_form as a
@@ -178,8 +280,10 @@
 
 
     <select id="getCounselApply" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-        SELECT a.*,m.mentor_name, m.user_id as mentor_user_id, p.item as form_progress_item_name, s.item as form_sortation_item_name, w.item as form_way_item_name, d.answer, d.reg_date as answer_date, d.way as answer_way, d.score,d.diary_id as diaryId
+        SELECT a.*,m.mentor_name, m.user_id as mentor_user_id,c.field_name, p.item as form_progress_item_name, s.item as form_sortation_item_name, w.item as form_way_item_name, d.answer, d.reg_date as answer_date, d.way as answer_way, d.score,d.diary_id as diaryId, d.place, d.start,d.end
         FROM counsel_apply_form as a
+        left join counsel_field_code as c
+        on c.field_id = a.field_id
         left join counsel_apply_form_progress_item as p
         on p.item_id = a.form_progress_item
         left join counsel_apply_form_sortation_item as s
@@ -284,10 +388,10 @@
     </select>
 
     <insert id="addDiary" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.MentoringDiary">
-        insert into mentoring_diary(form_id,mentor_id,answer,way)
-        VALUES(#{formId},#{mentorId},#{answer},#{way})
+        insert into mentoring_diary(form_id,mentor_id,answer,way,place,start,end)
+        VALUES(#{formId},#{mentorId},#{answer},#{way},#{place},#{start},#{end})
 
-        <selectKey keyProperty="mentorId" resultType="int" order="AFTER">
+        <selectKey keyProperty="diaryId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>

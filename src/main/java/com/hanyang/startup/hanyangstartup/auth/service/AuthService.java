@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
 
 import javax.mail.MessagingException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 @Service
@@ -50,14 +51,11 @@ public class AuthService {
         newUser.setType(socialData.getType());
 //        newUser.setSocial(new SocialData(socialData.getId(),socialData.getEmail(),socialData.getType()));
 
-        System.out.println("==========");
-        System.out.println(newUser);
-        System.out.println("==========");
         authDao.signUpSocialUser(newUser);
         try{
             emailService.sendWelComeEmail(newUser.getUserEmail(),newUser);
 
-        }catch (MessagingException e){
+        }catch (MessagingException | UnsupportedEncodingException e){
             System.out.println("메일 발송 실패");
             e.printStackTrace();
         }

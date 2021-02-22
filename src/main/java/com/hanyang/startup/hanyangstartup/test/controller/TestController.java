@@ -107,9 +107,9 @@ public class TestController {
             String process = templateEngine.process("commission/commission", context);
 
             String scss = new ClassPathResource("templates/commission/style.css").getURL().getPath();
-            String sfont = new ClassPathResource("templates/commission/abc.ttf").getURL().getPath();
+            String sfont = new ClassPathResource("templates/commission/font.ttf").getURL().getPath();
 
-            Document document = new Document(PageSize.A4, 0, 0, 00, 00);
+            Document document = new Document(PageSize.A4, 0, 0, 0, 0);
 
             PdfWriter writer = PdfWriter.getInstance(document, new BufferedOutputStream(res.getOutputStream()));
 

@@ -6,19 +6,71 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Email</title>
+    <title>창업지원단</title>
 </head>
 <body>
 <style>
-    .welcome{
-        color:red;
+    table{border-collapse: collapse;
+        min-width: 290px;
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+        border:1px solid lightgrey;
     }
+    table tr{
+        border:1px solid lightgrey;
+    }
+
+    .header{
+        background-color:black;
+    }
+    .header a {
+        padding: 20px;
+        display: inline-block;
+    }
+    table tbody td {color:black;}
+    table tbody td.content {padding: 14px 10px 14px;
+        font-size: 14px;}
 </style>
-<div>Welcome <b th:text="${user.userName}"></b></div>
-<div>
-    <img src="http://127.0.0.1:3005/api/image/commission1.jpg"/>
+<div style="margin-top: 50px;">
+    <table>
+        <tbody>
+        <tr>
+            <td class="header">
+                <a href="#">
+                    <img src="http://127.0.0.1:3005/api/image/logo.png"/>
+                </a>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                <h3>안녕하세요.<br/>한양대학교 창업지원단 입니다.</h3>
+                <p><span th:text="${user.userName}"></span>님 가입을 환영합니다.</p>
+            </td>
+        </tr>
+        <tr>
+            <td class="content">
+                <span>주소 : (04763) 서울특별시 성동구 왕십리로 222 한양대학교 HIT 103호</span>
+                <br/>
+                <span>© 2021. Startup Support Foundation, Hanyang University. All rights reserved.</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+<!--    <div class="header">-->
+<!--        <a href="#">-->
+<!--            <img src="http://127.0.0.1:3005/api/image/logo.png"/>-->
+<!--        </a>-->
+<!--    </div>-->
+<!--    <div class="content">-->
+<!--        <h2>가입을 환영합니다</h2>-->
+<!--    </div>-->
+<!--    <div class="footer">-->
+<!--        <span>주소 : (04763) 서울특별시 성동구 왕십리로 222 한양대학교 HIT 103호</span>-->
+<!--        <br/>-->
+<!--        <span>© 2021. Startup Support Foundation, Hanyang University. All rights reserved.</span>-->
+<!--    </div>-->
 </div>
 
-<div><p class="welcome">Welcome!</p></div>
 </body>
 </html>

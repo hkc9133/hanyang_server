@@ -11,7 +11,7 @@ body {
 .page {
     width: 21cm;
     min-height: 29.7cm;
-    padding: 2cm;
+    padding: 0 1.5cm;
     margin: 1cm auto;
     border-radius: 5px;
     background: white;
@@ -19,14 +19,9 @@ body {
     flex:1;
     /*background-image: url('./a.png');*/
 }
-.img{
-    width: 100px;
-    height: 100px;
-    background: url("./a.png") no-repeat ;
-}
 .subpage {
     padding: 1cm;
-    height: 256mm;
+    height: 276mm;
 }
 @page {
     size: A4 landscape;

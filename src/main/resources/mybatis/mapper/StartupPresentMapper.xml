@@ -3,16 +3,40 @@
 <mapper namespace="startup_present">
 
     <resultMap id="StartupPresentMap" type="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
-        <id property="startupPresentId" column="startup_present_id" />
+        <id property="startupId" column="startup_id" />
+        <result property="rownum" column="rownum"/>
         <result property="companyName" column="company_name"/>
-        <result property="item" column="item"/>
-        <result property="keyword" column="keyword"/>
+        <result property="companyOwner" column="company_owner"/>
+        <result property="companyPhoneNum" column="company_phone_num"/>
+        <result property="companyEmail" column="company_email"/>
+
+        <result property="address" column="address"/>
+        <result property="gubun" column="gubun"/>
+        <result property="companyKind" column="company_kind"/>
         <result property="homepage" column="homepage"/>
-        <result property="group" column="group"/>
-        <result property="fieldId" column="field_id"/>
-        <result property="fieldName" column="field_name"/>
+        <result property="item" column="item"/>
+        <result property="insta" column="insta"/>
+        <result property="facebook" column="facebook"/>
+        <result property="naverBlog" column="naver_blog"/>
+        <result property="twitter" column="twitter"/>
         <result property="createDate" column="create_date"/>
         <result property="regDate" column="reg_date"/>
+<!--        <collection property="attachFile" resultMap="AttachFileMap"/>-->
+        <association property="attachFile" column="startup_id" javaType="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile" select="selectAttachFile"/>
+
+        <collection property="techFieldList" column="startup_id" ofType="TechFieldMap" javaType="java.util.ArrayList" select="getCurrentTechFieldList"/>
+        <collection property="businessFieldList" column="startup_id"  ofType="BusinessFieldMap" javaType="java.util.ArrayList" select="getCurrentBusinessFieldList"/>
+    </resultMap>
+
+    <resultMap id="BusinessFieldMap" type="com.hanyang.startup.hanyangstartup.startupPresent.domain.BusinessFieldCode">
+        <id property="startupId" column="startup_id"/>
+        <result property="businessId" column="business_id"/>
+        <result property="businessName" column="business_name"/>
+    </resultMap>
+    <resultMap id="TechFieldMap" type="com.hanyang.startup.hanyangstartup.startupPresent.domain.TechFieldCode">
+        <id property="startupId" column="startup_id"/>
+        <result property="techId" column="tech_id"/>
+        <result property="techName" column="tech_name"/>
     </resultMap>
 
     <resultMap id="AttachFileMap" type="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
@@ -27,81 +51,194 @@
         <result property="fileExtension" column="file_extension"/>
     </resultMap>
 
-    <select id="getStartupPresentFieldList" resultType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresentField">
-        select * from startup_present_field_code
+    <select id="getBusinessFieldList" resultType="com.hanyang.startup.hanyangstartup.startupPresent.domain.BusinessFieldCode">
+        select * from business_field_code
+    </select>
+
+    <select id="getTechFieldList" resultType="com.hanyang.startup.hanyangstartup.startupPresent.domain.TechFieldCode">
+        select * from tech_field_code
     </select>
 
     <insert id="addStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
-        insert into startup_present(company_name,item,keyword,homepage,group,field_id,create_date) value(#{companyName},#{item},#{keyword},#{homepage},#{group},#{fieldId},#{createDate})
-        <selectKey keyProperty="startupPresentId" resultType="int" order="AFTER">
+        insert into startup_present(company_name,company_owner,company_phone_num,company_email,address,gubun,company_kind,homepage,create_date,item,insta,facebook,naver_blog,twitter,is_best)
+        value(#{companyName},#{companyOwner},#{companyPhoneNum},#{companyEmail},#{address},#{gubun},#{companyKind},#{homepage},#{createDate},#{item},#{insta},#{facebook},#{naverBlog},#{twitter},#{isBest})
+        <selectKey keyProperty="startupId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
+
+    <select id="getCurrentBusinessFieldList" parameterType="Integer"  resultMap="BusinessFieldMap">
+        select * from business_field as b
+        left join business_field_code as c
+        on b.business_id = c.business_id
+        WHERE startup_id = #{startupId}
+    </select>
+
+    <insert id="addBusinessFieldList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        insert into business_field(startup_id,business_id)
+        VALUES
+        <foreach collection="businessIdList" item="fieldId" separator=" , " >
+            (#{startupId}, #{fieldId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteBusinessFieldList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        DELETE FROM business_field
+        WHERE startup_id = #{startupId}
+    </delete>
+
+    <select id="getCurrentTechFieldList" parameterType="Integer"  resultMap="TechFieldMap">
+        select * from tech_field as t
+        left join tech_field_code as c
+        on t.tech_id = c.tech_id
+        WHERE startup_id = #{startupId}
+    </select>
+
+    <insert id="addTechFieldList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        insert into tech_field(startup_id,tech_id)
+        VALUES
+        <foreach collection="techIdList" item="fieldId" separator=" , " >
+            (#{startupId}, #{fieldId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteTechFieldList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
+        DELETE FROM tech_field
+        WHERE startup_id = #{startupId}
+    </delete>
+
 
     <update id="updateStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
         UPDATE startup_present
         <set>
             company_name = #{companyName},
+            company_owner = #{companyOwner},
+            company_phone_num = #{companyPhoneNum},
+            company_email = #{companyEmail},
+            address = #{address},
+            gubun = #{gubun},
             item = #{item},
-            keyword = #{keyword},
+            company_kind = #{companyKind},
             homepage = #{homepage},
-            group = #{group},
-            field_id = #{fieldId},
-            create_date = #{createDate}
+            create_date = #{createDate},
+            insta = #{insta},
+            facebook = #{facebook},
+            naver_blog = #{naverBlog},
+            twitter = #{twitter},
+            is_best = #{isBest}
         </set>
-        where startup_present_id = #{startupPresentId}
+        where startup_id = #{startupId}
     </update>
 
     <select id="getStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultMap="StartupPresentMap">
-        select * from startup_present as s
-        LEFT JOIN startup_present_field_code as f
-        ON f.field_id = s.field_id
-        where s.startup_present_id = #{startupPresentId}
+        SELECT s.*,bc.*,tc.*,f.* from startup_present as s
+        left join business_field as b
+          on s.startup_id = b.startup_id
+        left join business_field_code as bc
+          on b.business_id = bc.business_id
+        left join tech_field as t
+          on s.startup_id = t.startup_id
+        left join tech_field_code as tc
+          on t.tech_id = tc.tech_id
+        LEFT JOIN attach_file as f
+            ON s.startup_id = f.content_id and division = 'STARTUP_LOGO' AND status = 'A'
+        where s.startup_id = #{startupId}
+        group by s.startup_id
     </select>
 
     <select id="getStartupPresentList" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultMap="StartupPresentMap">
-        SELECT ROW_NUMBER() OVER (ORDER BY s.startup_present_id) rownum, s.* from startup_present as s
+        SELECT ROW_NUMBER() OVER (ORDER BY s.startup_id) rownum, s.*,f.* from startup_present as s
+        LEFT JOIN attach_file as f
+        ON s.startup_id = f.content_id and division = 'STARTUP_LOGO' AND status = 'A'
+        <if test="businessIdList!=null and businessIdList.size!=0">
+            left join business_field as b
+            on s.startup_id = b.startup_id
+        </if>
+        <if test="techIdList!=null and techIdList.size!=0">
+            left join tech_field as t
+            on s.startup_id = t.startup_id
+        </if>
         <where>
+            <if test="businessIdList!=null and businessIdList.size!=0">
+                and b.business_id IN
+                <foreach collection="businessIdList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="techIdList!=null and techIdList.size!=0">
+                and t.tech_id IN
+                <foreach collection="techIdList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
-                AND s.${searchField} like '%' #{searchValue} '%'
-            </if>
-            <if test="group != null and group != ''">
-                and s.group = #{group}
-            </if>
-            <if test="fieldId != null and fieldId != ''">
-                and s.field_id = #{fieldId}
-            </if>
-            <if test="createDate != null and createDate != ''">
-                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
+                AND p.${searchField} like '%' #{searchValue} '%'
             </if>
         </where>
-        order by s.startup_present_id desc
+        group by s.startup_id
+        order by s.startup_id desc
         <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
             limit #{startRowNo}, #{pageSize}
         </if>
     </select>
 
     <select id="getStartupPresentListCnt" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent" resultType="java.lang.Integer">
-        SELECT count(*) from startup_present as p
+        SELECT count(*) from startup_present as s
+        <if test="businessIdList!=null and businessIdList.size!=0">
+            left join business_field as b
+            on s.startup_id = b.startup_id
+        </if>
+        <if test="techIdList!=null and techIdList.size!=0">
+            left join tech_field as t
+            on s.startup_id = t.startup_id
+        </if>
         <where>
+            <if test="businessIdList!=null and businessIdList.size!=0">
+                and b.business_id IN
+                <foreach collection="businessIdList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="techIdList!=null and techIdList.size!=0">
+                and t.tech_id IN
+                <foreach collection="techIdList" item="item" index="index" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
                 AND s.${searchField} like '%' #{searchValue} '%'
-            </if>
-            <if test="group != null and group != ''">
-                and s.group = #{group}
-            </if>
-            <if test="fieldId != null and fieldId != ''">
-                and s.field_id = #{fieldId}
-            </if>
-            <if test="createDate != null and createDate != ''">
-                and DATE_FORMAT(s.create_date, '%Y') = DATE_FORMAT(#{createDate}, '%Y')
             </if>
         </where>
     </select>
 
     <delete id="deleteStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
         DELETE FROM startup_present
-        WHERE startup_present_id = #{startupPresentId}
+        WHERE startup_id = #{startupId}
     </delete>
+
+    <select id="getBestStartupList" resultMap="StartupPresentMap">
+        <![CDATA[
+            SELECT * FROM (
+            SELECT *, RANK() OVER (PARTITION BY s.gubun ORDER BY rand()) AS RN
+            FROM startup_present AS s
+            where is_best = 1
+            ) AS t
+            WHERE t.RN <= 9
+        ]]>
+    </select>
+
+    <select id="getStartupGubunCnt" resultType="com.hanyang.startup.hanyangstartup.startupPresent.domain.GubunCount">
+        select count(*) as count, gubun from startup_present
+        group by gubun
+    </select>
+
+    <select id="selectAttachFile" parameterType="Integer"  resultMap="AttachFileMap">
+        select * from attach_file
+        where division = 'STARTUP_LOGO'
+        and status = 'A'
+        and content_id = #{startupId}
+    </select>
+
+
 
 </mapper>

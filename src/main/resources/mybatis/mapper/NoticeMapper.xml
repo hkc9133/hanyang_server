@@ -33,6 +33,11 @@
         where notice_id = #{noticeId}
     </update>
 
+    <delete id="deleteNotice" parameterType="com.hanyang.startup.hanyangstartup.notice.domain.Notice">
+        DELETE FROM notice
+        where notice_id = #{noticeId}
+    </delete>
+
     <select id="getNoticePrev" parameterType="com.hanyang.startup.hanyangstartup.notice.domain.Notice" resultType="com.hanyang.startup.hanyangstartup.notice.domain.Notice">
         SELECT * FROM notice
         <where>

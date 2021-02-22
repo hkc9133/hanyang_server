@@ -66,6 +66,33 @@ public class MentoringService {
         return map;
     }
 
+    public Mentor getBestMentor(){
+
+        Mentor mentor = mentoringDao.getBestMentor();
+
+        mentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(mentor));
+
+
+        if(mentor.getMentorCareerStr() != null){
+            mentor.setMentorCareer(Arrays.asList(mentor.getMentorCareerStr().split(";").clone()));
+        }else{
+            mentor.setMentorCareer(new ArrayList<>());
+        }
+
+        if(mentor.getMentorKeywordStr() != null){
+            mentor.setMentorKeyword(Arrays.asList(mentor.getMentorKeywordStr().split(";").clone()));
+        }else{
+            mentor.setMentorKeyword(new ArrayList<>());
+        }
+
+        return mentor;
+
+//        Map<String, Object> map = new HashMap<>();
+//
+//        map.put("mentor", mentor);
+//        return map;
+    }
+
     public void updateMentor(Mentor mentor){
 
 //        String keywordStr = "";
@@ -119,7 +146,9 @@ public class MentoringService {
         CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
 
         //신청 분야 리스트
-        resultCounselApplyForm.setCounselFieldList(mentoringDao.getCounselFieldMentee(counselApplyForm));
+//        resultCounselApplyForm.setCounselFieldList(mentoringDao.getCounselFieldMentee(counselApplyForm));
+        resultCounselApplyForm.setSortationItemList(mentoringDao.getCounselSortationList(counselApplyForm));
+        resultCounselApplyForm.setWayItemList(mentoringDao.getCounselWayList(counselApplyForm));
 
         AttachFile attachFile = new AttachFile();
         attachFile.setContentId(counselApplyForm.getFormId());
@@ -140,7 +169,8 @@ public class MentoringService {
             answerAttachFile.setContentId(mentoringDiary.getDiaryId());
             answerAttachFile.setDivision(FILE_DIVISION.MENTORING_ANSWER_ATTACH);
             answerAttachFile.setStatus(FILE_STATUS.A);
-            map.put("answerFiles", fileSaveService.getAttachFileList(attachFile));
+            map.put("answerFiles", fileSaveService.getAttachFileList(answerAttachFile));
+            map.put("wayItemList", mentoringDao.getDiaryWayList(mentoringDiary));
         }
         return map;
     }
@@ -272,9 +302,30 @@ public class MentoringService {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void applyCounsel(CounselApplyForm counselApplyForm){
+    public void applyCounsel(CounselApplyForm counselApplyForm)throws Exception{
         mentoringDao.applyCounsel(counselApplyForm);
-        mentoringDao.addCounselFieldMentee(counselApplyForm);
+//        mentoringDao.addCounselFieldMentee(counselApplyForm);
+
+
+        if(counselApplyForm.getSortationIdList().size() > 0 ){
+            List<SortationItem> sortationItemList = new ArrayList<>();
+
+            for (int id: counselApplyForm.getSortationIdList()) {
+                sortationItemList.add(new SortationItem(counselApplyForm.getFormId(), id));
+            }
+
+            mentoringDao.addCounselSortation(sortationItemList);
+        }
+
+        if(counselApplyForm.getWayIdList().size() > 0 ){
+            List<WayItem> wayItemList = new ArrayList<>();
+
+            for (int id: counselApplyForm.getWayIdList()) {
+                wayItemList.add(new WayItem(counselApplyForm.getFormId(), id));
+            }
+            mentoringDao.addCounselWay(wayItemList);
+        }
+
 
         List<AttachFile> attachFileList = new ArrayList<>();
 
@@ -284,11 +335,11 @@ public class MentoringService {
             attachFile.setDivision(FILE_DIVISION.MENTORING_ATTACH);
             attachFile.setFileId(file);
             attachFileList.add(attachFile);
-            System.out.println(attachFile);
         }
         if(attachFileList.size() > 0){
             fileSaveService.updateAttachFile(attachFileList);
         }
+
     }
 
     @Transactional(rollbackFor = {Exception.class})
@@ -304,6 +355,15 @@ public class MentoringService {
         counselApplyForm.setFormId(mentoringDiary.getFormId());
         counselApplyForm.setApplyStatus(APPLY_STATUS.COMPLETED);
         mentoringDao.updateCounselApplyStatus(counselApplyForm);
+
+        if(mentoringDiary.getWayIdList().size() > 0 ){
+            List<WayItem> wayItemList = new ArrayList<>();
+
+            for (int id: mentoringDiary.getWayIdList()) {
+                wayItemList.add(new WayItem(mentoringDiary.getDiaryId(), id));
+            }
+            mentoringDao.addDiaryWay(wayItemList);
+        }
 
         if(mentoringDiary.getFiles() != null){
             for (MultipartFile file : mentoringDiary.getFiles()) {

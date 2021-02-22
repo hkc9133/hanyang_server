@@ -26,6 +26,10 @@ public class NoticeDao {
         sqlSession.update("notice.updateNotice",notice);
     }
 
+    public void deleteNotice(Notice notice){
+        sqlSession.delete("notice.deleteNotice",notice);
+    }
+
     public void updateNoticeCnt(Notice notice){
         sqlSession.update("notice.updateNoticeCnt",notice);
     }

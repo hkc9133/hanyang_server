@@ -88,6 +88,24 @@ public class AdminNoticeEventController {
         }
     }
 
+    @DeleteMapping(value = "/content/delete/{noticeId}")
+    public ResponseEntity<Response> deleteNotice(@PathVariable("noticeId") Integer noticeId,Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("게시글 삭제");
+            Notice notice = new Notice();
+            notice.setNoticeId(noticeId);
+            noticeService.deleteNotice(notice);
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @GetMapping(value = "/list")
     public ResponseEntity<Response> getNoticeList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
 

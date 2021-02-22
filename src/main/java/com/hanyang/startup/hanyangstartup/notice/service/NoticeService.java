@@ -77,6 +77,12 @@ public class NoticeService {
         noticeDao.updateNotice(notice);
     }
 
+    @Transactional(rollbackFor = {Exception.class})
+    public void deleteNotice(Notice notice) {
+        noticeDao.deleteNotice(notice);
+    }
+
+
     //이벤트
     public Map<String,Object> getNoticeList(Notice notice) {
         notice.setTotalCount(noticeDao.getNoticeListCnt(notice));

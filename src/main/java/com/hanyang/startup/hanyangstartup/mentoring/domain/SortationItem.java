@@ -8,6 +8,12 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class SortationItem {
+    private int formId;
     private int itemId;
     private String item;
+
+    public SortationItem (int formId, int itemId){
+        this.formId = formId;
+        this.itemId = itemId;
+    }
 }

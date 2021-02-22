@@ -111,6 +111,7 @@ public class MentoringController {
         }
     }
 
+
     @GetMapping("/mentor")
     public ResponseEntity<Response> getMentor(Principal principal){
         Response response;
@@ -119,6 +120,21 @@ public class MentoringController {
             mentor.setUserId(principal.getName());
 
             response = new Response("success", null, mentoringService.getMentor(mentor), 409);
+
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/mentor/best")
+    public ResponseEntity<Response> getBestMentor(Principal principal){
+        Response response;
+        try {
+            response = new Response("success", null, mentoringService.getBestMentor(), 200);
 
             return new ResponseEntity(response, HttpStatus.OK);
         }
@@ -138,7 +154,7 @@ public class MentoringController {
             mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
             mentor.setPageNo(page);
             if(pageSize != null){
-                mentor.setPageSize(pageSize);
+                mentor.setPageSize(9);
             }
             if(counselField != null){
                 List<Integer> counselFieldList = new ArrayList<>();
@@ -214,6 +230,7 @@ public class MentoringController {
             counselApplyForm.setUserId(principal.getName());
 
             System.out.println("====>상담 신청");
+            System.out.println(counselApplyForm);
 
             mentoringService.applyCounsel(counselApplyForm);
 
@@ -338,6 +355,7 @@ public class MentoringController {
             mentoringDiary.setMentorUserId(principal.getName());
 
             System.out.println("====>답변 작성");
+            System.out.println(mentoringDiary);
 
             mentoringService.addDiary(mentoringDiary);
 

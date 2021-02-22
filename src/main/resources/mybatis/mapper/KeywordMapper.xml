@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="keyword">
+
+    <select id="getKeyword" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword" resultType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+        SELECT *from keyword
+        where keyword_id = #{keywordId}
+    </select>
+
+    <select id="getKeywordList" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword" resultType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+        SELECT ROW_NUMBER() OVER (ORDER BY k.keyword_id) rownum, k.* from keyword as k
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+        order by k.count desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getKeywordListCnt" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword" resultType="java.lang.Integer">
+        SELECT count(*) from keyword as k
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+        </where>
+        order by k.keyword_id desc
+    </select>
+
+
+    <insert id="updateKeywordSearch" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+        INSERT INTO keyword(keyword) VALUES (#{keyword})
+        ON DUPLICATE KEY UPDATE count=count+1;
+    </insert>
+
+    <insert id="addKeyword" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+        INSERT INTO keyword(keyword,count) VALUES (#{keyword},#{count})
+    </insert>
+
+    <update id="updateKeyword" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+            UPDATE keyword
+            <set>
+                keyword = #{keyword},
+                count = #{count},
+            </set>
+            where keyword_id = #{keywordId}
+    </update>
+
+    <delete id="deleteKeyword" parameterType="com.hanyang.startup.hanyangstartup.keyword.domain.Keyword">
+        DELETE FROM keyword WHERE keyword_id = #{keywordId}
+    </delete>
+
+</mapper>

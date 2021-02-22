@@ -76,6 +76,10 @@ public class BoardDao {
         return sqlSession.selectOne("board.getBoardContentListCnt",boardConfig);
     }
 
+    public void deleteBoardContent(BoardContent boardContent){
+        sqlSession.update("board.deleteBoardContent",boardContent);
+    }
+
 
     public List<BoardCategoryCode> getBoardCategoryCodeList(BoardConfig boardConfig){
         return sqlSession.selectList("board.getBoardCategoryCodeList",boardConfig);

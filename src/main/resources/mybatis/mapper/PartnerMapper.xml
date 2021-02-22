@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="partner">
+
+    <resultMap id="PartnerMap" type="com.hanyang.startup.hanyangstartup.partner.domain.Partner">
+        <id property="partnerId" column="partner_id" />
+        <result property="rownum" column="rownum"/>
+        <result property="companyName" column="company_name"/>
+        <result property="field" column="field"/>
+        <result property="homepage" column="homepage"/>
+        <result property="location" column="location"/>
+        <result property="continentId" column="continent_id"/>
+        <result property="regDate" column="reg_date"/>
+        <association property="attachFile" column="partner_id" javaType="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile" select="selectAttachFile"/>
+        <association property="continent" column="continent_id" javaType="com.hanyang.startup.hanyangstartup.partner.domain.ContinentCode" select="getContinent"/>
+    </resultMap>
+
+    <resultMap id="ContinentMap" type="com.hanyang.startup.hanyangstartup.partner.domain.ContinentCode">
+        <id property="continentId" column="continent_id"/>
+        <result property="continentName" column="continent_name"/>
+    </resultMap>
+
+    <resultMap id="AttachFileMap" type="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
+        <id property="fileId" column="file_id"/>
+        <result property="contentId" column="content_id"/>
+        <result property="status" column="status"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="division" column="division"/>
+        <result property="filePath" column="file_path"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileOriginName" column="file_origin_name"/>
+        <result property="fileExtension" column="file_extension"/>
+    </resultMap>
+
+
+    <insert id="addPartner" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner">
+        insert into partners(company_name,field,homepage,location,continent_id)
+        value(#{companyName},#{field},#{homepage},#{location},#{continentId})
+        <selectKey keyProperty="partnerId" resultType="int" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <select id="getContinent" parameterType="Integer"  resultMap="ContinentMap">
+        select * from continent_code as c
+        WHERE continent_id = #{continentId}
+    </select>
+
+
+    <select id="getContinentList" resultMap="ContinentMap">
+        select * from continent_code
+    </select>
+
+
+    <update id="updatePartner" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner">
+        UPDATE partners
+        <set>
+            company_name = #{companyName},
+            field = #{field},
+            homepage = #{homepage},
+            location = #{location},
+            continent_id = #{continentId},
+        </set>
+        where partner_id = #{partnerId}
+    </update>
+
+    <select id="getPartner" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner" resultMap="PartnerMap">
+        SELECT p.*,c.* from partners as p
+        left join continent_code as c
+          on p.continent_id = c.continent_id
+        LEFT JOIN attach_file as f
+            ON p.partner_id = f.content_id and division = 'PARTNER_LOGO' AND status = 'A'
+        where p.partner_id = #{partnerId}
+    </select>
+
+    <select id="getPartnerList" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner" resultMap="PartnerMap">
+        SELECT ROW_NUMBER() OVER (ORDER BY p.partner_id) rownum, p.*,f.* from partners as p
+        left join continent_code as c
+        on p.continent_id = c.continent_id
+        LEFT JOIN attach_file as f
+        ON p.partner_id = f.content_id and division = 'PARTNER_LOGO' AND status = 'A'
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND p.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="continentId != null and continentId != ''">
+                AND p.continent_id = #{continentId}
+            </if>
+        </where>
+        order by p.partner_id desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getPartnerListCnt" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner" resultType="java.lang.Integer">
+        SELECT count(*) from partners as s
+        <where>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND s.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="continentId != null and continentId != ''">
+                AND s.continent_id = #{continentId}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deletePartner" parameterType="com.hanyang.startup.hanyangstartup.partner.domain.Partner">
+        DELETE FROM partners
+        WHERE partner_id = #{partnerId}
+    </delete>
+
+    <select id="selectAttachFile" parameterType="Integer"  resultMap="AttachFileMap">
+        select * from attach_file
+        where division = 'PARTNER_LOGO'
+        and status = 'A'
+        and content_id = #{partnerId}
+    </select>
+
+
+
+</mapper>

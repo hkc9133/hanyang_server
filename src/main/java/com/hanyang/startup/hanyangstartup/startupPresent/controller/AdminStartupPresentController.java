@@ -19,13 +19,29 @@ public class AdminStartupPresentController {
     @Autowired
     private StartupPresentService startupPresentService;
 
-    //팝업 조회
-    @GetMapping("/{startupPresentId}")
-    public ResponseEntity<Response> getStartupPresent(@PathVariable("startupPresentId") int startupPresentId, HttpServletRequest req, HttpServletResponse res){
+    @GetMapping("/field")
+    public ResponseEntity<Response> getFieldList(){
+        Response response;
+        try {
+            Map<String, Object>  result = startupPresentService.getFieldList();
+
+            response = new Response("success", null, result, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    @GetMapping("/{startupId}")
+    public ResponseEntity<Response> getStartupPresent(@PathVariable("startupId") int startupId, HttpServletRequest req, HttpServletResponse res){
         Response response;
         try {
             StartupPresent startupPresent = new StartupPresent();
-            startupPresent.setStartupPresentId(startupPresentId);
+            startupPresent.setStartupId(startupId);
             StartupPresent result = startupPresentService.getStartupPresent(startupPresent);
 
             response = new Response("success", null, result, 200);
@@ -38,17 +54,11 @@ public class AdminStartupPresentController {
         }
     }
 
-    //팝업 리스트 조회
-    @GetMapping("/list")
-    public ResponseEntity<Response> getStartupPresentList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam(value="startDate", required = false) String startDate, @RequestParam(value="endDate", required = false) String endDate) {
+
+    @PostMapping("/list")
+    public ResponseEntity<Response> getStartupPresentList(@RequestBody StartupPresent startupPresent) {
         Response response;
         try {
-            StartupPresent startupPresent = new StartupPresent();
-            startupPresent.setPageNo(page);
-            startupPresent.setStartDate(startDate);
-            startupPresent.setEndDate(endDate);
-            startupPresent.setSearchField(searchField);
-            startupPresent.setSearchValue(searchValue);
 
             Map<String, Object>  result = startupPresentService.getStartupPresentList(startupPresent);
 
@@ -61,11 +71,14 @@ public class AdminStartupPresentController {
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
-    //팝업 생성
+
     @PostMapping
-    public ResponseEntity<Response> addStartupPresent(@RequestBody StartupPresent startupPresent, HttpServletRequest req, HttpServletResponse res){
+    public ResponseEntity<Response> addStartupPresent(StartupPresent startupPresent, HttpServletRequest req, HttpServletResponse res){
         Response response;
         try {
+
+            System.out.println("스타트업 추가");
+            System.out.println(startupPresent);
             startupPresentService.addStartupPresent(startupPresent);
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);
@@ -79,10 +92,12 @@ public class AdminStartupPresentController {
 
     //팝업 수정
     @PostMapping("/edit")
-    public ResponseEntity<Response> updateStartupPresent(@RequestBody StartupPresent startupPresent, HttpServletRequest req, HttpServletResponse res){
+    public ResponseEntity<Response> updateStartupPresent(StartupPresent startupPresent, HttpServletRequest req, HttpServletResponse res){
         Response response;
         try {
 
+            System.out.println("스타트업 업데이트");
+            System.out.println(startupPresent);
             startupPresentService.updateStartupPresent(startupPresent);
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);
@@ -94,13 +109,13 @@ public class AdminStartupPresentController {
         }
     }
 
-    //팝업 삭제
+
     @DeleteMapping("/{startupPresentId}")
     public ResponseEntity<Response> deleteStartupPresent(@PathVariable("startupPresentId") int startupPresentId, HttpServletRequest req, HttpServletResponse res){
         Response response;
         try {
             StartupPresent startupPresent = new StartupPresent();
-            startupPresent.setStartupPresentId(startupPresentId);
+            startupPresent.setStartupId(startupPresentId);
 
             startupPresentService.deleteStartupPresent(startupPresent);
 

@@ -24,6 +24,8 @@ public class BoardConfig extends Page {
     private Boolean useFile;
     private Boolean useComment;
     private String writeRole;
+    private String subName01 = "";
+    private String subName02 = "";
 
     private Integer categoryId;
     //검색용

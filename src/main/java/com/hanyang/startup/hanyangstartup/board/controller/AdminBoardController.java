@@ -257,10 +257,31 @@ public class AdminBoardController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
+            Object a = "Asdasd";
+            String b = "Asdasd";
             response = new Response("error", null, e.getMessage(), 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
+
+    @DeleteMapping(value = "/content/delete/{contentId}")
+    public ResponseEntity<Response> deleteBoardContent(@PathVariable("contentId") Integer contentId,Principal principal) {
+
+        Response response;
+        try {
+            System.out.println("게시글 삭제");
+            BoardContent boardContent = new BoardContent();
+            boardContent.setContentId(contentId);
+            boardService.deleteBoardContent(boardContent);
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
     @PostMapping(value = "/reply")
     public ResponseEntity<Response> addReply(@RequestBody Reply reply, Principal principal) {

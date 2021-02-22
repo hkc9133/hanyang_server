@@ -34,6 +34,9 @@ public class MentoringDao {
     public Mentor getMentor(Mentor mentor){
         return sqlSession.selectOne("mentoring.getMentor",mentor);
     }
+    public Mentor getBestMentor(){
+        return sqlSession.selectOne("mentoring.getBestMentor");
+    }
 
     public void updateMentor(Mentor mentor){
         sqlSession.update("mentoring.updateMentor",mentor);
@@ -71,6 +74,32 @@ public class MentoringDao {
     public void applyCounsel(CounselApplyForm counselApplyForm){
         sqlSession.insert("mentoring.applyCounsel",counselApplyForm);
     }
+
+    public List<SortationItem> getCounselSortationList(CounselApplyForm counselApplyForm){
+        return sqlSession.selectList("mentoring.getCounselSortationList",counselApplyForm);
+    }
+
+    public List<WayItem> getCounselWayList(CounselApplyForm counselApplyForm){
+        return sqlSession.selectList("mentoring.getCounselWayList",counselApplyForm);
+    }
+
+    public void addCounselSortation(List<SortationItem> counselSortationList){
+        sqlSession.insert("mentoring.addCounselSortation",counselSortationList);
+    }
+
+    public void addCounselWay(List<WayItem> counselWayList){
+        sqlSession.insert("mentoring.addCounselWay",counselWayList);
+    }
+
+
+    public List<WayItem> getDiaryWayList(MentoringDiary mentoringDiary){
+        return sqlSession.selectList("mentoring.getDiaryWayList",mentoringDiary);
+    }
+    public void addDiaryWay(List<WayItem> counselWayList){
+        sqlSession.insert("mentoring.addDiaryWay",counselWayList);
+    }
+
+
     public void addCounselFieldMentee(CounselApplyForm counselApplyForm){
         sqlSession.insert("mentoring.addCounselFieldMentee",counselApplyForm);
     }
