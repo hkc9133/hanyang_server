@@ -1,4 +1,4 @@
-package com.hanyang.startup.hanyangstartup.notice.domain;
+package com.hanyang.startup.hanyangstartup.startup_calendar.domain;
 
 import com.hanyang.startup.hanyangstartup.common.domain.Page;
 import lombok.*;
@@ -12,8 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Notice extends Page {
-    private int noticeId;
+public class StartupCalendar extends Page {
+    private int startupCalendarId;
     private String title;
     private String content;
     private PROGRESS_STATUS progressStatus;
@@ -31,6 +31,9 @@ public class Notice extends Page {
     private String boardEnName;
     private String fileExtension;
     private Boolean isNotice;
+    private Boolean showNotice;
+    private Boolean showCalendar;
+    private Boolean showHot;
 
 
     private MultipartFile[] files;

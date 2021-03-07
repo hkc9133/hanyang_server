@@ -66,31 +66,60 @@ public class MentoringService {
         return map;
     }
 
-    public Mentor getBestMentor(){
+    public List<Mentor> getBestMentor(){
 
-        Mentor mentor = mentoringDao.getBestMentor();
-
-        mentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(mentor));
-
-
-        if(mentor.getMentorCareerStr() != null){
-            mentor.setMentorCareer(Arrays.asList(mentor.getMentorCareerStr().split(";").clone()));
-        }else{
-            mentor.setMentorCareer(new ArrayList<>());
-        }
-
-        if(mentor.getMentorKeywordStr() != null){
-            mentor.setMentorKeyword(Arrays.asList(mentor.getMentorKeywordStr().split(";").clone()));
-        }else{
-            mentor.setMentorKeyword(new ArrayList<>());
-        }
-
-        return mentor;
+//        Mentor mentor = mentoringDao.getBestMentor();
+////
+////        mentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(mentor));
+////
+////
+////        if(mentor.getMentorCareerStr() != null){
+////            mentor.setMentorCareer(Arrays.asList(mentor.getMentorCareerStr().split(";").clone()));
+////        }else{
+////            mentor.setMentorCareer(new ArrayList<>());
+////        }
+////
+////        if(mentor.getMentorKeywordStr() != null){
+////            mentor.setMentorKeyword(Arrays.asList(mentor.getMentorKeywordStr().split(";").clone()));
+////        }else{
+////            mentor.setMentorKeyword(new ArrayList<>());
+////        }
+////
+////        return mentor;
 
 //        Map<String, Object> map = new HashMap<>();
 //
 //        map.put("mentor", mentor);
 //        return map;
+
+//        if(mentor.getPageNo() != null){
+//            mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
+//        }
+        Mentor mentor = new Mentor();
+        mentor.setIsBest(true);
+        mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
+        List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
+
+        mentorList.stream().map(item-> {
+            if(item.getMentorCareerStr() != null){
+                item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
+            }else{
+                item.setMentorCareer(new ArrayList<>());
+            }
+
+            if(item.getMentorKeywordStr() != null){
+                item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
+            }else{
+                item.setMentorKeyword(new ArrayList<>());
+            }
+            item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
+            return item;
+        }).collect(Collectors.toList());
+
+//        Map<String, Object> map = new HashMap<>();
+//
+//        map.put("list", mentorList);
+        return mentorList;
     }
 
     public void updateMentor(Mentor mentor){

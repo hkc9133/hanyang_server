@@ -33,7 +33,7 @@
     <springProfile name="prod">
         <appender name="ERROR_FILE_POLICY" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                <level>ERROR</level>
+                <level>TRACE</level>
             </filter>
             <file>/var/log/hanyang/logs/hanyang-error.log</file>
             <encoder>

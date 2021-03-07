@@ -257,8 +257,6 @@ public class AdminBoardController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            Object a = "Asdasd";
-            String b = "Asdasd";
             response = new Response("error", null, e.getMessage(), 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }

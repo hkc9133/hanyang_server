@@ -24,6 +24,8 @@ public class BoardConfig extends Page {
     private Boolean useFile;
     private Boolean useComment;
     private String writeRole;
+    private String viewRole;
+    private Boolean isPrivacy;
     private String subName01 = "";
     private String subName02 = "";
 

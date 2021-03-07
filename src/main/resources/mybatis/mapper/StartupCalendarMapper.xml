@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="startup_calendar">
+
+    <update id="updateStartupCalendarCnt" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        UPDATE startup_calendar
+        set view_cnt = view_cnt + 1
+        where startup_calendar_id = #{startupCalendarId}
+    </update>
+
+    <select id="getStartupCalendar" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
+            resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        SELECT b.*, c.category_code_name
+        from startup_calendar b
+                 left join startup_calendar_category_code c
+                           on c.category_code_id = b.category_code_id
+        where startup_calendar_id = #{startupCalendarId}
+    </select>
+
+    <insert id="addStartupCalendar" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        insert into
+        startup_calendar(title,content,apply_start_date,apply_end_date,event_date,category_code_id,writer_id,is_notice,progress_status)
+        values(#{title},#{content},#{applyStartDateStr},#{applyEndDateStr},#{eventDateStr},#{categoryCodeId},#{writerId},#{isStartupCalendar},#{progressStatus})
+        <selectKey keyProperty="startupCalendarId" resultType="Integer" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+
+    <update id="updateStartupCalendar" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        UPDATE startup_calendar
+        SET title            = #{title},
+            content          = #{content},
+            category_code_id = #{categoryCodeId},
+            is_notice        = #{isNotice},
+            progress_status  = #{progressStatus},
+            apply_start_date = #{applyStartDateStr},
+            apply_end_date   = #{applyEndDateStr},
+            event_date       = #{eventDateStr},
+            where startup_calendar_id = #{startupCalendarId}
+    </update>
+
+    <delete id="deleteStartupCalendar" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        DELETE
+        FROM startup_calendar
+        where startup_calendar_id = #{startupCalendarId}
+    </delete>
+
+    <select id="getStartupCalendarPrev" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
+            resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        SELECT * FROM startup_calendar
+        <where>
+            and startup_calendar_id in (
+            select * from (
+            <![CDATA[select startup_calendar_id from startup_calendar where startup_calendar_id < #{startupCalendarId} order by startup_calendar_id desc limit 1]]>
+            ) as t
+            );
+        </where>
+    </select>
+    <select id="getStartupCalendarNext" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
+            resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        SELECT * FROM startup_calendar
+        <where>
+            and startup_calendar_id in (
+            select * from (
+            <![CDATA[select startup_calendar_id from startup_calendar where startup_calendar_id > #{startupCalendarId} order by startup_calendar_id limit 1]]>
+            ) as t
+            );
+        </where>
+    </select>
+
+    <select id="getStartupCalendarList" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
+            resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
+        SELECT ROW_NUMBER() OVER (ORDER BY a.startup_calendar_id) rownum, a.*, c.category_code_name from startup_calendar as a
+        LEFT JOIN startup_calendar_category_code as c
+        ON c.category_code_id = a.category_code_id
+        <where>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND a.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="date != null and date != ''">
+                AND DATE_FORMAT(a.apply_start_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(a.apply_end_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(a.event_date, '%Y-%m') = #{date}
+            </if>
+
+            <if test="date != null and date != ''">
+                AND DATE_FORMAT(a.apply_start_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(a.apply_end_date, '%Y-%m') = #{date}
+                AND DATE_FORMAT(a.event_date, '%Y-%m') = #{date}
+            </if>
+
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                and a.event_date BETWEEN #{startDate} AND #{endDate}
+            </if>
+        </where>
+        order by a.reg_date desc
+        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+            <!--         <if test="pageNo != null and pageNo !=-1 and pageNo != '' and starsctDate == null and endDate == null">-->
+            limit #{startRowNo}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="getStartupCalendarListCnt" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
+            resultType="java.lang.Integer">
+        SELECT count(*) from startup_calendar as a
+        <where>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND a.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                and a.event_date BETWEEN #{startDate} AND #{endDate}
+            </if>
+
+        </where>
+    </select>
+
+    <select id="getStartupCalendarCategoryCodeList"
+            resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendarCategoryCode">
+        SELECT * FROM startup_calendar_category_code
+    </select>
+</mapper>
+

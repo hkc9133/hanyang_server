@@ -1,19 +1,17 @@
 package com.hanyang.startup.hanyangstartup.main.controller;
 
-import com.hanyang.startup.hanyangstartup.board.domain.BoardCategoryCode;
 import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
+import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.main.service.MainService;
-import com.hanyang.startup.hanyangstartup.notice.domain.Notice;
+import com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,15 +39,15 @@ public class MainController {
         }
     }
 
-    @GetMapping("/notice")
-    public ResponseEntity<Response> getNoticeList() {
+    @GetMapping("/media")
+    public ResponseEntity<Response> getMediaList() {
         Response response;
 
         try {
 
-            List<Notice> noticeList = mainService.getNoticeList();
+            List<BoardContent> boardContentList = mainService.getMediaList();
 
-            response = new Response("success", null, noticeList, 200);
+            response = new Response("success", null, boardContentList, 200);
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();

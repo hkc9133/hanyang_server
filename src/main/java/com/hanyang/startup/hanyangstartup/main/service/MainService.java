@@ -5,8 +5,8 @@ import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
 import com.hanyang.startup.hanyangstartup.board.service.BoardService;
 import com.hanyang.startup.hanyangstartup.keyword.domain.Keyword;
 import com.hanyang.startup.hanyangstartup.keyword.service.KeywordService;
-import com.hanyang.startup.hanyangstartup.notice.domain.Notice;
-import com.hanyang.startup.hanyangstartup.notice.service.NoticeService;
+import com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar;
+import com.hanyang.startup.hanyangstartup.startup_calendar.service.StartupCalendarService;
 import com.hanyang.startup.hanyangstartup.popup.domain.Popup;
 import com.hanyang.startup.hanyangstartup.popup.service.PopupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class MainService {
     private BoardService boardService;
 
     @Autowired
-    private NoticeService noticeService;
+    private StartupCalendarService startupCalendarService;
 
     @Autowired
     private PopupService popupService;
@@ -36,10 +36,24 @@ public class MainService {
         Map<String, Object> map = new HashMap<>();
 
         //공지사항
-        Notice notice = new Notice();
+        BoardConfig notice = new BoardConfig();
+        notice.setBoardEnName("notice");
         notice.setPageNo(1);
         notice.setPageSize(10);
-        Map<String, Object> noticeList = noticeService.getNoticeList(notice);
+        Map<String, Object> noticeList = boardService.getBoardContentList(notice);
+
+        //핫이슈
+        BoardConfig issue = new BoardConfig();
+        issue.setBoardEnName("issue");
+        issue.setPageNo(1);
+        issue.setPageSize(10);
+        Map<String, Object> issueList = boardService.getBoardContentList(issue);
+
+        //창업 켈린더
+        StartupCalendar calendar = new StartupCalendar();
+        calendar.setPageNo(1);
+        calendar.setPageSize(5);
+        Map<String, Object> calendarList = startupCalendarService.getStartupCalendarList(calendar);
 
         //창업지원정보
         BoardConfig startupInfo = new BoardConfig();
@@ -54,12 +68,19 @@ public class MainService {
         popup.setPageSize(100);
         Map<String, Object>  result = popupService.getPopupList(popup);
 
-        //팝업 리스트
+        //온라인 콘텐츠
         BoardConfig onlineContentInfo = new BoardConfig();
         onlineContentInfo.setBoardEnName("online_content");
         onlineContentInfo.setPageNo(1);
-        onlineContentInfo.setPageSize(1);
+        onlineContentInfo.setPageSize(3);
         Map<String, Object> onlineContentList = boardService.getBoardContentList(onlineContentInfo);
+
+        //허브
+        BoardConfig hub = new BoardConfig();
+        hub.setBoardEnName("hub");
+        hub.setPageNo(1);
+        hub.setPageSize(10);
+        Map<String, Object> hubList = boardService.getBoardContentList(hub);
 
         //키워드
         Keyword keyword = new Keyword();
@@ -68,23 +89,29 @@ public class MainService {
 
 
         map.put("notice",noticeList.get("list"));
+        map.put("issue",issueList.get("list"));
+        map.put("calendar",calendarList.get("list"));
+//        map.put("hot",hotList.get("list"));
+
         map.put("startup_info",startupInfoList.get("list"));
         map.put("online_content",onlineContentList.get("list"));
+        map.put("hub",hubList.get("list"));
         map.put("popup",result.get("list"));
         map.put("keyword",keywordList.get("list"));
         return map;
 
     }
 
-    public List<Notice> getNoticeList(){
+    public List<BoardContent> getMediaList(){
         Map<String, Object> map = new HashMap<>();
 
         //공지사항
-        Notice notice = new Notice();
-        notice.setPageNo(1);
-        notice.setPageSize(10);
+        BoardConfig media = new BoardConfig();
+        media.setBoardEnName("media_report");
+        media.setPageNo(1);
+        media.setPageSize(10);
 
-        return (List<Notice>) noticeService.getNoticeList(notice).get("list");
+        return (List<BoardContent>)boardService.getBoardContentList(media).get("list");
 
     }
 

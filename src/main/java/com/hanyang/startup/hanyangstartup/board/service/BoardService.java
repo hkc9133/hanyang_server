@@ -144,6 +144,13 @@ public class BoardService {
         List<BoardContent> boardContentList = boardDao.getBoardContentList(boardConfig);
 
         boardContentList.stream().map(boardContent -> {
+
+            Reply reply = new Reply();
+            reply.setContentId(boardContent.getContentId());
+
+            List<Reply> replyList = boardDao.getReplyList(reply);
+            boardContent.setReplyCount(replyList.size());
+
             AttachFile attachFile = new AttachFile();
             attachFile.setContentId(boardContent.getContentId());
             attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);

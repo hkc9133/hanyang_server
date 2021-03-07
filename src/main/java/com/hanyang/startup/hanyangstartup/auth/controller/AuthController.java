@@ -201,7 +201,6 @@ public class AuthController {
         user.setUserPassword("");
 
         try{
-
             response = new Response("success", "인증 성공",user,200);
         }catch(Exception e){
             e.printStackTrace();

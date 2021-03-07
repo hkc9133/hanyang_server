@@ -43,7 +43,6 @@ public class ResourceController {
     @Autowired
     private FileSaveService fileSaveService;
 
-//    @RequestMapping(path = "/{fileCate}/{fileName}", method = RequestMethod.GET,produces = MediaType.IMAGE_JPEG_VALUE)
     @RequestMapping(path = "/**/{fileName}", method = RequestMethod.GET,produces = MediaType.IMAGE_JPEG_VALUE)
     public @ResponseBody byte[]
     showImage(@PathVariable("fileName") String fileName, HttpServletRequest req) throws IOException {
@@ -52,25 +51,9 @@ public class ResourceController {
         String path = url.split("/resource")[1];
         String filePath = path.split("/"+fileName)[0];
 
-        // ...
-//        File file = new File(UPLOAD_PATH+"/"+fileCate+"/"+fileName);
-//
-//        HttpHeaders header = new HttpHeaders();
-//        header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=img.jpg");
-//        header.add("Cache-Control", "no-cache, no-store, must-revalidate");
-//        header.add("Pragma", "no-cache");
-//        header.add("Expires", "0");
-//
-//        Path path = Paths.get(file.getAbsolutePath());
-//        ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
-//
-
         InputStream image = new FileInputStream(UPLOAD_PATH+filePath+"/"+fileName);
         byte[] ib = IOUtils.toByteArray(image);
         ib.clone();
-//            res.setContentType(MediaType.IMAGE_JPEG_VALUE);
-//            IOUtils.copy(in, res.getOutputStream());
-//            return IOUtils.toByteArray(in);
         return ib;
     }
 

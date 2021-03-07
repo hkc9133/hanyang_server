@@ -162,15 +162,22 @@
     <update id="deleteBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
         UPDATE board_content
         SET status = 'D'
-            where content_id = #{contentId}
+        <where>
+            and content_id = #{contentId}
+            <if test="writerId != null and writerId != ''">
+                AND writer_id = #{writerId}
+            </if>
+        </where>
     </update>
 
     <select id="getBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent"
             resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        SELECT b.*, c.category_code_name
+        SELECT b.*, c.category_code_name,u.user_name
         from board_content b
-                 left join board_category_code c
-                           on c.category_code_id = b.category_code_id
+        left join board_category_code c
+        on c.category_code_id = b.category_code_id
+        left join users AS u
+        ON b.writer_id = u.user_id
         where content_id = #{contentId}
     </select>
 
@@ -336,11 +343,12 @@
         FROM board_reply as a
         LEFT JOIN users as u
         on u.user_id = a.reply_writer
-        <where>
-            <if test="contentId != null and contentId != ''">
-                AND content_id = #{contentId}
-            </if>
-        </where>
+        WHERE content_id = #{contentId}
+<!--        <where>-->
+<!--            <if test="contentId != null and contentId != ''">-->
+<!--                AND content_id = #{contentId}-->
+<!--            </if>-->
+<!--        </where>-->
         ORDER BY IF(ISNULL(parent_id), reply_id, parent_id), parent_reply_id
     </select>
 

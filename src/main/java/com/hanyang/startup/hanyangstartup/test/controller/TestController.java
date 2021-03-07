@@ -1,6 +1,8 @@
 package com.hanyang.startup.hanyangstartup.test.controller;
 
 import com.hanyang.startup.hanyangstartup.common.util.EncodingUtil;
+import com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor;
+import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -38,6 +40,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +57,8 @@ public class TestController {
     @Autowired
     private EncodingUtil encodingUtil;
 
+    @Autowired
+    private MentoringService mentoringService;
 
     @PostMapping("/aaa")
     public void abcd(HttpServletRequest req,HttpServletResponse res) throws IOException{
@@ -82,22 +88,27 @@ public class TestController {
     }
 
     @GetMapping
-    public byte[] imageJoinTest (HttpServletRequest req, HttpServletResponse res) throws FileNotFoundException, IOException, DocumentException {
+    public byte[] imageJoinTest (HttpServletRequest req, HttpServletResponse res, Principal principal) throws FileNotFoundException, IOException, DocumentException {
         try{
+            Mentor mentor = new Mentor();
+            mentor.setUserId("admin1");
+
+            mentor = (Mentor)mentoringService.getMentor(mentor).get("mentor");
 
             LocalDateTime localDateTime = LocalDateTime.now();
             int year = localDateTime.getYear();
             int month = localDateTime.getMonthValue();
             int day = localDateTime.getDayOfMonth();
-            String name = "에네이";
 
             Map<String,Object> map = new HashMap();
-            map.put("year",year);
-            map.put("month",month);
-            map.put("day",day);
-            map.put("name",name);
 
-            String fileName = name+"_위촉장.pdf";
+            map.put("name",mentor.getMentorName());
+            map.put("company",mentor.getMentorCompany());
+            map.put("position",mentor.getMentorPosition());
+            map.put("date",year + "년 "+month+"월 "+day+"일");
+
+
+            String fileName = mentor.getMentorName()+"_위촉장.pdf";
 
             fileName = encodingUtil.browserFileNameEncoding(fileName, encodingUtil.getBrowser(req));
 
@@ -106,8 +117,14 @@ public class TestController {
 
             String process = templateEngine.process("commission/commission", context);
 
-            String scss = new ClassPathResource("templates/commission/style.css").getURL().getPath();
-            String sfont = new ClassPathResource("templates/commission/font.ttf").getURL().getPath();
+            ClassPathResource classPathResource = new ClassPathResource("templates/commission/style.css");
+            if(classPathResource.exists() == false){
+                throw new IllegalArgumentException();
+            }
+//            new InputStreamReader(classPathResource.getInputStream(), "UTF-8")
+//            String scss = new ClassPathResource("templates/commission/style.css").getURL().getPath();
+            String sfont = Paths.get("/root/lib/font.ttf").toString();
+
 
             Document document = new Document(PageSize.A4, 0, 0, 0, 0);
 
@@ -124,7 +141,9 @@ public class TestController {
 
             // CSS
             CSSResolver cssResolver = new StyleAttrCSSResolver();
-            CssFile cssFile = helper.getCSS(new FileInputStream(scss));
+
+            CssFile cssFile = helper.getCSS(new ClassPathResource("templates/commission/style.css").getInputStream());
+//            CssFile cssFile = helper.getCSS(new FileInputStream(scss));
             cssResolver.addCss(cssFile);
 
             // HTML, 폰트 설정

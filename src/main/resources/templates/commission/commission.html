@@ -23,7 +23,7 @@
         margin: 10mm auto;
         /*border: 1px #D3D3D3 solid;*/
         border-radius: 5px;
-        background: white;
+        background:white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     }
 
@@ -33,6 +33,7 @@
     }
 
     @media print {
+
         html, body {
             width: 210mm;
             height: 297mm;
@@ -48,6 +49,7 @@
             background: initial;
             page-break-after: always;
         }
+
     }
 </style>
 <div class="book">
@@ -58,30 +60,28 @@
                     위 촉 장
                 </h1>
             </div>
-            <div style="height: 5cm;padding-left: 4.3cm;">
-                <p style="font-size:18pt;">성 명 : <b>정영록</b></p>
-                <p style="font-size:18pt;">소 속 : <b>한경세무회계</b></p>
-                <p style="font-size:18pt;">직 위 : <b>대표회계사</b></p>
+            <div style="height: 5cm;padding-left: 5.2cm;">
+                <p style="font-size:18pt;">성 명 : <b th:text="${info.name}"></b></p>
+                <p style="font-size:18pt;">소 속 : <b th:text="${info.company}"></b></p>
+                <p style="font-size:18pt;">직 위 : <b th:text="${info.position}"></b></p>
             </div>
-            <div style="height: 5cm;padding-left: 4.3cm;">
+            <div style="height: 5cm;padding-left: 5cm;">
                 <p style="padding:0.2cm 0;font-size: 17pt">위촉사항 : 한양대학교 창업지원단 창업멘토</p>
-                <p style="padding:0.2cm 0;font-size: 17pt">위촉기간 : 2020. 6. 1.~ 2021. 5. 31.</p>
             </div>
             <div style="height: 3cm;"></div>
             <div style="text-align: center;">
-                <p>2020 년 6 월 1 일</p>
+                <p th:text="${info.date}"></p>
             </div>
             <div style="height: 0.5cm;"></div>
-            <div style="padding-left: 4.3cm;margin-top:4cm;">
+            <div style="padding-left: 5.2cm;margin-top:4cm;">
                 <span style="font-size: 17pt;z-index: 20;">한양대학교</span><br/><span style="font-size: 17pt;z-index: 20;">창업지원단장</span>
-                <span style="font-size: 27pt;z-index: 20;margin-left: 1cm;">류 창 완</span><img src="stamp.jpg"
-                                                                                             style="width: 1.1cm;height: 1cm"/>
+                <span style="font-size: 27pt;z-index: 20;margin-left: 1cm;">전 상 경</span>
+                <img src="/root/lib/stamp.jpg" style="width: 1.1cm;height: 1cm"/>
             </div>
             <div style="height: 3cm;"></div>
             <div style="text-align: center;">
-                <img src="logo.png" style="width: 2.7cm;height: 1cm"/>
+                <img src="/root/lib/logo.png" style="width: 2.7cm;height: 1cm"/>
             </div>
-
         </div>
     </div>
 </div>

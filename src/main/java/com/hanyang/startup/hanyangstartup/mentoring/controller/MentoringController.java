@@ -2,17 +2,47 @@ package com.hanyang.startup.hanyangstartup.mentoring.controller;
 
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.common.exception.CustomException;
+import com.hanyang.startup.hanyangstartup.common.util.EncodingUtil;
 import com.hanyang.startup.hanyangstartup.mentoring.domain.*;
 import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorker;
+import com.itextpdf.tool.xml.XMLWorkerFontProvider;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
+import com.itextpdf.tool.xml.css.CssFile;
+import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
+import com.itextpdf.tool.xml.html.CssAppliers;
+import com.itextpdf.tool.xml.html.CssAppliersImpl;
+import com.itextpdf.tool.xml.html.Tags;
+import com.itextpdf.tool.xml.parser.XMLParser;
+import com.itextpdf.tool.xml.pipeline.css.CSSResolver;
+import com.itextpdf.tool.xml.pipeline.css.CssResolverPipeline;
+import com.itextpdf.tool.xml.pipeline.end.PdfWriterPipeline;
+import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
+import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
+import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +52,12 @@ public class MentoringController {
 
     @Autowired
     private MentoringService mentoringService;
+
+    @Autowired
+    private EncodingUtil encodingUtil;
+    @Autowired
+    private TemplateEngine templateEngine;
+
 
     @GetMapping("/counsel_field_code")
     public ResponseEntity<Response> getCounselFieldCode(){
@@ -392,4 +428,109 @@ public class MentoringController {
         }
     }
 
+
+    @GetMapping("/commission")
+    public byte[] commissionDownload (HttpServletRequest req, HttpServletResponse res,Principal principal) throws FileNotFoundException, IOException, DocumentException {
+        try{
+
+            Mentor mentor = new Mentor();
+            mentor.setUserId(principal.getName());
+
+            mentor = (Mentor)mentoringService.getMentor(mentor).get("mentor");
+
+            LocalDateTime localDateTime = LocalDateTime.now();
+            int year = localDateTime.getYear();
+            int month = localDateTime.getMonthValue();
+            int day = localDateTime.getDayOfMonth();
+
+            Map<String,Object> map = new HashMap();
+
+            map.put("name",mentor.getMentorName());
+            map.put("company",mentor.getMentorCompany());
+            map.put("position",mentor.getMentorPosition());
+            map.put("date",year + "년 "+month+"월 "+day+"일");
+
+
+            String fileName = mentor.getMentorName()+"_위촉장.pdf";
+
+            fileName = encodingUtil.browserFileNameEncoding(fileName, encodingUtil.getBrowser(req));
+
+            Context context = new Context();
+            context.setVariable("info", map);
+
+            String process = templateEngine.process("commission/commission", context);
+
+            ClassPathResource classPathResource = new ClassPathResource("templates/commission/style.css");
+            if(classPathResource.exists() == false){
+                throw new IllegalArgumentException();
+            }
+//            new InputStreamReader(classPathResource.getInputStream(), "UTF-8")
+//            String scss = new ClassPathResource("templates/commission/style.css").getURL().getPath();
+            String sfont = Paths.get("/root/lib/font.ttf").toString();
+
+
+            Document document = new Document(PageSize.A4, 0, 0, 0, 0);
+
+            PdfWriter writer = PdfWriter.getInstance(document, new BufferedOutputStream(res.getOutputStream()));
+
+            // 파일 다운로드 설정
+            res.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+            res.setHeader("Content-Transfer-Encoding", "binary");
+            res.setContentType("application/pdf");
+
+            // Document 오픈
+            document.open();
+            XMLWorkerHelper helper = XMLWorkerHelper.getInstance();
+
+            // CSS
+            CSSResolver cssResolver = new StyleAttrCSSResolver();
+
+            CssFile cssFile = helper.getCSS(new ClassPathResource("templates/commission/style.css").getInputStream());
+//            CssFile cssFile = helper.getCSS(new FileInputStream(scss));
+            cssResolver.addCss(cssFile);
+
+            // HTML, 폰트 설정
+            XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
+            fontProvider.register(sfont, "abc"); // MalgunGothic은
+
+            CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
+
+            HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
+            htmlContext.setTagFactory(Tags.getHtmlTagProcessorFactory());
+            htmlContext.setImageProvider(new AbstractImageProvider() {
+                @Override
+                public String getImageRootPath() {
+                    try{
+                        return new ClassPathResource("templates/commission").getURL().getPath();
+                    }catch (Exception e){
+                        e.printStackTrace();
+
+                        return null;
+                    }
+                }
+            });
+
+            // Pipelines
+            PdfWriterPipeline pdf = new PdfWriterPipeline(document, writer);
+            HtmlPipeline html = new HtmlPipeline(htmlContext, pdf);
+            CssResolverPipeline css = new CssResolverPipeline(cssResolver, html);
+
+            XMLWorker worker = new XMLWorker(css, true);
+            XMLParser xmlParser = new XMLParser(worker, Charset.forName("UTF-8"));
+
+            // 폰트 설정에서 별칭으로 줬던 "MalgunGothic"을 html 안에 폰트로 지정한다.
+//            String sHtml = "<html><head></head><body style='font-family:MalgunGothic;'>" + map.get("printData").toString() + "</body></html>";
+            // byte[] bHtml = (map.get("printData").toString()).getBytes();
+
+            xmlParser.parse(new StringReader(process));
+            document.close();
+            writer.close();
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
+
+        return null;
+
+    }
 }

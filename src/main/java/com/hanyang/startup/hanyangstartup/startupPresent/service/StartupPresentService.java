@@ -59,12 +59,16 @@ public class StartupPresentService {
 
         //새로 추가한 이미지가 있으면
         if(startupPresent.getCompanyLogo() != null){
-            List<AttachFile> attachFileList = new ArrayList<>();
-            AttachFile attachFile = new AttachFile();
-            attachFile.setFileId(startupPresent.getRemoveFileId());
 
-            attachFileList.add(attachFile);
-            fileSaveService.deleteAttachFile(attachFileList);
+            if(startupPresent.getRemoveFileId() != null){
+                List<AttachFile> attachFileList = new ArrayList<>();
+                AttachFile attachFile = new AttachFile();
+                attachFile.setFileId(startupPresent.getRemoveFileId());
+
+                attachFileList.add(attachFile);
+                fileSaveService.deleteAttachFile(attachFileList);
+
+            }
 
             fileSaveService.fileSave(startupPresent.getCompanyLogo(),startupPresent.getStartupId(), FILE_DIVISION.STARTUP_LOGO);
         }

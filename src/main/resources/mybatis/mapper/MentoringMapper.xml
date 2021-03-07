@@ -50,7 +50,7 @@
         select * from counsel_apply_form_way_item
     </select>
 
-    <select id="getMentorListCnt" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig" resultType="java.lang.Integer">
+    <select id="getMentorListCnt" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor" resultType="java.lang.Integer">
         select count(distinct(a.mentor_id)) from mentors as a
         left join users AS b
         ON a.user_id = b.user_id
@@ -121,6 +121,9 @@
             </if>
             <if test="mentorStatus != null">
                 AND mentor_status = #{mentorStatus}
+            </if>
+            <if test="isBest">
+                AND is_best = #{isBest}
             </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
                 AND a.${searchField} like '%' #{searchValue} '%'

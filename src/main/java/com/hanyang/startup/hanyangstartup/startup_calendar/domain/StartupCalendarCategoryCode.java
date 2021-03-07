@@ -1,4 +1,4 @@
-package com.hanyang.startup.hanyangstartup.notice.domain;
+package com.hanyang.startup.hanyangstartup.startup_calendar.domain;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class NoticeCategoryCode {
+public class StartupCalendarCategoryCode {
     private int categoryCodeId;
     private String categoryCodeName;
 }

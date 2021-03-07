@@ -40,5 +40,6 @@ public class BoardContent  extends Page {
     private String categoryCodeName;
     private String userName;
     private String color;
+    private Integer replyCount;
 
 }
