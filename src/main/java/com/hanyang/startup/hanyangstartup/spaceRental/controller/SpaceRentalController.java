@@ -37,9 +37,9 @@ public class SpaceRentalController {
         Response response;
         try {
 
-            User user = authService.findByUserId(principal.getName());
+//            User user = authService.findByUserId(principal.getName());
             RentalRoom rentalRoom = new RentalRoom();
-            rentalRoom.setRentalRole(user.getRole().toString());
+//            rentalRoom.setRentalRole(user.getRole().toString());
             Map<String, Object> map = spaceRentalService.getSpaceRentalInfoList(rentalRoom);
 
             response = new Response("success", null, map, 200);

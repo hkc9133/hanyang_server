@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+
 @RestController
 @RequestMapping("/test")
 public class TestController {
@@ -188,6 +189,20 @@ public class TestController {
         }
 
         return null;
-
     }
+
+//
+//
+//    @GetMapping("/login")
+//    public void test(Principal principal, HttpServletRequest req, HttpServletResponse res){
+//        OAuthClient oAuthClient = new OAuthClient();
+//        //client id 정보 입력
+//        oAuthClient.setClientId("5b67a3b231677f88cfcaba41b77d872");
+//        //client scret 정보 입력
+//        oAuthClient.setClientSecret("8483b416bbb356f9c6379f5dbcd8c80");
+//        //앱에서 사용하는 API의 ID들 (예: 1,2,3)
+//        oAuthClient.setScope("1862,1864,1865,1863,1867,1866");
+//        //redirect uri 정보 입력
+//        oAuthClient.setRedirectUrl("http://127.0.0.1/auth/login");
+//    }
 }

@@ -18,9 +18,8 @@
     </select>
 
     <insert id="addStartupCalendar" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
-        insert into
-        startup_calendar(title,content,apply_start_date,apply_end_date,event_date,category_code_id,writer_id,is_notice,progress_status)
-        values(#{title},#{content},#{applyStartDateStr},#{applyEndDateStr},#{eventDateStr},#{categoryCodeId},#{writerId},#{isStartupCalendar},#{progressStatus})
+        insert into startup_calendar(title,content,apply_start_date,apply_end_date,event_date,category_code_id,writer_id,progress_status)
+        values(#{title},#{content},#{applyStartDateStr},#{applyEndDateStr},#{eventDateStr},#{categoryCodeId},#{writerId},#{progressStatus})
         <selectKey keyProperty="startupCalendarId" resultType="Integer" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -31,11 +30,10 @@
         SET title            = #{title},
             content          = #{content},
             category_code_id = #{categoryCodeId},
-            is_notice        = #{isNotice},
             progress_status  = #{progressStatus},
             apply_start_date = #{applyStartDateStr},
             apply_end_date   = #{applyEndDateStr},
-            event_date       = #{eventDateStr},
+            event_date       = #{eventDateStr}
             where startup_calendar_id = #{startupCalendarId}
     </update>
 
@@ -70,7 +68,7 @@
 
     <select id="getStartupCalendarList" parameterType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar"
             resultType="com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar">
-        SELECT ROW_NUMBER() OVER (ORDER BY a.startup_calendar_id) rownum, a.*, c.category_code_name from startup_calendar as a
+        SELECT ROW_NUMBER() OVER (ORDER BY a.event_date) rownum, a.*, c.category_code_name from startup_calendar as a
         LEFT JOIN startup_calendar_category_code as c
         ON c.category_code_id = a.category_code_id
         <where>
@@ -81,22 +79,16 @@
                 AND ${searchField} like '%' #{searchValue} '%'
             </if>
             <if test="date != null and date != ''">
-                AND DATE_FORMAT(a.apply_start_date, '%Y-%m') = #{date}
-                AND DATE_FORMAT(a.apply_end_date, '%Y-%m') = #{date}
-                AND DATE_FORMAT(a.event_date, '%Y-%m') = #{date}
-            </if>
-
-            <if test="date != null and date != ''">
-                AND DATE_FORMAT(a.apply_start_date, '%Y-%m') = #{date}
-                AND DATE_FORMAT(a.apply_end_date, '%Y-%m') = #{date}
-                AND DATE_FORMAT(a.event_date, '%Y-%m') = #{date}
+                OR DATE_FORMAT(a.apply_start_date, '%Y-%m') = #{date}
+                OR DATE_FORMAT(a.apply_end_date, '%Y-%m') = #{date}
+                OR DATE_FORMAT(a.event_date, '%Y-%m') = #{date}
             </if>
 
             <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
                 and a.event_date BETWEEN #{startDate} AND #{endDate}
             </if>
         </where>
-        order by a.reg_date desc
+        order by a.event_date desc
         <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
             <!--         <if test="pageNo != null and pageNo !=-1 and pageNo != '' and starsctDate == null and endDate == null">-->
             limit #{startRowNo}, #{pageSize}

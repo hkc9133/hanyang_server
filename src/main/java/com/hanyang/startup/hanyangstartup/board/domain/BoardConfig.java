@@ -26,8 +26,20 @@ public class BoardConfig extends Page {
     private String writeRole;
     private String viewRole;
     private Boolean isPrivacy;
-    private String subName01 = "";
-    private String subName02 = "";
+    private String subName01;
+    private String subName02;
+    private String subName03;
+    private String subName04;
+    private String subName05;
+    private String subName06;
+    private String subName07;
+    private String subDValue01;
+    private String subDValue02;
+    private String subDValue03;
+    private String subDValue04;
+    private String subDValue05;
+    private String subDValue06;
+    private String subDValue07;
 
     private Integer categoryId;
     //검색용

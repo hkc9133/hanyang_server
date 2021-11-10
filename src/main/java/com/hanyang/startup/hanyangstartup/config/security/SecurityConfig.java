@@ -59,7 +59,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //                .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/admin/**").permitAll()
                 .antMatchers("/board/**").permitAll()
-                .antMatchers("/space_rental").hasAnyRole("USER","ADMIN","SD","MT","TC")
+                .antMatchers("/space_rental").permitAll()
+                .antMatchers("/space_rental/schedule/apply").hasAnyRole("USER","ADMIN","SD","MT","TC")
                 .antMatchers("/mentoring/**").permitAll()
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
@@ -70,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override // ignore check swagger resource
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers("/v2/api-docs", "/swagger-resources/**",
-                "/swagger-ui.html", "/webjars/**", "/swagger/**","/image/**");
+                "/swagger-ui.html", "/webjars/**", "/swagger/**","/image/**","/hwp/**","/pdf/**");
     }
 
     @Bean

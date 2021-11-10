@@ -3,6 +3,8 @@ package com.hanyang.startup.hanyangstartup.startupPresent.controller;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent;
 import com.hanyang.startup.hanyangstartup.startupPresent.service.StartupPresentService;
+import com.sun.rowset.internal.Row;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 @RestController
@@ -126,6 +131,29 @@ public class AdminStartupPresentController {
             e.printStackTrace();
             response = new Response("fail", null, null, 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/excel_download")
+    public void excelDownloadAll(HttpServletRequest req, HttpServletResponse res) throws IOException {
+
+        OutputStream out = null;
+
+        try {
+            HSSFWorkbook workbook = startupPresentService.excelDownloadAll();
+
+            res.reset();
+            res.setHeader("Content-Disposition", "attachment;filename=스타트업 배출현황.xls");
+            res.setContentType("application/vnd.ms-excel");
+            out = new BufferedOutputStream(res.getOutputStream());
+
+            workbook.write(out);
+            out.flush();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(out != null) out.close();
         }
     }
 }

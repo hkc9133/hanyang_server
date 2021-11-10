@@ -51,6 +51,23 @@ public class BoardController {
 
             AttachFile attachFile = fileSaveService.fileSave(file, null, FILE_DIVISION.BOARD_CONTENT_IMG);
             String path = attachFile.getFilePath()+"/"+attachFile.getFileName()+attachFile.getFileExtension();
+            String fileUrl = "/resource"+path;
+            Map<String,String> map = new HashMap<>();
+            map.put("url", fileUrl);
+            return map;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+    @PostMapping("/thumb/img")
+    public Map<String,String> thumbImageUpload(@RequestParam(name = "upload") MultipartFile file, HttpServletRequest req, HttpServletResponse res){
+        Response response;
+        try {
+
+            AttachFile attachFile = fileSaveService.fileSave(file, null, FILE_DIVISION.BOARD_THUMB_IMG);
+            String path = attachFile.getFilePath()+"/"+attachFile.getFileName()+attachFile.getFileExtension();
             String fileUrl = req.getRequestURL().substring(0, req.getRequestURL().indexOf(CONTEXT_PATH)+CONTEXT_PATH.length()) +"/resource"+path;
             Map<String,String> map = new HashMap<>();
             map.put("url", fileUrl);
@@ -160,6 +177,22 @@ public class BoardController {
             boardContent.setWriterId(principal.getName());
             boardContent.setContentId(contentId);
             boardService.deleteBoardContent(boardContent);
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response = new Response("error", null, e.getMessage(), 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "/content/edit")
+    public ResponseEntity<Response> updateBoardContent(BoardContent boardContent, Principal principal) {
+
+        Response response;
+        try {
+            boardContent.setWriterId(principal.getName());
+            boardService.updateBoardContent(boardContent);
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {

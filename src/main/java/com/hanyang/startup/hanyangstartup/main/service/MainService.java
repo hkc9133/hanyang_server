@@ -76,11 +76,11 @@ public class MainService {
         Map<String, Object> onlineContentList = boardService.getBoardContentList(onlineContentInfo);
 
         //허브
-        BoardConfig hub = new BoardConfig();
-        hub.setBoardEnName("hub");
-        hub.setPageNo(1);
-        hub.setPageSize(10);
-        Map<String, Object> hubList = boardService.getBoardContentList(hub);
+//        BoardConfig hub = new BoardConfig();
+//        hub.setBoardEnName("hub");
+//        hub.setPageNo(1);
+//        hub.setPageSize(10);
+//        Map<String, Object> hubList = boardService.getBoardContentList(hub);
 
         //키워드
         Keyword keyword = new Keyword();
@@ -95,7 +95,7 @@ public class MainService {
 
         map.put("startup_info",startupInfoList.get("list"));
         map.put("online_content",onlineContentList.get("list"));
-        map.put("hub",hubList.get("list"));
+        map.put("hub",null);
         map.put("popup",result.get("list"));
         map.put("keyword",keywordList.get("list"));
         return map;

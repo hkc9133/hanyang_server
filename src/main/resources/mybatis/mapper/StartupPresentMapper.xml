@@ -60,8 +60,8 @@
     </select>
 
     <insert id="addStartupPresent" parameterType="com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent">
-        insert into startup_present(company_name,company_owner,company_phone_num,company_email,address,gubun,company_kind,homepage,create_date,item,insta,facebook,naver_blog,twitter,is_best)
-        value(#{companyName},#{companyOwner},#{companyPhoneNum},#{companyEmail},#{address},#{gubun},#{companyKind},#{homepage},#{createDate},#{item},#{insta},#{facebook},#{naverBlog},#{twitter},#{isBest})
+        insert into startup_present(company_name,company_owner,company_phone_num,company_email,address,gubun,company_kind,homepage,create_date,item,insta,facebook,naver_blog,twitter,is_best,company_num,company_status)
+        value(#{companyName},#{companyOwner},#{companyPhoneNum},#{companyEmail},#{address},#{gubun},#{companyKind},#{homepage},#{createDate},#{item},#{insta},#{facebook},#{naverBlog},#{twitter},#{isBest},#{companyNum},#{companyStatus})
         <selectKey keyProperty="startupId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -125,7 +125,9 @@
             facebook = #{facebook},
             naver_blog = #{naverBlog},
             twitter = #{twitter},
-            is_best = #{isBest}
+            is_best = #{isBest},
+            company_num = #{companyNum},
+            company_status = #{companyStatus}
         </set>
         where startup_id = #{startupId}
     </update>
@@ -171,8 +173,14 @@
                     #{item}
                 </foreach>
             </if>
+            <if test="gubun != null and gubun != ''">
+                AND gubun like '%' #{gubun} '%'
+            </if>
+            <if test="companyStatus != null and companyStatus != ''">
+                AND company_status like '%' #{companyStatus} '%'
+            </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
-                AND p.${searchField} like '%' #{searchValue} '%'
+                AND s.${searchField} like '%' #{searchValue} '%'
             </if>
         </where>
         group by s.startup_id

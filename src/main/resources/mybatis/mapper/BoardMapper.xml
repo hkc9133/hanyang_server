@@ -12,10 +12,17 @@
         UPDATE board_config
         SET board_en_name = #{boardEnName},
             board_kr_name = #{boardKrName},
+            use_file = #{useFile},
+            use_comment = #{useComment},
             category_id   = #{categoryId},
             board_desc    = #{boardDesc},
             sub_name_01    = #{subName01},
-            sub_name_02    = #{subName02}
+            sub_name_02    = #{subName02},
+            sub_name_03    = #{subName03},
+            sub_name_04    = #{subName04},
+            sub_name_05    = #{subName05},
+            sub_name_06    = #{subName06},
+            sub_name_07    = #{subName07}
         where board_en_name = #{boardEnName}
     </update>
 
@@ -143,8 +150,8 @@
 
     <!--    컨텐츠-->
     <insert id="addBoardContent" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        insert into board_content(board_en_name,title,content,thumbnail_img,category_code_id,writer_id,is_notice,sub01,sub02)
-        values(#{boardEnName},#{title},#{content}, #{thumbnailImg},#{categoryCodeId},#{writerId},#{isNotice},#{sub01},#{sub02})
+        insert into board_content(board_en_name,title,content,category_code_id,writer_id,is_notice,sub01,sub02,sub03,sub04,sub05,sub06,sub07,reg_date)
+        values(#{boardEnName},#{title},#{content}, #{categoryCodeId},#{writerId},#{isNotice},#{sub01},#{sub02},#{sub03},#{sub04},#{sub05},#{sub06},#{sub07},#{regDate})
         <selectKey keyProperty="contentId" resultType="Integer" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
@@ -155,7 +162,15 @@
         SET title            = #{title},
             content          = #{content},
             category_code_id = #{categoryCodeId},
-            is_notice        = #{isNotice}
+            reg_date = #{regDate},
+            is_notice = #{isNotice},
+            sub01 = #{sub01},
+            sub02 = #{sub02},
+            sub03 = #{sub03},
+            sub04 = #{sub04},
+            sub05 = #{sub05},
+            sub06 = #{sub06},
+            sub07 = #{sub07}
         where content_id = #{contentId}
     </update>
 
@@ -219,8 +234,8 @@
 
     <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
             resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        select *
-        from (
+
+
         select null as rownum, a.*, b.category_code_name, b.color, c.user_name
         FROM board_content AS a
         left join board_category_code AS b
@@ -228,8 +243,8 @@
         left join users AS c
         ON a.writer_id = c.user_id
         <where>
-               and is_notice = true
-               and a.status = 'A'
+            and is_notice = true
+            and a.status = 'A'
             <if test="boardEnName != null and boardEnName != ''">
                 AND board_en_name = #{boardEnName}
             </if>
@@ -249,8 +264,8 @@
                 AND <![CDATA[date(reg_date) <= #{endDate}]]>
             </if>
         </where>
-        UNION ALL
-        SELECT ROW_NUMBER() OVER (ORDER BY a.content_id) rownum,
+        union all
+        select * from (SELECT ROW_NUMBER() OVER (ORDER BY a.reg_date) rownum,
         a.*,
         b.category_code_name,
         b.color,
@@ -281,37 +296,59 @@
             <if test="endDate != null">
                 AND <![CDATA[date(reg_date) <= #{endDate}]]>
             </if>
+            order by rownum desc
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                limit #{startRowNo}, #{pageSize}
+            </if>
         </where>
-        order by content_id desc
-        <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
-            limit #{startRowNo}, #{pageSize}
-        </if>
-        ) as m order by is_notice desc
+
+        )as m order by is_notice desc ,rownum desc
+
     </select>
 
     <select id="getBoardContentPrev" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent"
             resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
-        SELECT * FROM board_content
-        <where>
-            AND board_en_name = #{boardEnName}
-            and content_id in (
-            select * from (
-            <![CDATA[select content_id from board_content where content_id < #{contentId} order by content_id desc limit 1]]>
-            ) as t
-            );
-        </where>
+                SELECT * FROM board_content
+                <where>
+                    <![CDATA[
+                    AND board_en_name = #{boardEnName}
+                    and status = 'A'
+                    and is_notice = false
+                    and reg_date < #{regDate}
+                    order by reg_date desc limit 1
+                    ]]>
+                </where>
+<!--        SELECT * FROM board_content-->
+<!--        <where>-->
+<!--            AND board_en_name = #{boardEnName}-->
+<!--            and content_id in (-->
+<!--            select * from (-->
+<!--            <![CDATA[select content_id from board_content where reg_date < #{regDate} order by reg_date desc limit 1]]>-->
+<!--            ) as t-->
+<!--            );-->
+<!--        </where>-->
     </select>
     <select id="getBoardContentNext" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent"
             resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
         SELECT * FROM board_content
-        <where>
-            AND board_en_name = #{boardEnName}
-            and content_id in (
-            select * from (
-            <![CDATA[select content_id from board_content where content_id > #{contentId} order by content_id limit 1]]>
-            ) as t
-            );
-        </where>
+                <where>
+                    <![CDATA[
+                    AND board_en_name = #{boardEnName}
+                    and status = 'A'
+                    and is_notice = false
+                    and reg_date > #{regDate}
+                    order by reg_date asc limit 1
+                    ]]>
+                </where>
+<!--        SELECT * FROM board_content-->
+<!--        <where>-->
+<!--            AND board_en_name = #{boardEnName}-->
+<!--            and content_id in (-->
+<!--            select * from (-->
+<!--            <![CDATA[select content_id from board_content where reg_date > #{regDate} order by reg_date limit 1]]>-->
+<!--            ) as t-->
+<!--            );-->
+<!--        </where>-->
     </select>
 
     <!--    컨텐츠-->

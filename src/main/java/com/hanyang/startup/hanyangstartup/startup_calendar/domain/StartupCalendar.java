@@ -30,10 +30,6 @@ public class StartupCalendar extends Page {
     private String writerId;
     private String boardEnName;
     private String fileExtension;
-    private Boolean isNotice;
-    private Boolean showNotice;
-    private Boolean showCalendar;
-    private Boolean showHot;
 
 
     private MultipartFile[] files;

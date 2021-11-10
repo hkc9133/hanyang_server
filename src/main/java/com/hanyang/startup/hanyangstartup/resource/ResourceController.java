@@ -13,6 +13,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
@@ -23,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,18 +45,33 @@ public class ResourceController {
     @Autowired
     private FileSaveService fileSaveService;
 
-    @RequestMapping(path = "/**/{fileName}", method = RequestMethod.GET,produces = MediaType.IMAGE_JPEG_VALUE)
-    public @ResponseBody byte[]
-    showImage(@PathVariable("fileName") String fileName, HttpServletRequest req) throws IOException {
+    @RequestMapping(path = "/**/{fileName}", method = RequestMethod.GET,produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_GIF_VALUE}
+    )
+    public @ResponseBody ResponseEntity<byte[]>
+    showImage(@PathVariable("fileName") String fileName, HttpServletRequest req,HttpServletResponse res) throws IOException {
 
         String url = req.getRequestURL().toString();
         String path = url.split("/resource")[1];
         String filePath = path.split("/"+fileName)[0];
 
         InputStream image = new FileInputStream(UPLOAD_PATH+filePath+"/"+fileName);
-        byte[] ib = IOUtils.toByteArray(image);
-        ib.clone();
-        return ib;
+
+//        byte[] ib = IOUtils.toByteArray(image);
+//        ib.clone();
+//        return ib;
+        final HttpHeaders headers = new HttpHeaders();
+        String extension = StringUtils.getFilenameExtension(fileName); // jpg
+        if(extension.toLowerCase().equals("jpg") || extension.toLowerCase().equals("jpeg")){
+            headers.setContentType(MediaType.IMAGE_JPEG);
+        }else if(extension.toLowerCase().equals("png")){
+            headers.setContentType(MediaType.IMAGE_PNG);
+        }else if(extension.toLowerCase().equals("gif")){
+            headers.setContentType(MediaType.IMAGE_GIF);
+        }
+
+
+
+        return new ResponseEntity<byte[]>(IOUtils.toByteArray(image), headers, HttpStatus.CREATED);
     }
 
     @RequestMapping(path = "/attach_file/{FILE_DIVISION}", method = RequestMethod.POST, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -66,7 +83,9 @@ public class ResourceController {
             AttachFile attachFile = fileSaveService.fileSave(file, null, fileDivision);
 
             String path = attachFile.getFilePath()+"/"+attachFile.getFileName()+attachFile.getFileExtension();
-            String fileUrl = req.getRequestURL().substring(0, req.getRequestURL().indexOf(CONTEXT_PATH)+CONTEXT_PATH.length()) +"/resource"+path;
+//            String fileUrl = req.getRequestURL().substring(0, req.getRequestURL().indexOf(CONTEXT_PATH)+CONTEXT_PATH.length()) +"/resource"+path;
+            String fileUrl = "/resource"+path;
+
 
             uploadResult.setUrl(fileUrl);
             uploadResult.setUid(UUID.randomUUID().toString());
@@ -93,9 +112,13 @@ public class ResourceController {
         AttachFile result = fileSaveService.getAttachFile(attachFile);
 
         Path path = Paths.get(UPLOAD_PATH+"/"+result.getFilePath()+"/"+result.getFileName()+result.getFileExtension());
+        String contentType = Files.probeContentType(path);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + result.getFileOriginName());
+        headers.add(HttpHeaders.CONTENT_TYPE, contentType);
+        headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename(result.getFileOriginName(), StandardCharsets.UTF_8)
+                .build());
 
         ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(path));
 

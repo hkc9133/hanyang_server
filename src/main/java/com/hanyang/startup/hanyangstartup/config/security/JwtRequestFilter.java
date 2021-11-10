@@ -48,8 +48,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final Cookie jwtToken = cookieUtil.getCookie(httpServletRequest,JwtUtil.ACCESS_TOKEN_NAME);
 
-        System.out.println("시");
-        System.out.println(jwtToken);
         String username = null;
         String jwt = null;
         String refreshJwt = null;
@@ -58,11 +56,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         try{
             if(jwtToken != null){
                 jwt = jwtToken.getValue();
-                System.out.println("유저 이름 ===");
-                System.out.println(jwtUtil.getUsername(jwt));
-                System.out.println("유저 이름 = ");
                 username = jwtUtil.getUsername(jwt);
-                System.out.println("111111");
             }
             if(username!=null){
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -74,7 +68,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             }
         }catch (ExpiredJwtException e){
-            System.out.println("여");
 //            refreshJwt =redisUtil.getData(username);
             Cookie refreshToken = cookieUtil.getCookie(httpServletRequest, JwtUtil.REFRESH_TOKEN_NAME);
             if(refreshToken!=null){

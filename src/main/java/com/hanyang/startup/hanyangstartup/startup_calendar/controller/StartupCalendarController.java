@@ -50,6 +50,9 @@ public class StartupCalendarController {
             startupCalendar.setSearchValue(searchValue);
             startupCalendar.setDate(date);
 
+//            System.out.println("캘린더");
+//            System.out.println(startupCalendar);
+
             Map<String,Object> map = startupCalendarService.getStartupCalendarList(startupCalendar);
             response = new Response("success", null, map, 200);
             return new ResponseEntity(response, HttpStatus.OK);

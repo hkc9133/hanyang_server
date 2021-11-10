@@ -1,18 +1,32 @@
 package com.hanyang.startup.hanyangstartup.mentoring.service;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hanyang.startup.hanyangstartup.auth.service.AuthService;
 import com.hanyang.startup.hanyangstartup.board.domain.BoardContent;
+import com.hanyang.startup.hanyangstartup.common.domain.Email;
+import com.hanyang.startup.hanyangstartup.common.service.EmailService;
 import com.hanyang.startup.hanyangstartup.mentoring.dao.MentoringDao;
 import com.hanyang.startup.hanyangstartup.mentoring.domain.*;
 import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_DIVISION;
 import com.hanyang.startup.hanyangstartup.resource.domain.FILE_STATUS;
 import com.hanyang.startup.hanyangstartup.resource.service.FileSaveService;
+import com.hanyang.startup.hanyangstartup.startupPresent.domain.StartupPresent;
+import io.jsonwebtoken.io.EncodingException;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
 
+import javax.mail.MessagingException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.stream.Collectors;
@@ -26,7 +40,12 @@ public class MentoringService {
     @Autowired
     private FileSaveService fileSaveService;
     @Autowired
-    private AuthService authService;
+    private EmailService emailService;
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Value(value = "${config.adminEmail}")
+    private String ADMIN_EMAIL;
 
     public List<CounselFiledCode> getCounselFieldCode(){
         return mentoringDao.getCounselFieldCode();
@@ -45,7 +64,7 @@ public class MentoringService {
 
         Mentor resultMentor = mentoringDao.getMentor(mentor);
 
-        resultMentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(mentor));
+        resultMentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(resultMentor));
 
 
         if(resultMentor.getMentorCareerStr() != null){
@@ -206,6 +225,26 @@ public class MentoringService {
 
     public void updateCounselApply(CounselApplyForm counselApplyForm){
 
+//        ASSIGN,RETURN,PROCESS,COMPLETED
+        CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
+
+        try {
+            Mentor mentor = new Mentor();
+            mentor.setMentorId(counselApplyForm.getAssignMentorId());
+            if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN) && !resultCounselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN)){
+
+                Email email = new Email();
+                email.setToName(mentor.getMentorName());
+                email.setTo(mentor.getMentorEmail());
+                email.setTitle("멘토링 신청이 접수되었습니다.");
+                email.setDesc("홈페이지를 확인해 주세요.");
+                emailService.sendEmail(email);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
 //        String keywordStr = "";
 //        for (String keyword: mentor.getMentorKeyword()) {
 //            keywordStr += keyword + ";";
@@ -222,6 +261,35 @@ public class MentoringService {
     }
 
     public void updateCounselApplyStatus(CounselApplyForm counselApplyForm){
+        CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
+        try {
+            if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.RETURN)){
+
+                Email email = new Email();
+                email.setToName("한양대학교 창업지원단");
+                email.setTo(ADMIN_EMAIL);
+                email.setTitle("멘토가 신청을 반려하였습니다.");
+                email.setDesc("멘토를 다시 배정해 주세요.");
+                emailService.sendEmail(email);
+            }else if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.PROCESS)){
+
+                Email email = new Email();
+                email.setToName(resultCounselApplyForm.getMenteeName());
+                email.setTo(resultCounselApplyForm.getMenteeEmail());
+                email.setTitle("멘토배정이 완료되었습니다.");
+                email.setDesc("멘토의 연락 후 멘토링이 진행됩니다.");
+                emailService.sendEmail(email);
+
+                Email email2 = new Email();
+                email2.setToName("한양대학교 창업지원단");
+                email2.setTo(ADMIN_EMAIL);
+                email2.setTitle("멘토,멘티 매칭이 완료되었습니다.");
+                emailService.sendEmail(email2);
+            }
+
+        }catch (Exception e){
+
+        }
 
         mentoringDao.updateCounselApplyStatus(counselApplyForm);
     }
@@ -309,6 +377,10 @@ public class MentoringService {
         mentoringDao.updateMentorProfile(mentor);
 
         mentoringDao.removeCounselFieldMentor(mentor);
+
+        System.out.println("====1");
+        System.out.println(mentor);
+        System.out.println("====1");
 
         if(mentor.getMentorFieldList().size() > 0){
             mentoringDao.addCounselFieldMentor(mentor);
@@ -399,6 +471,36 @@ public class MentoringService {
                 fileSaveService.fileSave(file, mentoringDiary.getDiaryId(), FILE_DIVISION.MENTORING_ANSWER_ATTACH);
             }
         }
+
+
+        try {
+
+                CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
+
+                Email email = new Email();
+                email.setToName(resultCounselApplyForm.getMenteeName());
+                email.setTo(resultCounselApplyForm.getMenteeEmail());
+                email.setTitle("멘토링이 완료되었습니다.");
+                email.setDesc("별점평가 후 멘토 의견 조회가 가능합니다.");
+                emailService.sendEmail(email);
+
+
+                Email email2 = new Email();
+                email2.setToName("한양대학교 창업지원단");
+                email2.setTo(ADMIN_EMAIL);
+                email2.setTitle("멘토링 완료 후 멘토링 일지가 제출되었습니다.");
+                emailService.sendEmail(email2);
+
+                Email email3 = new Email();
+                email3.setToName(searchMentor.getMentorName());
+                email3.setTo(searchMentor.getMentorEmail());
+                email3.setTitle("멘토링 일지 제출이 완료되었습니다.");
+                emailService.sendEmail(email3);
+
+
+        }catch (Exception e){
+
+        }
     }
 
     public void updateDiary(MentoringDiary mentoringDiary){
@@ -416,16 +518,303 @@ public class MentoringService {
 
     }
 
-//    public Map<String,Object> getCounselApplyList(CounselApplyForm counselApplyForm){
-//        counselApplyForm.setPageSize(10);
-//        counselApplyForm.setTotalCount(mentoringDao.getCounselApplyListCnt(counselApplyForm));
-//
-//        Map<String,Object> map = new HashMap<>();
-//
-//        map.put("page",counselApplyForm);
-//        map.put("list",mentoringDao.getCounselApplyList(counselApplyForm));
-//
-//        return map;
-//    }
+    public HSSFWorkbook excelDownloadAll(){
+        Mentor mentor = new Mentor();
+        mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
 
+        mentor.setPageSize(mentor.getTotalCount());
+
+        List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
+
+        mentorList.stream().map(item-> {
+            if(item.getMentorCareerStr() != null){
+                item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
+            }else{
+                item.setMentorCareer(new ArrayList<>());
+            }
+
+            if(item.getMentorKeywordStr() != null){
+                item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
+            }else{
+                item.setMentorKeyword(new ArrayList<>());
+            }
+            item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
+            return item;
+        }).collect(Collectors.toList());
+
+        HSSFWorkbook workbook = new HSSFWorkbook();
+
+        HSSFSheet sheet = workbook.createSheet("멘토 현황");
+
+        HSSFRow row = null;
+
+        HSSFCell cell = null;
+
+        row = sheet.createRow(0);
+        String[] headerKey = {"아이디", "멘토 소개", "경력", "이름", "소속", "핸드폰", "키워드","이메일","현재 경력","직책","우수 멘토"};
+
+        for(int i=0; i<headerKey.length; i++) {
+            cell = row.createCell(i);
+            cell.setCellValue(headerKey[i]);
+        }
+
+        for(int i=0; i<mentorList.size(); i++) {
+            row = sheet.createRow(i + 1);
+            Mentor vo = mentorList.get(i);
+
+            cell = row.createCell(0);
+            cell.setCellValue(vo.getUserId());
+
+            cell = row.createCell(1);
+            cell.setCellValue(vo.getMentorIntroduction());
+
+            cell = row.createCell(2);
+            cell.setCellValue(vo.getMentorCareerStr());
+
+            cell = row.createCell(3);
+            cell.setCellValue(vo.getMentorName());
+
+            cell = row.createCell(4);
+            cell.setCellValue(vo.getMentorCompany());
+            cell = row.createCell(5);
+            cell.setCellValue(vo.getMentorPhoneNumber());
+            cell = row.createCell(6);
+            cell.setCellValue(vo.getMentorKeywordStr());
+            cell = row.createCell(7);
+            cell.setCellValue(vo.getMentorEmail());
+            cell = row.createCell(8);
+            cell.setCellValue(vo.getCurrentCareer());
+
+            cell = row.createCell(9);
+            cell.setCellValue(vo.getMentorPosition());
+
+            cell = row.createCell(10);
+            if(vo.getIsBest() != null){
+                cell.setCellValue(vo.getIsBest());
+            }else{
+                cell.setCellValue("");
+            }
+
+
+        }
+
+        return workbook;
+
+    }
+
+    public HSSFWorkbook counselApplyDownloadAll(){
+
+//        Mentor mentor = new Mentor();
+//        mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
+//
+//        mentor.setPageSize(mentor.getTotalCount());
+//
+//        List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
+
+        CounselApplyForm counselApplyForm = new CounselApplyForm();
+        counselApplyForm.setTotalCount(mentoringDao.getCounselApplyListCnt(counselApplyForm));
+        counselApplyForm.setPageSize(counselApplyForm.getTotalCount());
+
+        List<CounselApplyForm> counselApplyList = mentoringDao.getCounselApplyList(counselApplyForm);
+//
+//        mentorList.stream().map(item-> {
+//            if(item.getMentorCareerStr() != null){
+//                item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
+//            }else{
+//                item.setMentorCareer(new ArrayList<>());
+//            }
+//
+//            if(item.getMentorKeywordStr() != null){
+//                item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
+//            }else{
+//                item.setMentorKeyword(new ArrayList<>());
+//            }
+//            item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
+//            return item;
+//        }).collect(Collectors.toList());
+
+        HSSFWorkbook workbook = new HSSFWorkbook();
+
+        HSSFSheet sheet = workbook.createSheet("멘토 현황");
+
+        HSSFRow row = null;
+
+        HSSFCell cell = null;
+
+        row = sheet.createRow(0);
+        String[] headerKey = {"번호","아이디", "이름","희망 분야","구분","창업 진행 상황","상담 진행 방식", "상담 제목","상담 내용", "핸드폰 번호", "E-MAIL", "승인 상태", "신청일","멘토 아이디","멘토 이름","상담 장소","답변","상담 진행일","답변 작성일","평가"};
+
+        for(int i=0; i<headerKey.length; i++) {
+            cell = row.createCell(i);
+            cell.setCellValue(headerKey[i]);
+        }
+
+        List<WayItem> wList = null;
+        for(int i=0; i<counselApplyList.size(); i++) {
+            row = sheet.createRow(i + 1);
+            CounselApplyForm vo = counselApplyList.get(i);
+
+            CounselApplyForm apply = mentoringDao.getCounselApply(vo);
+            apply.setSortationItemList(mentoringDao.getCounselSortationList(apply));
+            apply.setWayItemList(mentoringDao.getCounselWayList(apply));
+
+//            if(vo.getApplyStatus() == APPLY_STATUS.COMPLETED || vo.getApplyStatus() == APPLY_STATUS.ASSIGN || vo.getApplyStatus() == APPLY_STATUS.PROCESS){
+//                MentoringDiary searchDiary = new MentoringDiary();
+//                searchDiary.setFormId(apply.getFormId());
+//                MentoringDiary mentoringDiary = mentoringDao.getDiary(searchDiary);
+//
+//                wList = mentoringDao.getDiaryWayList(mentoringDiary);
+//            }
+
+            cell = row.createCell(0);
+            cell.setCellValue(vo.getRownum());
+
+            cell = row.createCell(1);
+            cell.setCellValue(apply.getUserId());
+
+            cell = row.createCell(2);
+            cell.setCellValue(apply.getMenteeName());
+            cell = row.createCell(3);
+            cell.setCellValue(apply.getFieldName());
+
+
+            cell = row.createCell(4);
+            if(apply.getSortationItemList() != null && apply.getSortationItemList().size() > 0){
+                StringBuilder s = new StringBuilder();
+                apply.getSortationItemList().forEach(item -> {
+                    s.append(item.getItem()+", ");
+                });
+                cell.setCellValue(s.toString());
+            }else{
+                cell.setCellValue("");
+            }
+
+            cell = row.createCell(5);
+            cell.setCellValue(apply.getFormProgressItemName());
+
+            cell = row.createCell(6);
+            if(apply.getWayItemList() != null && apply.getWayItemList().size() > 0){
+                StringBuilder s = new StringBuilder();
+                apply.getWayItemList().forEach(item -> {
+                    s.append(item.getItem()+", ");
+                });
+                cell.setCellValue(s.toString());
+            }else{
+                cell.setCellValue("");
+            }
+
+
+            cell = row.createCell(7);
+            cell.setCellValue(apply.getTitle());
+
+            cell = row.createCell(8);
+            cell.setCellValue(apply.getContent());
+
+            cell = row.createCell(9);
+            cell.setCellValue(apply.getMenteePhoneNumber());
+
+            cell = row.createCell(10);
+            cell.setCellValue(apply.getMenteeEmail());
+            cell = row.createCell(11);
+            cell.setCellValue(this.getStatus(apply.getApplyStatus().toString()));
+            cell = row.createCell(12);
+            cell.setCellValue(apply.getRegDate().toString());
+
+
+
+            //멘토
+
+//            private String mentorName;
+//            private String mentorUserId;
+//            private Integer mentorId;
+//
+//            //일지
+//            private Integer diaryId;
+//            private String answer;
+//            private String answerWay;
+//            private String place;
+//            @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
+//            private LocalDateTime answerDate;
+//
+//            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+//            private LocalDateTime start;
+//            @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+//            private LocalDateTime end;
+//            private Integer score;
+
+            cell = row.createCell(13);
+            cell.setCellValue(apply.getMentorUserId());
+            cell = row.createCell(14);
+            cell.setCellValue(apply.getMentorName());
+            cell = row.createCell(15);
+            cell.setCellValue(apply.getPlace());
+
+            cell = row.createCell(16);
+            cell.setCellValue(apply.getAnswer());
+
+            cell = row.createCell(17);
+            if(apply.getStart() != null && apply.getEnd() != null){
+                cell.setCellValue(apply.getStart()+" ~ "+apply.getEnd());
+            }else{
+                cell.setCellValue("");
+            }
+            cell = row.createCell(18);
+
+            if(apply.getAnswerDate() != null){
+                cell.setCellValue(apply.getAnswerDate().toString());
+            }else{
+                cell.setCellValue("");
+            }
+            cell = row.createCell(19);
+            if(vo.getScore() != null){
+                cell.setCellValue(apply.getScore());
+            }else{
+                cell.setCellValue("");
+            }
+//            cell = row.createCell(8);
+//            cell.setCellValue(vo.getMentorEmail());
+//            cell = row.createCell(8);
+//            cell.setCellValue(vo.getCurrentCareer());
+//
+//            cell = row.createCell(9);
+//            cell.setCellValue(vo.getMentorPosition());
+//
+//            cell = row.createCell(10);
+//            if(vo.getIsBest() != null){
+//                cell.setCellValue(vo.getIsBest());
+//            }else{
+//                cell.setCellValue("");
+//            }
+
+
+        }
+
+        return workbook;
+
+    }
+
+    public String getStatus(String st){
+        String status = "";
+        if(st != null){
+            switch (st){
+                case "APPLY":
+                    status =  "신청";
+                    break;
+                case "ASSIGN":
+                    status =  "배정 완료";
+                    break;
+                case "RETURN":
+                    status =  "반려";
+                    break;
+                case "PROCESS":
+                    status =  "상담 진행중";
+                    break;
+                case "COMPLETED":
+                    status =  "상담 완료";
+                    break;
+            }
+        }
+        return status;
+
+    }
 }

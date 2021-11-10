@@ -16,9 +16,9 @@ import java.time.format.DateTimeFormatterBuilder;
 public class RentalRoomTime {
     private Integer timeId;
     private Integer roomId;
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private String startTime;
-    @DateTimeFormat(pattern = "HH:mm")
+    @DateTimeFormat(pattern = "HH:mm:ss")
     private String endTime;
 //    private Integer rentalTime;
 

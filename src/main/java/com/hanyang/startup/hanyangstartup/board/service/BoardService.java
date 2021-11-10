@@ -89,6 +89,11 @@ public class BoardService {
                 fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
             }
         }
+        if(boardContent.getThumb() != null){
+            for (MultipartFile file : boardContent.getThumb()) {
+                fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_THUMB_IMG);
+            }
+        }
     }
 
     //컨텐츠 수정
@@ -109,6 +114,11 @@ public class BoardService {
                 fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_ATTACH);
             }
         }
+        if(boardContent.getThumb() != null){
+            for (MultipartFile file : boardContent.getThumb()) {
+                fileSaveService.fileSave(file, boardContent.getContentId(), FILE_DIVISION.BOARD_THUMB_IMG);
+            }
+        }
         boardDao.updateBoardContent(boardContent);
     }
 
@@ -121,6 +131,12 @@ public class BoardService {
         attachFile.setContentId(boardContent.getContentId());
         attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
         attachFile.setStatus(FILE_STATUS.A);
+
+        AttachFile thumb = new AttachFile();
+        thumb.setContentId(boardContent.getContentId());
+        thumb.setDivision(FILE_DIVISION.BOARD_THUMB_IMG);
+        thumb.setStatus(FILE_STATUS.A);
+
         Map<String, Object> map = new HashMap<>();
         BoardContent resultContent = boardDao.getBoardContent(boardContent);
 
@@ -133,6 +149,7 @@ public class BoardService {
         map.put("prev", boardDao.getBoardContentPrev(resultContent));
         map.put("next", boardDao.getBoardContentNext(resultContent));
         map.put("files", fileSaveService.getAttachFileList(attachFile));
+        map.put("thumb", fileSaveService.getAttachFileList(thumb));
         return map;
     }
 
@@ -156,7 +173,13 @@ public class BoardService {
             attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
             attachFile.setStatus(FILE_STATUS.A);
 
+            AttachFile thumb = new AttachFile();
+            thumb.setContentId(boardContent.getContentId());
+            thumb.setDivision(FILE_DIVISION.BOARD_THUMB_IMG);
+            thumb.setStatus(FILE_STATUS.A);
+
             boardContent.setAttachFileList(fileSaveService.getAttachFileList(attachFile));
+            boardContent.setThumbList(fileSaveService.getAttachFileList(thumb));
             return boardContent;
         }).collect(Collectors.toList());
 

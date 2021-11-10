@@ -1,7 +1,11 @@
 package com.hanyang.startup.hanyangstartup.mentoring.controller;
 
+import com.hanyang.startup.hanyangstartup.auth.domain.User;
+import com.hanyang.startup.hanyangstartup.auth.service.AuthService;
+import com.hanyang.startup.hanyangstartup.common.domain.Email;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.common.exception.CustomException;
+import com.hanyang.startup.hanyangstartup.common.service.EmailService;
 import com.hanyang.startup.hanyangstartup.common.util.EncodingUtil;
 import com.hanyang.startup.hanyangstartup.mentoring.domain.*;
 import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
@@ -26,6 +30,7 @@ import com.itextpdf.tool.xml.pipeline.html.AbstractImageProvider;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipeline;
 import com.itextpdf.tool.xml.pipeline.html.HtmlPipelineContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,11 +57,18 @@ public class MentoringController {
 
     @Autowired
     private MentoringService mentoringService;
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private EncodingUtil encodingUtil;
     @Autowired
+    private EmailService emailService;
+    @Autowired
     private TemplateEngine templateEngine;
+
+    @Value(value = "${config.adminEmail}")
+    private String ADMIN_EMAIL;
 
 
     @GetMapping("/counsel_field_code")
@@ -189,8 +201,10 @@ public class MentoringController {
             Mentor mentor = new Mentor();
             mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
             mentor.setPageNo(page);
-            if(pageSize != null){
+            if(pageSize == null){
                 mentor.setPageSize(9);
+            }else{
+                mentor.setPageSize(pageSize);
             }
             if(counselField != null){
                 List<Integer> counselFieldList = new ArrayList<>();
@@ -269,6 +283,19 @@ public class MentoringController {
             System.out.println(counselApplyForm);
 
             mentoringService.applyCounsel(counselApplyForm);
+
+//            User user = authService.findByUserId(principal.getName());
+            Email email = new Email();
+            email.setToName(counselApplyForm.getMenteeName());
+            email.setTo(counselApplyForm.getMenteeEmail());
+            email.setTitle("멘토링신청이 접수되었습니다");
+            emailService.sendEmail(email);
+
+            Email email2 = new Email();
+            email2.setToName("한양대학교 창업지원단");
+            email2.setTo(ADMIN_EMAIL);
+            email2.setTitle("멘토링신청이 접수되었습니다");
+            emailService.sendEmail(email2);
 
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);

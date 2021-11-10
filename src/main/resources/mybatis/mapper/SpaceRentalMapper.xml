@@ -195,7 +195,7 @@
             SELECT IF(count(*) > 0, TRUE, FALSE)
             FROM rental_schedule
             WHERE room_id = #{roomId}
-            and status != 'CANCEL'
+            and status in ('APPLY','ACCEPT')
             and rental_date = #{searchDate}
             and rental_start_time BETWEEN t.start_time AND t.end_time
             AND rental_end_time - INTERVAL 1 SECOND  BETWEEN t.start_time AND t.end_time
@@ -293,7 +293,7 @@
                 AND DATE_FORMAT(s.rental_date, '%Y-%m') = #{date}
             </if>
         </where>
-        order by s.schedule_id desc
+        order by s.rental_start_time asc
         <if test="pageNo != null and pageNo !=-1 and pageNo != '' and date == null or date == ''">
             limit #{startRowNo}, #{pageSize}
         </if>
@@ -321,7 +321,8 @@
     </select>
 
     <insert id="addRentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
-        insert into rental_schedule(room_id,rental_date, rental_start_time, rental_end_time,user_id, person_count,purpose,reservation_num) value(#{roomId},#{rentalDate},#{rentalStartTime},#{rentalEndTime},#{userId},#{personCount},#{purpose},CONCAT(DATE_FORMAT(now(),'%Y%m%d%H%i%s'),#{roomId}))
+        insert into rental_schedule(room_id,rental_date, rental_start_time, rental_end_time,user_id, person_count,purpose,reservation_num, user_name, user_company, user_phone_num,status)
+        value(#{roomId},#{rentalDate},#{rentalStartTime},#{rentalEndTime},#{userId},#{personCount},#{purpose},CONCAT(DATE_FORMAT(now(),'%Y%m%d%H%i%s'),#{roomId}),#{userName},#{userCompany},#{userPhoneNum},'ACCEPT')
     </insert>
 
     <update id="updateRentalSchedule" parameterType="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalSchedule">
@@ -335,6 +336,15 @@
             </if>
             <if test="purpose != null and purpose != ''">
                 purpose = #{purpose},
+            </if>
+            <if test="userName != null and userName != ''">
+                user_name = #{userName},
+            </if>
+            <if test="userCompany != null and userCompany != ''">
+                user_company = #{userCompany},
+            </if>
+            <if test="userPhoneNum != null and userPhoneNum != ''">
+                user_phone_num = #{userPhoneNum},
             </if>
         </set>
         <where>

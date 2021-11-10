@@ -5,11 +5,19 @@ import com.hanyang.startup.hanyangstartup.auth.domain.UserType;
 import com.hanyang.startup.hanyangstartup.auth.service.UserService;
 import com.hanyang.startup.hanyangstartup.board.domain.BoardConfig;
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -75,6 +83,44 @@ public class AdminUserController {
             e.printStackTrace();
             response = new Response("error", null, e.getMessage(), 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/excel_download")
+    public void excelDownloadAll(Principal principal, HttpServletRequest req, HttpServletResponse res) throws IOException {
+
+        OutputStream out = null;
+
+        try {
+            HSSFWorkbook workbook = userService.excelDownloadAll();
+
+
+            res.reset();
+            String userAgent = req.getHeader("User-Agent");
+
+            String fileName = "사용자 현황.xls";
+            boolean ie = (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident") > -1);
+
+            if(ie) {
+                fileName = URLEncoder.encode( "fileName", "utf-8" ).replaceAll("\\+", "%20");
+            } else {
+                fileName = new String( String.valueOf(fileName).getBytes("utf-8"), "iso-8859-1");
+            }
+
+            res.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+            res.setHeader("Content-Transfer-Encoding", "binary");
+
+//            res.setHeader("Content-Disposition", "attachment;filename=단원리스트.xls");
+            res.setContentType("application/vnd.ms-excel;");
+            out = new BufferedOutputStream(res.getOutputStream());
+
+            workbook.write(out);
+            out.flush();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if(out != null) out.close();
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.hanyang.startup.hanyangstartup.resource.domain;
 
 public enum FILE_DIVISION {
+    BOARD_THUMB_IMG,
     BOARD_CONTENT_IMG,
     BOARD_ATTACH,
     NOTICE_ATTACH,

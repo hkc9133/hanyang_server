@@ -4,19 +4,28 @@ import com.hanyang.startup.hanyangstartup.auth.dao.AuthDao;
 import com.hanyang.startup.hanyangstartup.auth.domain.RequestSocialData;
 import com.hanyang.startup.hanyangstartup.auth.domain.SocialData;
 import com.hanyang.startup.hanyangstartup.auth.domain.User;
+import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.common.service.EmailService;
 import com.hanyang.startup.hanyangstartup.util.RedisUtil;
 import com.hanyang.startup.hanyangstartup.util.SaltUtil;
+import kr.ac.hanyang.service.OAuthClient;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
+import java.security.Principal;
 import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class AuthService {
@@ -35,14 +44,14 @@ public class AuthService {
     private EmailService emailService;
 
     @Transactional(rollbackFor = {Exception.class})
-    public void signUpUser(User user) throws Exception{
+    public void signUpUser(User user) throws Exception {
         String password = user.getUserPassword();
-        user.setUserPassword(saltUtil.encodePassword(saltUtil.genSalt(),password));
+        user.setUserPassword(saltUtil.encodePassword(saltUtil.genSalt(), password));
         authDao.signUpSocialUser(user);
     }
 
     @Transactional
-    public User signUpSocialUser(RequestSocialData socialData){
+    public User signUpSocialUser(RequestSocialData socialData) {
         User newUser = new User();
         newUser.setUserId(socialData.getId());
         newUser.setUserEmail(socialData.getEmail());
@@ -52,40 +61,40 @@ public class AuthService {
 //        newUser.setSocial(new SocialData(socialData.getId(),socialData.getEmail(),socialData.getType()));
 
         authDao.signUpSocialUser(newUser);
-        try{
-            emailService.sendWelComeEmail(newUser.getUserEmail(),newUser);
+        try {
+            emailService.sendWelComeEmail(newUser.getUserEmail(), newUser);
 
-        }catch (MessagingException | UnsupportedEncodingException e){
+        } catch (MessagingException | UnsupportedEncodingException e) {
             System.out.println("메일 발송 실패");
             e.printStackTrace();
         }
         return newUser;
     }
 
-    public User findByIdAndType(RequestSocialData socialData){
-        HashMap<String,Object> map  = new HashMap<>();
+    public User findByIdAndType(RequestSocialData socialData) {
+        HashMap<String, Object> map = new HashMap<>();
         map.put("id", socialData.getId());
         map.put("type", socialData.getType());
         return authDao.findByIdAndType(map);
     }
 
-    public User findByUserId(String userId){
+    public User findByUserId(String userId) {
         return authDao.findByUserId(userId);
     }
 
     @Transactional
-    public User loginUser(User user) throws NotFoundException,Exception {
-        HashMap<String,Object> map  = new HashMap<>();
-        map.put("id",user.getUserId());
+    public User loginUser(User user) throws NotFoundException, Exception {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("id", user.getUserId());
 //        map.put("password",saltUtil.encodePassword(saltUtil.genSalt(),user.getUserPassword()));
-        map.put("type","NORMAL");
+        map.put("type", "NORMAL");
 
         User loginUser = authDao.findByIdAndType(map);
 
         if (loginUser == null) throw new NotFoundException("멤버가 없습니다");
 
         if (!BCrypt.checkpw(user.getUserPassword(), loginUser.getUserPassword())) {
-            throw new Exception ("비밀번호가 틀립니다.");
+            throw new Exception("비밀번호가 틀립니다.");
         }
 
         authDao.updateLastLogin(loginUser);
@@ -96,7 +105,7 @@ public class AuthService {
 
     @Transactional
     public User loginSocialUser(RequestSocialData socialData) throws NotFoundException {
-        HashMap<String,Object> map  = new HashMap<>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put("id", socialData.getId());
         map.put("type", socialData.getType());
         User user = authDao.findByIdAndType(map);
@@ -126,4 +135,23 @@ public class AuthService {
 ////        socialData.getId()
 //        return socialData.getId();
     }
+
+    public OAuthClient initHanyang() {
+        try {
+            OAuthClient oAuthClient = new OAuthClient();
+            oAuthClient.setClientId("5b67a3b231677f88cfcaba41b77d872");
+            oAuthClient.setClientSecret("8483b416bbb356f9c6379f5dbcd8c80");
+            oAuthClient.setScope("10,117");
+            oAuthClient.setRedirectUrl("https://startup.hanyang.ac.kr/user/login");
+//            oAuthClient.setRedirectUrl("http://127.0.0.1:3000/user/login");
+
+            return oAuthClient;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }

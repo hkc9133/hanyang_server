@@ -32,7 +32,10 @@ public class StartupPresent extends Page {
     private String facebook;
     private String naverBlog;
     private String twitter;
-    private Boolean isBest;
+    private Boolean isBest = false;
+
+    private String companyNum;
+    private String companyStatus;
 
     private List<Integer> businessIdList;
     private List<Integer> techIdList;

@@ -157,6 +157,7 @@
             mentor_email = #{mentorEmail},
             mentor_position = #{mentorPosition},
             is_best = #{isBest},
+            mentor_status = #{mentorStatus}
         </set>
         <where>
             <if test="userId != null and userId != ''">
@@ -283,7 +284,7 @@
 
 
     <select id="getCounselApply" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-        SELECT a.*,m.mentor_name, m.user_id as mentor_user_id,c.field_name, p.item as form_progress_item_name, s.item as form_sortation_item_name, w.item as form_way_item_name, d.answer, d.reg_date as answer_date, d.way as answer_way, d.score,d.diary_id as diaryId, d.place, d.start,d.end
+        SELECT a.*,m.mentor_name, m.user_id as mentor_user_id,c.field_name, p.item as form_progress_item_name, s.item as form_sortation_item_name, w.item as form_way_item_name, d.answer, d.reg_date as answer_date, d.way as answer_way, d.score,d.diary_id as diaryId, d.place, d.start,d.end,d.score
         FROM counsel_apply_form as a
         left join counsel_field_code as c
         on c.field_id = a.field_id

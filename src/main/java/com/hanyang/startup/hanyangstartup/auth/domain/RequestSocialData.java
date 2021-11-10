@@ -15,4 +15,5 @@ public class RequestSocialData {
     private String email;
     private UserType type;
     private Role role;
+    private Boolean isLogin;
 }

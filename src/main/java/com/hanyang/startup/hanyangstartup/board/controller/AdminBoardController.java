@@ -70,6 +70,9 @@ public class AdminBoardController {
     public ResponseEntity<Response> updateBoard(@PathVariable("boardName") String boardName, @RequestBody BoardConfig boardConfig) {
         Response response;
 
+        System.out.println("설정");
+        System.out.println(boardConfig);
+
         try {
             boardService.updateBoard(boardConfig);
 
@@ -228,11 +231,12 @@ public class AdminBoardController {
     }
 
     @PostMapping(value = "/content")
-    public ResponseEntity<Response> addBoardContent(BoardContent boardContent, Principal principal) {
+    public ResponseEntity<Response> addBoardContent(BoardContent boardContent, Principal principal)throws Exception {
 
         Response response;
         try {
             System.out.println("게시글 추가");
+            System.out.println(boardContent);
             boardContent.setWriterId(principal.getName());
             boardService.addBoardContent(boardContent);
             response = new Response("success", null, null, 200);
@@ -250,6 +254,7 @@ public class AdminBoardController {
         Response response;
         try {
             System.out.println("게시글 수정");
+            System.out.println(boardContent);
 //            boardContent.setWriterId(principal.getName());
             boardContent.setWriterId(principal.getName());
             boardService.updateBoardContent(boardContent);

@@ -20,7 +20,7 @@ public class UserDao {
         sqlSession.update("user.updateUser",user);
     }
 
-    public List<BoardConfig> getUserList(User user){
+    public List<User> getUserList(User user){
         return sqlSession.selectList("user.getUserList",user);
     }
     public int getUserListCnt(User user){
