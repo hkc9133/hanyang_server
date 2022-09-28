@@ -13,7 +13,7 @@ import java.util.List;
 @ToString
 public class RentalPlace {
     private Integer placeId;
-    private Boolean isActive = true;
+    private Boolean isActive;
     private String placeName;
     private String placeDesc;
     private List<RentalRoom> rentalRoomList;

@@ -34,8 +34,9 @@
             <result property="rentalRole" column="rental_role"/>
             <result property="isActive" column="is_active"/>
             <result property="isHoliday" column="is_holiday"/>
-            <collection property="roomAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>
-            <collection property="rentalRoomTimeList" javaType="java.util.ArrayList" resultMap="RentalRoomTimeMap"/>
+<!--            <collection property="roomAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>-->
+<!--            <collection property="rentalRoomTimeList" javaType="java.util.ArrayList" resultMap="RentalRoomTimeMap"/>-->
+        <collection property="rentalRoomTimeList" column="room_id"  ofType="RentalRoomTimeMap" javaType="java.util.ArrayList" select="getRentalRoomTimeList"/>
     </resultMap>
 
     <resultMap id="RentalPlaceMap" type="com.hanyang.startup.hanyangstartup.spaceRental.domain.RentalPlace">
@@ -43,8 +44,10 @@
         <result property="isActive" column="is_active"/>
         <result property="placeName" column="place_name"/>
         <result property="placeDesc" column="place_desc"/>
-        <collection property="placeAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>
-        <collection property="rentalRoomList" javaType="java.util.ArrayList" resultMap="RentalRoomMap"/>
+<!--        <collection property="placeAttachFileList" javaType="java.util.ArrayList" resultMap="AttachFileMap"/>-->
+<!--        <collection property="rentalRoomList" javaType="java.util.ArrayList" resultMap="RentalRoomMap"/>-->
+
+        <collection property="rentalRoomList" column="place_id"  ofType="RentalRoomMap" javaType="java.util.ArrayList" select="getRentalRoomList"/>
     </resultMap>
 
     <select id="getStatusCount" resultType="com.hanyang.startup.hanyangstartup.spaceRental.domain.StatusCount">
@@ -54,9 +57,7 @@
 
     <select id="getPlaceInfoAll" resultMap="RentalPlaceMap">
         select * from rental_place as place
-        left join rental_room as r ON r.place_id = place.place_id
-        left join rental_room_time as t on t.room_id = r.room_id
-        order by place.place_id, r.room_id, t.start_time
+        order by place.place_id
     </select>
 
     <!--    장소-->
@@ -354,6 +355,16 @@
             </if>
         </where>
     </update>
+
+    <select id="getRentalRoomList" parameterType="java.lang.String" resultMap="RentalRoomMap">
+            SELECT * from rental_room
+            WHERE place_id = #{placeId}
+    </select>
+    <select id="getRentalRoomTimeList" parameterType="java.lang.String" resultMap="RentalRoomTimeMap">
+            SELECT * from rental_room_time
+            WHERE room_id = #{roomId}
+    </select>
+
 
 
 <!--    스케쥴 끝-->

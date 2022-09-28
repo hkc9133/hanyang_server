@@ -480,82 +480,82 @@ public class MentoringController {
 
             String fileName = mentor.getMentorName()+"_위촉장.pdf";
 
-            fileName = encodingUtil.browserFileNameEncoding(fileName, encodingUtil.getBrowser(req));
+        fileName = encodingUtil.browserFileNameEncoding(fileName, encodingUtil.getBrowser(req));
 
-            Context context = new Context();
-            context.setVariable("info", map);
+        Context context = new Context();
+        context.setVariable("info", map);
 
-            String process = templateEngine.process("commission/commission", context);
+        String process = templateEngine.process("commission/commission", context);
 
-            ClassPathResource classPathResource = new ClassPathResource("templates/commission/style.css");
-            if(classPathResource.exists() == false){
-                throw new IllegalArgumentException();
-            }
+        ClassPathResource classPathResource = new ClassPathResource("templates/commission/style.css");
+        if(classPathResource.exists() == false){
+            throw new IllegalArgumentException();
+        }
 //            new InputStreamReader(classPathResource.getInputStream(), "UTF-8")
 //            String scss = new ClassPathResource("templates/commission/style.css").getURL().getPath();
-            String sfont = Paths.get("/root/lib/font.ttf").toString();
+        String sfont = Paths.get("/root/lib/font.ttf").toString();
 
 
-            Document document = new Document(PageSize.A4, 0, 0, 0, 0);
+        Document document = new Document(PageSize.A4, 0, 0, 0, 0);
 
-            PdfWriter writer = PdfWriter.getInstance(document, new BufferedOutputStream(res.getOutputStream()));
+        PdfWriter writer = PdfWriter.getInstance(document, new BufferedOutputStream(res.getOutputStream()));
 
-            // 파일 다운로드 설정
-            res.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
-            res.setHeader("Content-Transfer-Encoding", "binary");
-            res.setContentType("application/pdf");
+        // 파일 다운로드 설정
+        res.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\";");
+        res.setHeader("Content-Transfer-Encoding", "binary");
+        res.setContentType("application/pdf");
 
-            // Document 오픈
-            document.open();
-            XMLWorkerHelper helper = XMLWorkerHelper.getInstance();
+        // Document 오픈
+        document.open();
+        XMLWorkerHelper helper = XMLWorkerHelper.getInstance();
 
-            // CSS
-            CSSResolver cssResolver = new StyleAttrCSSResolver();
+        // CSS
+        CSSResolver cssResolver = new StyleAttrCSSResolver();
 
-            CssFile cssFile = helper.getCSS(new ClassPathResource("templates/commission/style.css").getInputStream());
+        CssFile cssFile = helper.getCSS(new ClassPathResource("templates/commission/style.css").getInputStream());
 //            CssFile cssFile = helper.getCSS(new FileInputStream(scss));
-            cssResolver.addCss(cssFile);
+        cssResolver.addCss(cssFile);
 
-            // HTML, 폰트 설정
-            XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
-            fontProvider.register(sfont, "abc"); // MalgunGothic은
+        // HTML, 폰트 설정
+        XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
+        fontProvider.register(sfont, "abc"); // MalgunGothic은
 
-            CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
+        CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
 
-            HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
-            htmlContext.setTagFactory(Tags.getHtmlTagProcessorFactory());
-            htmlContext.setImageProvider(new AbstractImageProvider() {
-                @Override
-                public String getImageRootPath() {
-                    try{
-                        return new ClassPathResource("templates/commission").getURL().getPath();
-                    }catch (Exception e){
-                        e.printStackTrace();
+        HtmlPipelineContext htmlContext = new HtmlPipelineContext(cssAppliers);
+        htmlContext.setTagFactory(Tags.getHtmlTagProcessorFactory());
+        htmlContext.setImageProvider(new AbstractImageProvider() {
+            @Override
+            public String getImageRootPath() {
+                try{
+                    return new ClassPathResource("templates/commission").getURL().getPath();
+                }catch (Exception e){
+                    e.printStackTrace();
 
-                        return null;
-                    }
+                    return null;
                 }
-            });
+            }
+        });
 
-            // Pipelines
-            PdfWriterPipeline pdf = new PdfWriterPipeline(document, writer);
-            HtmlPipeline html = new HtmlPipeline(htmlContext, pdf);
-            CssResolverPipeline css = new CssResolverPipeline(cssResolver, html);
+        // Pipelines
+        PdfWriterPipeline pdf = new PdfWriterPipeline(document, writer);
+        HtmlPipeline html = new HtmlPipeline(htmlContext, pdf);
+        CssResolverPipeline css = new CssResolverPipeline(cssResolver, html);
 
-            XMLWorker worker = new XMLWorker(css, true);
-            XMLParser xmlParser = new XMLParser(worker, Charset.forName("UTF-8"));
+        XMLWorker worker = new XMLWorker(css, true);
+        XMLParser xmlParser = new XMLParser(worker, Charset.forName("UTF-8"));
 
-            // 폰트 설정에서 별칭으로 줬던 "MalgunGothic"을 html 안에 폰트로 지정한다.
+        // 폰트 설정에서 별칭으로 줬던 "MalgunGothic"을 html 안에 폰트로 지정한다.
 //            String sHtml = "<html><head></head><body style='font-family:MalgunGothic;'>" + map.get("printData").toString() + "</body></html>";
-            // byte[] bHtml = (map.get("printData").toString()).getBytes();
+        // byte[] bHtml = (map.get("printData").toString()).getBytes();
 
-            xmlParser.parse(new StringReader(process));
-            document.close();
-            writer.close();
-        }catch (Exception e){
-            e.printStackTrace();
+        xmlParser.parse(new StringReader(process));
+        document.close();
+        writer.close();
+    }catch (Exception e){
+        e.printStackTrace();
 
-        }
+    }
 
         return null;
 
