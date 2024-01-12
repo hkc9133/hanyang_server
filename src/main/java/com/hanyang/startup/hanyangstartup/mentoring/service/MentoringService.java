@@ -257,6 +257,8 @@ public class MentoringService {
 //        }
 //        mentor.setMentorCareerStr(careerStr);
 
+        System.out.println("ddddddddddddddddd");
+        System.out.println(counselApplyForm);
         mentoringDao.updateCounselApply(counselApplyForm);
     }
 

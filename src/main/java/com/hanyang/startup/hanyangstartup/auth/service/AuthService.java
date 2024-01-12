@@ -43,6 +43,12 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
+
+    @Transactional(rollbackFor = {Exception.class})
+    public void test() throws Exception {
+        System.out.println(saltUtil.encodePassword(saltUtil.genSalt(), "rmfrltps2871"));
+    }
+
     @Transactional(rollbackFor = {Exception.class})
     public void signUpUser(User user) throws Exception {
         String password = user.getUserPassword();

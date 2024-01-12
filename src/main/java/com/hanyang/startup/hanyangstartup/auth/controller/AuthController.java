@@ -52,6 +52,21 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
+
+//    @GetMapping("/aaa")
+//    public Response test() {
+//        Response response;
+//        try {
+//            authService.test();
+//
+//            response = new Response("success", "성공적으로 회원가입을 완료했습닌다.", null, 200);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            response = new Response("error", "회원가입 실패", e.getMessage(), 400);
+//        }
+//        return response;
+//    }
+
     @PostMapping("/signup")
     public Response signUser(@RequestBody User signUpUser, HttpServletResponse res) {
         Response response;

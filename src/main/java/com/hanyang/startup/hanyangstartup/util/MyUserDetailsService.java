@@ -19,7 +19,6 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
 
         User user = authDao.findByUserId(userId);
-        System.out.println(user);
         if(user == null){
             throw new UsernameNotFoundException(userId + " : 사용자 존재하지 않음");
         }

@@ -319,18 +319,22 @@
             <if test="applyStatus != null">
                 apply_status = #{applyStatus},
             </if>
-            <choose>
+            assign_mentor_id = #{assignMentorId}
+<!--            <if test="assignMentorId != null and assignMentorId != ''">-->
+<!--                assign_mentor_id = #{assignMentorId},-->
+<!--            </if>-->
+<!--            <choose>-->
 
-                <when test="assignMentorId != null and assignMentorId != ''">
-                    assign_mentor_id = #{assignMentorId},
-                </when>
+<!--                <when test="assignMentorId != null and assignMentorId != ''">-->
+<!--                    assign_mentor_id = #{assignMentorId},-->
+<!--                </when>-->
 
-                <otherwise>
-                    assign_mentor_id = null,
-                    apply_status = 'APPLY'
-                </otherwise>
+<!--                <otherwise>-->
+<!--                    assign_mentor_id = null,-->
+<!--                    apply_status = 'APPLY'-->
+<!--                </otherwise>-->
 
-            </choose>
+<!--            </choose>-->
         </set>
         WHERE form_id = #{formId}
     </update>

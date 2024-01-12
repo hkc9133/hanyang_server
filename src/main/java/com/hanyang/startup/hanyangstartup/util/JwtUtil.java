@@ -49,14 +49,10 @@ public class JwtUtil {
     }
 
     public String generateToken(User user) {
-        System.out.println("토큰 생성");
-        System.out.println(user);
         return doGenerateToken(user.getUserId(), TOKEN_VALIDATION_SECOND);
     }
 
     public String generateRefreshToken(User user) {
-        System.out.println("리프레시 토큰 생성");
-        System.out.println(user);
         return doGenerateToken(user.getUserId(), REFRESH_TOKEN_VALIDATION_SECOND);
     }
 
@@ -64,8 +60,6 @@ public class JwtUtil {
 
         Claims claims = Jwts.claims();
         claims.put("username", username);
-        System.out.println("토큰 생성 시 유저 아이디");
-        System.out.println(username);
 
         String jwt = Jwts.builder()
                 .setClaims(claims)

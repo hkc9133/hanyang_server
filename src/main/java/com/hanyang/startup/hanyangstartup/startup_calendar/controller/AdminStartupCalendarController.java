@@ -31,7 +31,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -49,7 +49,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -66,7 +66,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -82,7 +82,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -100,7 +100,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }
@@ -126,7 +126,7 @@ public class AdminStartupCalendarController {
             return new ResponseEntity(response, HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new Response("error", null, e.getMessage(), 400);
+            response = new Response("error", "에러가 발생했습니다", "", 400);
             return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
         }
     }

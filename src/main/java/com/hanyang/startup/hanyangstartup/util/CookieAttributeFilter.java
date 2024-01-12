@@ -21,7 +21,6 @@ public class CookieAttributeFilter implements Filter {
     }
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-        System.out.println("필터");
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 //        LOG.info("Same Site Filter Logging Response :{}", res.getContentType());
