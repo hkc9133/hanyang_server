@@ -36,11 +36,7 @@ public class MainService {
         Map<String, Object> map = new HashMap<>();
 
         //공지사항
-        BoardConfig notice = new BoardConfig();
-        notice.setBoardEnName("notice");
-        notice.setPageNo(1);
-        notice.setPageSize(10);
-        Map<String, Object> noticeList = boardService.getBoardContentList(notice);
+        Map<String, Object> noticeList = boardService.getBoardContentMain();
 
         //핫이슈
         BoardConfig issue = new BoardConfig();

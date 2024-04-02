@@ -60,6 +60,9 @@ public class BoardDao {
         sqlSession.update("board.updateBoardContentCnt",boardContent);
     }
 
+    public List<BoardContent> getBoardContentMain(){
+        return sqlSession.selectList("board.getBoardContentMain");
+    }
     public List<BoardContent> getBoardContentList(BoardConfig boardConfig){
         return sqlSession.selectList("board.getBoardContentList",boardConfig);
     }
