@@ -2,10 +2,12 @@ package com.hanyang.startup.hanyangstartup.studentReport.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hanyang.startup.hanyangstartup.common.domain.Page;
+import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,5 +35,11 @@ public class StudentReport extends Page {
     private String userId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private LocalDateTime regDate;
+
+    private List<AttachFile> attachFileList;
+    private List<Integer> uploadResultList;
+
+
+    private List<AttachFile> files;
 
 }
