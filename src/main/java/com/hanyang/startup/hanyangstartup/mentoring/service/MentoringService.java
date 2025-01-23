@@ -44,38 +44,42 @@ public class MentoringService {
     @Autowired
     private TemplateEngine templateEngine;
 
+
     @Value(value = "${config.adminEmail}")
     private String ADMIN_EMAIL;
 
-    public List<CounselFiledCode> getCounselFieldCode(){
+    public List<CounselFiledCode> getCounselFieldCode() {
         return mentoringDao.getCounselFieldCode();
     }
-    public List<ProgressItem> getProgressItem(){
+
+    public List<ProgressItem> getProgressItem() {
         return mentoringDao.getProgressItem();
     }
-    public List<SortationItem> getSortationItem(){
+
+    public List<SortationItem> getSortationItem() {
         return mentoringDao.getSortationItem();
     }
-    public List<WayItem> getWayItem(){
+
+    public List<WayItem> getWayItem() {
         return mentoringDao.getWayItem();
     }
 
-    public Map<String, Object> getMentor(Mentor mentor){
+    public Map<String, Object> getMentor(Mentor mentor) {
 
         Mentor resultMentor = mentoringDao.getMentor(mentor);
 
         resultMentor.setMentorFieldList(mentoringDao.getCounselFieldMentor(resultMentor));
 
 
-        if(resultMentor.getMentorCareerStr() != null){
+        if (resultMentor.getMentorCareerStr() != null) {
             resultMentor.setMentorCareer(Arrays.asList(resultMentor.getMentorCareerStr().split(";").clone()));
-        }else{
+        } else {
             resultMentor.setMentorCareer(new ArrayList<>());
         }
 
-        if(resultMentor.getMentorKeywordStr() != null){
+        if (resultMentor.getMentorKeywordStr() != null) {
             resultMentor.setMentorKeyword(Arrays.asList(resultMentor.getMentorKeywordStr().split(";").clone()));
-        }else{
+        } else {
             resultMentor.setMentorKeyword(new ArrayList<>());
         }
 
@@ -85,7 +89,7 @@ public class MentoringService {
         return map;
     }
 
-    public List<Mentor> getBestMentor(){
+    public List<Mentor> getBestMentor() {
 
 //        Mentor mentor = mentoringDao.getBestMentor();
 ////
@@ -119,16 +123,16 @@ public class MentoringService {
         mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
         List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
 
-        mentorList.stream().map(item-> {
-            if(item.getMentorCareerStr() != null){
+        mentorList.stream().map(item -> {
+            if (item.getMentorCareerStr() != null) {
                 item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorCareer(new ArrayList<>());
             }
 
-            if(item.getMentorKeywordStr() != null){
+            if (item.getMentorKeywordStr() != null) {
                 item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorKeyword(new ArrayList<>());
             }
             item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
@@ -141,7 +145,7 @@ public class MentoringService {
         return mentorList;
     }
 
-    public void updateMentor(Mentor mentor){
+    public void updateMentor(Mentor mentor) {
 
 //        String keywordStr = "";
 //        for (String keyword: mentor.getMentorKeyword()) {
@@ -158,23 +162,23 @@ public class MentoringService {
         mentoringDao.updateMentor(mentor);
     }
 
-    public Map<String, Object> getMentorList(Mentor mentor){
+    public Map<String, Object> getMentorList(Mentor mentor) {
 
-        if(mentor.getPageNo() != null){
+        if (mentor.getPageNo() != null) {
             mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
         }
         List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
 
-        mentorList.stream().map(item-> {
-            if(item.getMentorCareerStr() != null){
+        mentorList.stream().map(item -> {
+            if (item.getMentorCareerStr() != null) {
                 item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorCareer(new ArrayList<>());
             }
 
-            if(item.getMentorKeywordStr() != null){
+            if (item.getMentorKeywordStr() != null) {
                 item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorKeyword(new ArrayList<>());
             }
             item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
@@ -189,7 +193,7 @@ public class MentoringService {
         return map;
     }
 
-    public Map<String, Object> getCounselApply(CounselApplyForm counselApplyForm){
+    public Map<String, Object> getCounselApply(CounselApplyForm counselApplyForm) {
 
         CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
 
@@ -208,22 +212,25 @@ public class MentoringService {
         map.put("counselApply", resultCounselApplyForm);
         map.put("files", fileSaveService.getAttachFileList(attachFile));
 
-        if(resultCounselApplyForm.getApplyStatus() == APPLY_STATUS.COMPLETED){
+        if (resultCounselApplyForm.getApplyStatus() == APPLY_STATUS.COMPLETED) {
             MentoringDiary searchDiary = new MentoringDiary();
             searchDiary.setFormId(resultCounselApplyForm.getFormId());
             MentoringDiary mentoringDiary = mentoringDao.getDiary(searchDiary);
 
             AttachFile answerAttachFile = new AttachFile();
-            answerAttachFile.setContentId(mentoringDiary.getDiaryId());
-            answerAttachFile.setDivision(FILE_DIVISION.MENTORING_ANSWER_ATTACH);
-            answerAttachFile.setStatus(FILE_STATUS.A);
-            map.put("answerFiles", fileSaveService.getAttachFileList(answerAttachFile));
-            map.put("wayItemList", mentoringDao.getDiaryWayList(mentoringDiary));
+            if (mentoringDiary != null) {
+                answerAttachFile.setDivision(FILE_DIVISION.MENTORING_ANSWER_ATTACH);
+                map.put("wayItemList", mentoringDao.getDiaryWayList(mentoringDiary));
+
+                answerAttachFile.setContentId(mentoringDiary.getDiaryId());
+                answerAttachFile.setStatus(FILE_STATUS.A);
+                map.put("answerFiles", fileSaveService.getAttachFileList(answerAttachFile));
+            }
         }
         return map;
     }
 
-    public void updateCounselApply(CounselApplyForm counselApplyForm){
+    public void updateCounselApply(CounselApplyForm counselApplyForm) {
 
 //        ASSIGN,RETURN,PROCESS,COMPLETED
         CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
@@ -231,7 +238,7 @@ public class MentoringService {
         try {
             Mentor mentor = new Mentor();
             mentor.setMentorId(counselApplyForm.getAssignMentorId());
-            if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN) && !resultCounselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN)){
+            if (counselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN) && !resultCounselApplyForm.getApplyStatus().equals(APPLY_STATUS.ASSIGN)) {
 
                 Email email = new Email();
                 email.setToName(mentor.getMentorName());
@@ -241,7 +248,7 @@ public class MentoringService {
                 emailService.sendEmail(email);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -260,10 +267,10 @@ public class MentoringService {
         mentoringDao.updateCounselApply(counselApplyForm);
     }
 
-    public void updateCounselApplyStatus(CounselApplyForm counselApplyForm){
+    public void updateCounselApplyStatus(CounselApplyForm counselApplyForm) {
         CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
         try {
-            if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.RETURN)){
+            if (counselApplyForm.getApplyStatus().equals(APPLY_STATUS.RETURN)) {
 
                 Email email = new Email();
                 email.setToName("한양대학교 창업지원단");
@@ -271,7 +278,7 @@ public class MentoringService {
                 email.setTitle("멘토가 신청을 반려하였습니다.");
                 email.setDesc("멘토를 다시 배정해 주세요.");
                 emailService.sendEmail(email);
-            }else if(counselApplyForm.getApplyStatus().equals(APPLY_STATUS.PROCESS)){
+            } else if (counselApplyForm.getApplyStatus().equals(APPLY_STATUS.PROCESS)) {
 
                 Email email = new Email();
                 email.setToName(resultCounselApplyForm.getMenteeName());
@@ -285,9 +292,23 @@ public class MentoringService {
                 email2.setTo(ADMIN_EMAIL);
                 email2.setTitle("멘토,멘티 매칭이 완료되었습니다.");
                 emailService.sendEmail(email2);
+            } else if (counselApplyForm.getApplyStatus().equals(APPLY_STATUS.CANCEL)) {
+
+                Email email = new Email();
+                email.setToName(resultCounselApplyForm.getMenteeName());
+                email.setTo(resultCounselApplyForm.getMenteeEmail());
+                email.setTitle("상담신청 취소");
+                email.setDesc("상담신청이 취소되었습니다");
+                emailService.sendEmail(email);
+
+                Email email2 = new Email();
+                email2.setToName("한양대학교 창업지원단");
+                email2.setTo(ADMIN_EMAIL);
+                email2.setTitle("상담신청이 취소되었습니다");
+                emailService.sendEmail(email2);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -295,9 +316,9 @@ public class MentoringService {
     }
 
 
-    public Map<String, Object> getCounselApplyList(CounselApplyForm counselApplyForm){
+    public Map<String, Object> getCounselApplyList(CounselApplyForm counselApplyForm) {
 
-        if(counselApplyForm.getPageNo() != null){
+        if (counselApplyForm.getPageNo() != null) {
             counselApplyForm.setTotalCount(mentoringDao.getCounselApplyListCnt(counselApplyForm));
         }
         List<CounselApplyForm> counselApplyList = mentoringDao.getCounselApplyList(counselApplyForm);
@@ -317,7 +338,7 @@ public class MentoringService {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void applyMentor(Mentor mentor){
+    public void applyMentor(Mentor mentor) {
 
 //        String fieldStr = "";
 //        for (Integer field: mentor.getMentorFieldList()) {
@@ -326,13 +347,13 @@ public class MentoringService {
 //        mentor.setMentorFieldStr(fieldStr);
 
         String keywordStr = "";
-        for (String keyword: mentor.getMentorKeyword()) {
+        for (String keyword : mentor.getMentorKeyword()) {
             keywordStr += keyword + ";";
         }
         mentor.setMentorKeywordStr(keywordStr);
 
         String careerStr = "";
-        for (String career: mentor.getMentorCareer()) {
+        for (String career : mentor.getMentorCareer()) {
             careerStr += career + ";";
         }
         mentor.setMentorCareerStr(careerStr);
@@ -340,11 +361,11 @@ public class MentoringService {
         mentoringDao.applyMentor(mentor);
         mentoringDao.addCounselFieldMentor(mentor);
 
-        fileSaveService.fileSave(mentor.getProfileImg(),mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
+        fileSaveService.fileSave(mentor.getProfileImg(), mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void updateMentorProfile(Mentor mentor){
+    public void updateMentorProfile(Mentor mentor) {
 
 //        String fieldStr = "";
 //        for (Integer field: mentor.getMentorFieldList()) {
@@ -353,23 +374,23 @@ public class MentoringService {
 //        mentor.setMentorFieldStr(fieldStr);
 
         String keywordStr = "";
-        for (String keyword: mentor.getMentorKeyword()) {
+        for (String keyword : mentor.getMentorKeyword()) {
             keywordStr += keyword + ";";
         }
 
         //빈문자열이 들어가서 초기화
-        if(keywordStr == ""){
+        if (keywordStr == "") {
             keywordStr = null;
         }
         mentor.setMentorKeywordStr(keywordStr);
 
         String careerStr = "";
-        for (String career: mentor.getMentorCareer()) {
+        for (String career : mentor.getMentorCareer()) {
             careerStr += career + ";";
         }
 
         //빈문자열이 들어가서 초기화
-        if(careerStr == ""){
+        if (careerStr == "") {
             careerStr = null;
         }
         mentor.setMentorCareerStr(careerStr);
@@ -382,15 +403,15 @@ public class MentoringService {
         System.out.println(mentor);
         System.out.println("====1");
 
-        if(mentor.getMentorFieldList().size() > 0){
+        if (mentor.getMentorFieldList().size() > 0) {
             mentoringDao.addCounselFieldMentor(mentor);
         }
 
-        if(mentor.getProfileImg() != null){
+        if (mentor.getProfileImg() != null) {
             List<AttachFile> attachFileList = new ArrayList<>();
 
             //이미지가 없었다면
-            if(mentor.getFileId() != null){
+            if (mentor.getFileId() != null) {
                 AttachFile attachFile = new AttachFile();
                 attachFile.setFileId(mentor.getFileId());
                 attachFileList.add(attachFile);
@@ -398,30 +419,30 @@ public class MentoringService {
                 fileSaveService.deleteAttachFile(attachFileList);
             }
 
-            fileSaveService.fileSave(mentor.getProfileImg(),mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
+            fileSaveService.fileSave(mentor.getProfileImg(), mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);
         }
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void applyCounsel(CounselApplyForm counselApplyForm)throws Exception{
+    public void applyCounsel(CounselApplyForm counselApplyForm) throws Exception {
         mentoringDao.applyCounsel(counselApplyForm);
 //        mentoringDao.addCounselFieldMentee(counselApplyForm);
 
 
-        if(counselApplyForm.getSortationIdList().size() > 0 ){
+        if (counselApplyForm.getSortationIdList().size() > 0) {
             List<SortationItem> sortationItemList = new ArrayList<>();
 
-            for (int id: counselApplyForm.getSortationIdList()) {
+            for (int id : counselApplyForm.getSortationIdList()) {
                 sortationItemList.add(new SortationItem(counselApplyForm.getFormId(), id));
             }
 
             mentoringDao.addCounselSortation(sortationItemList);
         }
 
-        if(counselApplyForm.getWayIdList().size() > 0 ){
+        if (counselApplyForm.getWayIdList().size() > 0) {
             List<WayItem> wayItemList = new ArrayList<>();
 
-            for (int id: counselApplyForm.getWayIdList()) {
+            for (int id : counselApplyForm.getWayIdList()) {
                 wayItemList.add(new WayItem(counselApplyForm.getFormId(), id));
             }
             mentoringDao.addCounselWay(wayItemList);
@@ -430,21 +451,90 @@ public class MentoringService {
 
         List<AttachFile> attachFileList = new ArrayList<>();
 
-        for (Integer file: counselApplyForm.getUploadResultList()) {
+        for (Integer file : counselApplyForm.getUploadResultList()) {
             AttachFile attachFile = new AttachFile();
             attachFile.setContentId(counselApplyForm.getFormId());
             attachFile.setDivision(FILE_DIVISION.MENTORING_ATTACH);
             attachFile.setFileId(file);
             attachFileList.add(attachFile);
         }
-        if(attachFileList.size() > 0){
+        if (attachFileList.size() > 0) {
             fileSaveService.updateAttachFile(attachFileList);
         }
 
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void addDiary(MentoringDiary mentoringDiary){
+    public void updateApplyCounsel(CounselApplyForm counselApplyForm) throws Exception {
+        mentoringDao.updateApplyCounsel(counselApplyForm);
+//        mentoringDao.addCounselFieldMentee(counselApplyForm);
+
+
+        if (counselApplyForm.getSortationIdList().size() > 0) {
+            List<SortationItem> sortationItemList = new ArrayList<>();
+
+            for (int id : counselApplyForm.getSortationIdList()) {
+                sortationItemList.add(new SortationItem(counselApplyForm.getFormId(), id));
+            }
+
+            mentoringDao.resetCounselSortation(counselApplyForm.getFormId());
+            mentoringDao.addCounselSortation(sortationItemList);
+        }
+
+        if (counselApplyForm.getWayIdList().size() > 0) {
+            List<WayItem> wayItemList = new ArrayList<>();
+
+            for (int id : counselApplyForm.getWayIdList()) {
+                wayItemList.add(new WayItem(counselApplyForm.getFormId(), id));
+            }
+            mentoringDao.resetCounselWay(counselApplyForm.getFormId());
+            mentoringDao.addCounselWay(wayItemList);
+        }
+
+
+        List<AttachFile> attachFileList = new ArrayList<>();
+        List<AttachFile> removeList = new ArrayList<>();
+
+        for (Integer file : counselApplyForm.getUploadResultList()) {
+            AttachFile attachFile = new AttachFile();
+            attachFile.setContentId(counselApplyForm.getFormId());
+            attachFile.setDivision(FILE_DIVISION.MENTORING_ATTACH);
+            attachFile.setFileId(file);
+            attachFileList.add(attachFile);
+        }
+        if (attachFileList.size() > 0) {
+            fileSaveService.updateAttachFile(attachFileList);
+        }
+
+        for (Integer file : counselApplyForm.getRemoveFiles()) {
+            AttachFile attachFile = new AttachFile();
+            attachFile.setContentId(counselApplyForm.getFormId());
+            attachFile.setDivision(FILE_DIVISION.MENTORING_ATTACH);
+            attachFile.setFileId(file);
+            removeList.add(attachFile);
+        }
+
+        if (removeList.size() > 0) {
+            fileSaveService.deleteAttachFile(removeList);
+        }
+
+        if (counselApplyForm.getApplyStatus().equals(APPLY_STATUS.APPLY)) {
+            Email email = new Email();
+            email.setToName(counselApplyForm.getMenteeName());
+            email.setTo(counselApplyForm.getMenteeEmail());
+            email.setTitle("멘토링신청이 접수되었습니다");
+            emailService.sendEmail(email);
+
+            Email email2 = new Email();
+            email2.setToName("한양대학교 창업지원단");
+            email2.setTo(ADMIN_EMAIL);
+            email2.setTitle("멘토링신청이 접수되었습니다");
+            emailService.sendEmail(email2);
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public void addDiary(MentoringDiary mentoringDiary) {
         Mentor mentor = new Mentor();
         mentor.setUserId(mentoringDiary.getMentorUserId());
         Mentor searchMentor = mentoringDao.getMentor(mentor);
@@ -457,16 +547,16 @@ public class MentoringService {
         counselApplyForm.setApplyStatus(APPLY_STATUS.COMPLETED);
         mentoringDao.updateCounselApplyStatus(counselApplyForm);
 
-        if(mentoringDiary.getWayIdList().size() > 0 ){
+        if (mentoringDiary.getWayIdList().size() > 0) {
             List<WayItem> wayItemList = new ArrayList<>();
 
-            for (int id: mentoringDiary.getWayIdList()) {
+            for (int id : mentoringDiary.getWayIdList()) {
                 wayItemList.add(new WayItem(mentoringDiary.getDiaryId(), id));
             }
             mentoringDao.addDiaryWay(wayItemList);
         }
 
-        if(mentoringDiary.getFiles() != null){
+        if (mentoringDiary.getFiles() != null) {
             for (MultipartFile file : mentoringDiary.getFiles()) {
                 fileSaveService.fileSave(file, mentoringDiary.getDiaryId(), FILE_DIVISION.MENTORING_ANSWER_ATTACH);
             }
@@ -475,42 +565,42 @@ public class MentoringService {
 
         try {
 
-                CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
+            CounselApplyForm resultCounselApplyForm = mentoringDao.getCounselApply(counselApplyForm);
 
-                Email email = new Email();
-                email.setToName(resultCounselApplyForm.getMenteeName());
-                email.setTo(resultCounselApplyForm.getMenteeEmail());
-                email.setTitle("멘토링이 완료되었습니다.");
-                email.setDesc("별점평가 후 멘토 의견 조회가 가능합니다.");
-                emailService.sendEmail(email);
-
-
-                Email email2 = new Email();
-                email2.setToName("한양대학교 창업지원단");
-                email2.setTo(ADMIN_EMAIL);
-                email2.setTitle("멘토링 완료 후 멘토링 일지가 제출되었습니다.");
-                emailService.sendEmail(email2);
-
-                Email email3 = new Email();
-                email3.setToName(searchMentor.getMentorName());
-                email3.setTo(searchMentor.getMentorEmail());
-                email3.setTitle("멘토링 일지 제출이 완료되었습니다.");
-                emailService.sendEmail(email3);
+            Email email = new Email();
+            email.setToName(resultCounselApplyForm.getMenteeName());
+            email.setTo(resultCounselApplyForm.getMenteeEmail());
+            email.setTitle("멘토링이 완료되었습니다.");
+            email.setDesc("별점평가 후 멘토 의견 조회가 가능합니다.");
+            emailService.sendEmail(email);
 
 
-        }catch (Exception e){
+            Email email2 = new Email();
+            email2.setToName("한양대학교 창업지원단");
+            email2.setTo(ADMIN_EMAIL);
+            email2.setTitle("멘토링 완료 후 멘토링 일지가 제출되었습니다.");
+            emailService.sendEmail(email2);
+
+            Email email3 = new Email();
+            email3.setToName(searchMentor.getMentorName());
+            email3.setTo(searchMentor.getMentorEmail());
+            email3.setTitle("멘토링 일지 제출이 완료되었습니다.");
+            emailService.sendEmail(email3);
+
+
+        } catch (Exception e) {
 
         }
     }
 
-    public void updateDiary(MentoringDiary mentoringDiary){
+    public void updateDiary(MentoringDiary mentoringDiary) {
 
         CounselApplyForm counselApplyForm = new CounselApplyForm();
         counselApplyForm.setFormId(mentoringDiary.getFormId());
         counselApplyForm.setApplyStatus(APPLY_STATUS.COMPLETED);
         counselApplyForm.setUserId(mentoringDiary.getMenteeUserId());
 
-        if(mentoringDao.getCounselApply(counselApplyForm) != null){
+        if (mentoringDao.getCounselApply(counselApplyForm) != null) {
             mentoringDao.updateDiary(mentoringDiary);
 
         }
@@ -518,7 +608,7 @@ public class MentoringService {
 
     }
 
-    public HSSFWorkbook excelDownloadAll(){
+    public HSSFWorkbook excelDownloadAll() {
         Mentor mentor = new Mentor();
         mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
 
@@ -526,16 +616,16 @@ public class MentoringService {
 
         List<Mentor> mentorList = mentoringDao.getMentorList(mentor);
 
-        mentorList.stream().map(item-> {
-            if(item.getMentorCareerStr() != null){
+        mentorList.stream().map(item -> {
+            if (item.getMentorCareerStr() != null) {
                 item.setMentorCareer(Arrays.asList(item.getMentorCareerStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorCareer(new ArrayList<>());
             }
 
-            if(item.getMentorKeywordStr() != null){
+            if (item.getMentorKeywordStr() != null) {
                 item.setMentorKeyword(Arrays.asList(item.getMentorKeywordStr().split(";").clone()));
-            }else{
+            } else {
                 item.setMentorKeyword(new ArrayList<>());
             }
             item.setMentorFieldList(mentoringDao.getCounselFieldMentor(item));
@@ -551,14 +641,14 @@ public class MentoringService {
         HSSFCell cell = null;
 
         row = sheet.createRow(0);
-        String[] headerKey = {"아이디", "멘토 소개", "경력", "이름", "소속", "핸드폰", "키워드","이메일","현재 경력","직책","우수 멘토"};
+        String[] headerKey = {"아이디", "멘토 소개", "경력", "이름", "소속", "핸드폰", "키워드", "이메일", "현재 경력", "직책", "우수 멘토"};
 
-        for(int i=0; i<headerKey.length; i++) {
+        for (int i = 0; i < headerKey.length; i++) {
             cell = row.createCell(i);
             cell.setCellValue(headerKey[i]);
         }
 
-        for(int i=0; i<mentorList.size(); i++) {
+        for (int i = 0; i < mentorList.size(); i++) {
             row = sheet.createRow(i + 1);
             Mentor vo = mentorList.get(i);
 
@@ -589,9 +679,9 @@ public class MentoringService {
             cell.setCellValue(vo.getMentorPosition());
 
             cell = row.createCell(10);
-            if(vo.getIsBest() != null){
+            if (vo.getIsBest() != null) {
                 cell.setCellValue(vo.getIsBest());
-            }else{
+            } else {
                 cell.setCellValue("");
             }
 
@@ -602,7 +692,7 @@ public class MentoringService {
 
     }
 
-    public HSSFWorkbook counselApplyDownloadAll(){
+    public HSSFWorkbook counselApplyDownloadAll() {
 
 //        Mentor mentor = new Mentor();
 //        mentor.setTotalCount(mentoringDao.getMentorListCnt(mentor));
@@ -642,15 +732,15 @@ public class MentoringService {
         HSSFCell cell = null;
 
         row = sheet.createRow(0);
-        String[] headerKey = {"번호","아이디", "이름","희망 분야","구분","창업 진행 상황","상담 진행 방식", "상담 제목","상담 내용", "핸드폰 번호", "E-MAIL", "승인 상태", "신청일","멘토 아이디","멘토 이름","상담 장소","답변","상담 진행일","답변 작성일","평가"};
+        String[] headerKey = {"번호", "아이디", "이름", "희망 분야", "구분", "창업 진행 상황", "상담 진행 방식", "상담 제목", "상담 내용", "핸드폰 번호", "E-MAIL", "승인 상태", "신청일", "멘토 아이디", "멘토 이름", "상담 장소", "답변", "상담 진행일", "답변 작성일", "평가"};
 
-        for(int i=0; i<headerKey.length; i++) {
+        for (int i = 0; i < headerKey.length; i++) {
             cell = row.createCell(i);
             cell.setCellValue(headerKey[i]);
         }
 
         List<WayItem> wList = null;
-        for(int i=0; i<counselApplyList.size(); i++) {
+        for (int i = 0; i < counselApplyList.size(); i++) {
             row = sheet.createRow(i + 1);
             CounselApplyForm vo = counselApplyList.get(i);
 
@@ -679,13 +769,13 @@ public class MentoringService {
 
 
             cell = row.createCell(4);
-            if(apply.getSortationItemList() != null && apply.getSortationItemList().size() > 0){
+            if (apply.getSortationItemList() != null && apply.getSortationItemList().size() > 0) {
                 StringBuilder s = new StringBuilder();
                 apply.getSortationItemList().forEach(item -> {
-                    s.append(item.getItem()+", ");
+                    s.append(item.getItem() + ", ");
                 });
                 cell.setCellValue(s.toString());
-            }else{
+            } else {
                 cell.setCellValue("");
             }
 
@@ -693,13 +783,13 @@ public class MentoringService {
             cell.setCellValue(apply.getFormProgressItemName());
 
             cell = row.createCell(6);
-            if(apply.getWayItemList() != null && apply.getWayItemList().size() > 0){
+            if (apply.getWayItemList() != null && apply.getWayItemList().size() > 0) {
                 StringBuilder s = new StringBuilder();
                 apply.getWayItemList().forEach(item -> {
-                    s.append(item.getItem()+", ");
+                    s.append(item.getItem() + ", ");
                 });
                 cell.setCellValue(s.toString());
-            }else{
+            } else {
                 cell.setCellValue("");
             }
 
@@ -719,7 +809,6 @@ public class MentoringService {
             cell.setCellValue(this.getStatus(apply.getApplyStatus().toString()));
             cell = row.createCell(12);
             cell.setCellValue(apply.getRegDate().toString());
-
 
 
             //멘토
@@ -753,22 +842,22 @@ public class MentoringService {
             cell.setCellValue(apply.getAnswer());
 
             cell = row.createCell(17);
-            if(apply.getStart() != null && apply.getEnd() != null){
-                cell.setCellValue(apply.getStart()+" ~ "+apply.getEnd());
-            }else{
+            if (apply.getStart() != null && apply.getEnd() != null) {
+                cell.setCellValue(apply.getStart() + " ~ " + apply.getEnd());
+            } else {
                 cell.setCellValue("");
             }
             cell = row.createCell(18);
 
-            if(apply.getAnswerDate() != null){
+            if (apply.getAnswerDate() != null) {
                 cell.setCellValue(apply.getAnswerDate().toString());
-            }else{
+            } else {
                 cell.setCellValue("");
             }
             cell = row.createCell(19);
-            if(vo.getScore() != null){
+            if (vo.getScore() != null) {
                 cell.setCellValue(apply.getScore());
-            }else{
+            } else {
                 cell.setCellValue("");
             }
 //            cell = row.createCell(8);
@@ -793,24 +882,24 @@ public class MentoringService {
 
     }
 
-    public String getStatus(String st){
+    public String getStatus(String st) {
         String status = "";
-        if(st != null){
-            switch (st){
+        if (st != null) {
+            switch (st) {
                 case "APPLY":
-                    status =  "신청";
+                    status = "신청";
                     break;
                 case "ASSIGN":
-                    status =  "배정 완료";
+                    status = "배정 완료";
                     break;
                 case "RETURN":
-                    status =  "반려";
+                    status = "반려";
                     break;
                 case "PROCESS":
-                    status =  "상담 진행중";
+                    status = "상담 진행중";
                     break;
                 case "COMPLETED":
-                    status =  "상담 완료";
+                    status = "상담 완료";
                     break;
             }
         }

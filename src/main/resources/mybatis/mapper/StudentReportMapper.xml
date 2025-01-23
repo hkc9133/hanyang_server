@@ -56,7 +56,8 @@
     </update>
 
     <select id="getStudentReport" parameterType="com.hanyang.startup.hanyangstartup.studentReport.domain.StudentReport" resultMap="StudentReportMap">
-        select * from student_report as s
+        select s.*
+               from student_report as s
         where s.student_report_id = #{studentReportId}
     </select>
 

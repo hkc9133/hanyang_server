@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hanyang.startup.hanyangstartup.common.domain.Page;
 import com.hanyang.startup.hanyangstartup.resource.domain.AttachFile;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +31,8 @@ public class StudentReport extends Page {
     private String businessItem;
     private Integer sales;
     private Integer staffNum;
+
+    private AttachFile certificateFile;
 
 
     private String userId;

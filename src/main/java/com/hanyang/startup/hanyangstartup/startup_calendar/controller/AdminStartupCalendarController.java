@@ -1,6 +1,7 @@
 package com.hanyang.startup.hanyangstartup.startup_calendar.controller;
 
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
+import com.hanyang.startup.hanyangstartup.startup_calendar.domain.PROGRESS_STATUS;
 import com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendar;
 import com.hanyang.startup.hanyangstartup.startup_calendar.domain.StartupCalendarCategoryCode;
 import com.hanyang.startup.hanyangstartup.startup_calendar.service.StartupCalendarService;
@@ -106,7 +107,7 @@ public class AdminStartupCalendarController {
     }
 
     @GetMapping(value = "/list")
-    public ResponseEntity<Response> getStartupCalendarList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate) {
+    public ResponseEntity<Response> getStartupCalendarList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate,@RequestParam("progressStatus") PROGRESS_STATUS progressStatus) {
 
 
         Response response;
@@ -120,6 +121,8 @@ public class AdminStartupCalendarController {
             startupCalendar.setSearchValue(searchValue);
             startupCalendar.setStartDate(startDate);
             startupCalendar.setEndDate(endDate);
+            startupCalendar.setProgressStatus(progressStatus);
+
 
             Map<String,Object> map = startupCalendarService.getStartupCalendarList(startupCalendar);
             response = new Response("success", null, map, 200);

@@ -187,6 +187,40 @@ public class BoardService {
 
         return map;
     }
+
+    public Map<String, Object> getBoardContentEnMain(){
+        Map<String, Object> map = new HashMap<>();
+
+        List<BoardContent> boardContentList = boardDao.getBoardContentEnMain();
+
+        boardContentList.stream().map(boardContent -> {
+
+            Reply reply = new Reply();
+            reply.setContentId(boardContent.getContentId());
+
+            List<Reply> replyList = boardDao.getReplyList(reply);
+            boardContent.setReplyCount(replyList.size());
+
+            AttachFile attachFile = new AttachFile();
+            attachFile.setContentId(boardContent.getContentId());
+            attachFile.setDivision(FILE_DIVISION.BOARD_ATTACH);
+            attachFile.setStatus(FILE_STATUS.A);
+
+            AttachFile thumb = new AttachFile();
+            thumb.setContentId(boardContent.getContentId());
+            thumb.setDivision(FILE_DIVISION.BOARD_THUMB_IMG);
+            thumb.setStatus(FILE_STATUS.A);
+
+            boardContent.setAttachFileList(fileSaveService.getAttachFileList(attachFile));
+            boardContent.setThumbList(fileSaveService.getAttachFileList(thumb));
+            return boardContent;
+        }).collect(Collectors.toList());
+
+
+        map.put("list", boardContentList);
+
+        return map;
+    }
     //컨텐츠 리스트
     public Map<String, Object> getBoardContentList(BoardConfig boardConfig) {
         boardConfig.setTotalCount(boardDao.getBoardContentListCnt(boardConfig));

@@ -22,6 +22,9 @@
             <if test="division != null">
                 AND division = #{division}
             </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
         </where>
     </select>
 
@@ -40,7 +43,7 @@
         </where>
     </select>
 
-    <update  id="updateAttachFile" parameterType="java.util.ArrayList">
+    <update  id="updateAttachFileList" parameterType="java.util.ArrayList">
         <foreach item="item" collection="list" separator=";">
             UPDATE attach_file
             <set>
@@ -55,6 +58,21 @@
                 </if>
             </where>
         </foreach>
+    </update>
+
+    <update  id="updateAttachFile" parameterType="com.hanyang.startup.hanyangstartup.resource.domain.AttachFile">
+            UPDATE attach_file
+            <set>
+                <if test="contentId != null and contentId != ''">
+                    content_id = #{contentId},
+                </if>
+            </set>
+            <where>
+                AND file_id = #{fileId}
+                <if test="division != null">
+                    AND division = #{division}
+                </if>
+            </where>
     </update>
 
     <update  id="deleteAttachFile" parameterType="java.util.List">

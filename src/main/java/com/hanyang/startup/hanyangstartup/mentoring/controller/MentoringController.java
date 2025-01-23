@@ -194,18 +194,23 @@ public class MentoringController {
     }
 
     @GetMapping("/mentor/list")
-    public ResponseEntity<Response> getMentorList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",required = false) Integer pageSize, @RequestParam(value = "counselField", defaultValue = "") Integer counselField,Principal principal){
+    public ResponseEntity<Response> getMentorList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "6",required = false) Integer pageSize, @RequestParam(value = "counselField", defaultValue = "") Integer counselField,Principal principal){
         Response response;
         try {
 
             Mentor mentor = new Mentor();
             mentor.setMentorStatus(MENTOR_STATUS.ACCEPT);
             mentor.setPageNo(page);
-            if(pageSize == null){
-                mentor.setPageSize(9);
-            }else{
-                mentor.setPageSize(pageSize);
-            }
+            mentor.setPageSize(pageSize);
+
+            System.out.println("VVVVVVVVVVVVV");
+            System.out.println(page);
+            System.out.println(pageSize);
+//            if(pageSize == null){
+//                mentor.setPageSize(9);
+//            }else{
+//                mentor.setPageSize(pageSize);
+//            }
             if(counselField != null){
                 List<Integer> counselFieldList = new ArrayList<>();
                 counselFieldList.add(counselField);
@@ -296,6 +301,30 @@ public class MentoringController {
             email2.setTo(ADMIN_EMAIL);
             email2.setTitle("멘토링신청이 접수되었습니다");
             emailService.sendEmail(email2);
+
+            response = new Response("success", null, null, 200);
+            return new ResponseEntity(response, HttpStatus.OK);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            response = new Response("fail", null, null, 400);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @PutMapping("/counsel/apply")
+    public ResponseEntity<Response> updateApplyCounsel(CounselApplyForm counselApplyForm, Principal principal){
+        Response response;
+        try {
+
+            counselApplyForm.setUserId(principal.getName());
+
+            System.out.println("====>상담 신청");
+            System.out.println(counselApplyForm);
+
+            mentoringService.updateApplyCounsel(counselApplyForm);
+
 
             response = new Response("success", null, null, 200);
             return new ResponseEntity(response, HttpStatus.OK);

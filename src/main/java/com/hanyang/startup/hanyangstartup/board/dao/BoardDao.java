@@ -63,6 +63,9 @@ public class BoardDao {
     public List<BoardContent> getBoardContentMain(){
         return sqlSession.selectList("board.getBoardContentMain");
     }
+    public List<BoardContent> getBoardContentEnMain(){
+        return sqlSession.selectList("board.getBoardContentEnMain");
+    }
     public List<BoardContent> getBoardContentList(BoardConfig boardConfig){
         return sqlSession.selectList("board.getBoardContentList",boardConfig);
     }

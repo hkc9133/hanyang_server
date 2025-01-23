@@ -243,6 +243,15 @@
         </where>
         ORDER BY reg_date DESC LIMIT 10
     </select>
+    <select id="getBoardContentEnMain" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+        SELECT * FROM board_content
+        <where>
+            AND board_en_name = 'notice_en'
+            AND is_notice = true
+            AND status = 'A'
+        </where>
+        ORDER BY reg_date DESC LIMIT 10
+    </select>
 
     <select id="getBoardContentList" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
             resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">

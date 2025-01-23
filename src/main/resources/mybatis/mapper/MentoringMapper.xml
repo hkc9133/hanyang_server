@@ -38,6 +38,8 @@
 
     <select id="getCounselFieldCode" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselFiledCode">
         select * from counsel_field_code
+        where use_yn = 1
+        order by order_num asc
     </select>
 
     <select id="getProgressItem" resultType="com.hanyang.startup.hanyangstartup.mentoring.domain.ProgressItem">
@@ -130,7 +132,7 @@
             </if>
         </where>
         group by a.mentor_id
-        order by a.mentor_id desc
+        order by a.mentor_name asc
         <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
             limit #{startRowNo}, #{pageSize}
         </if>
@@ -193,12 +195,27 @@
     </delete>
 
     <insert id="applyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
-        insert into counsel_apply_form(user_id,title,content,form_progress_item,field_id,mentee_name,mentee_email,mentee_phone_number,hope_mentor)
-        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{fieldId},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor})
+        insert into counsel_apply_form(user_id,title,content,form_progress_item,field_id,mentee_name,mentee_email,mentee_phone_number,hope_mentor,apply_status)
+        VALUES(#{userId},#{title},#{content},#{formProgressItem},#{fieldId},#{menteeName},#{menteeEmail},#{menteePhoneNumber},#{hopeMentor},#{applyStatus})
         <selectKey keyProperty="formId" resultType="int" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
     </insert>
+
+    <update id="updateApplyCounsel" parameterType="com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm">
+        update counsel_apply_form
+        set
+        title = #{title},
+        content = #{content},
+        form_progress_item = #{formProgressItem},
+        field_id = #{fieldId},
+        mentee_name = #{menteeName},
+        mentee_email = #{menteeEmail},
+        mentee_phone_number = #{menteePhoneNumber},
+        hope_mentor = #{hopeMentor},
+        apply_status = #{applyStatus}
+        where form_id = #{formId}
+    </update>
 
     <insert id="addCounselSortation" parameterType="java.util.List">
         insert into counsel_apply_form_sortation(form_id, item_id)
@@ -207,6 +224,10 @@
             (#{item.formId}, #{item.itemId})
         </foreach>
     </insert>
+    <delete id="resetCounselSortation" parameterType="java.lang.Integer">
+        delete from counsel_apply_form_sortation
+        where form_id = #{formId}
+    </delete>
 
     <insert id="addCounselWay" parameterType="java.util.List">
         insert into counsel_apply_form_way(form_id, item_id)
@@ -215,6 +236,10 @@
             (#{item.formId}, #{item.itemId})
         </foreach>
     </insert>
+    <delete id="resetCounselWay" parameterType="java.lang.Integer">
+        delete from counsel_apply_form_way
+        where form_id = #{formId}
+    </delete>
 
     <insert id="addDiaryWay" parameterType="java.util.List">
         insert into mentoring_diary_way(diary_id, item_id)
@@ -278,6 +303,15 @@
             </if>
             <if test="mentorUserId != null and mentorUserId != ''">
                 AND m.user_id = #{mentorUserId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                AND a.reg_date between #{startDate} and #{endDate}
+            </if>
+            <if test="applyStatus != null">
+                AND a.apply_status = #{applyStatus}
             </if>
         </where>
     </select>
@@ -356,6 +390,15 @@
             </if>
             <if test="mentorUserId != null and mentorUserId != ''">
                 AND m.user_id = #{mentorUserId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">
+                AND a.reg_date between #{startDate} and #{endDate}
+            </if>
+            <if test="applyStatus != null">
+                AND a.apply_status = #{applyStatus}
             </if>
         </where>
         order by a.form_id desc

@@ -74,6 +74,9 @@ public class MentoringDao {
     public void applyCounsel(CounselApplyForm counselApplyForm){
         sqlSession.insert("mentoring.applyCounsel",counselApplyForm);
     }
+    public void updateApplyCounsel(CounselApplyForm counselApplyForm){
+        sqlSession.insert("mentoring.updateApplyCounsel",counselApplyForm);
+    }
 
     public List<SortationItem> getCounselSortationList(CounselApplyForm counselApplyForm){
         return sqlSession.selectList("mentoring.getCounselSortationList",counselApplyForm);
@@ -86,9 +89,15 @@ public class MentoringDao {
     public void addCounselSortation(List<SortationItem> counselSortationList){
         sqlSession.insert("mentoring.addCounselSortation",counselSortationList);
     }
+    public void resetCounselSortation(Integer formId){
+        sqlSession.delete("mentoring.resetCounselSortation",formId);
+    }
 
     public void addCounselWay(List<WayItem> counselWayList){
         sqlSession.insert("mentoring.addCounselWay",counselWayList);
+    }
+    public void resetCounselWay(Integer formId){
+        sqlSession.delete("mentoring.resetCounselWay",formId);
     }
 
 

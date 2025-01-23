@@ -2,10 +2,7 @@ package com.hanyang.startup.hanyangstartup.mentoring.controller;
 
 import com.hanyang.startup.hanyangstartup.common.domain.Response;
 import com.hanyang.startup.hanyangstartup.mentoring.dao.MentoringDao;
-import com.hanyang.startup.hanyangstartup.mentoring.domain.CounselApplyForm;
-import com.hanyang.startup.hanyangstartup.mentoring.domain.CounselFiledCode;
-import com.hanyang.startup.hanyangstartup.mentoring.domain.MENTOR_STATUS;
-import com.hanyang.startup.hanyangstartup.mentoring.domain.Mentor;
+import com.hanyang.startup.hanyangstartup.mentoring.domain.*;
 import com.hanyang.startup.hanyangstartup.mentoring.service.MentoringService;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,12 +151,24 @@ public class AdminMentoringController {
 
 
     @PostMapping("/counsel_apply")
-    public ResponseEntity<Response> getCounselApplyList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize, CounselApplyForm counselApplyForm){
+    public ResponseEntity<Response> getCounselApplyList(@RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                        @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize,
+                                                        @RequestParam(value = "searchField",required = false) String searchField,
+                                                        @RequestParam(value = "searchValue",required = false) String searchValue,
+                                                        @RequestParam(value = "status",required = false) APPLY_STATUS status,
+                                                        @RequestParam(value = "startDate",defaultValue = "") String startDate,
+                                                        @RequestParam(value = "endDate",defaultValue = "") String endDate,
+                                                        CounselApplyForm counselApplyForm){
         Response response;
         try {
-
+            
             counselApplyForm.setPageNo(page);
             counselApplyForm.setPageSize(pageSize);
+            counselApplyForm.setSearchField(searchField);
+            counselApplyForm.setSearchValue(searchValue);
+            counselApplyForm.setApplyStatus(status);
+            counselApplyForm.setStartDate(startDate);
+            counselApplyForm.setEndDate(endDate);
             Map<String, Object> map = mentoringService.getCounselApplyList(counselApplyForm);
 
             response = new Response("success", null, map, 200);

@@ -25,8 +25,12 @@ public class FileSaveDao {
         return sqlSession.selectOne("attach_file.getAttachFile",attachFile);
     }
 
-    public void updateAttachFile(List<AttachFile> attachFileList){
-        sqlSession.update("attach_file.updateAttachFile",attachFileList);
+    public void updateAttachFileList(List<AttachFile> attachFileList){
+        sqlSession.update("attach_file.updateAttachFileList",attachFileList);
+    }
+
+    public void updateAttachFile(AttachFile attachFile){
+        sqlSession.update("attach_file.updateAttachFile",attachFile);
     }
 
     public void deleteAttachFile(List<AttachFile> attachFileList){

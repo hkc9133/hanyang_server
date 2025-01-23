@@ -75,6 +75,9 @@
             <if test="categoryCodeId != null and categoryCodeId != ''">
                 AND a.category_code_id = #{categoryCodeId}
             </if>
+            <if test="progressStatus != null">
+                AND a.progress_status = #{progressStatus}
+            </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
                 AND ${searchField} like '%' #{searchValue} '%'
             </if>
@@ -101,6 +104,9 @@
         <where>
             <if test="categoryCodeId != null and categoryCodeId != ''">
                 AND a.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="progressStatus != null">
+                AND a.progress_status = #{progressStatus}
             </if>
             <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
                 AND ${searchField} like '%' #{searchValue} '%'

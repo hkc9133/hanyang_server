@@ -42,6 +42,7 @@ public class CounselApplyForm extends Page {
 
     private List<AttachFile> attachFileList;
     private List<Integer> uploadResultList;
+    private List<Integer> removeFiles;
 
     //삭제예정
 //    private List<CounselField> counselFieldList;

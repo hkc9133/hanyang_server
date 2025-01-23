@@ -28,6 +28,9 @@ public class AdminStudentReportController {
             studentReport.setStudentReportId(studentReportId);
             StudentReport result = studentReportService.getStudentReport(studentReport);
 
+            System.out.println("DFDFDFD");
+            System.out.println(result);
+
             response = new Response("success", null, result, 200);
             return new ResponseEntity(response, HttpStatus.OK);
         }

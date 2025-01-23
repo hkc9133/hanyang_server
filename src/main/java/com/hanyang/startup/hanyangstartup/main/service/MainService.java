@@ -38,6 +38,9 @@ public class MainService {
         //공지사항
         Map<String, Object> noticeList = boardService.getBoardContentMain();
 
+        //공지사항 영문
+        Map<String, Object> noticeEnList = boardService.getBoardContentEnMain();
+
         //핫이슈
         BoardConfig issue = new BoardConfig();
         issue.setBoardEnName("issue");
@@ -85,6 +88,7 @@ public class MainService {
 
 
         map.put("notice",noticeList.get("list"));
+        map.put("notice_en",noticeEnList.get("list"));
         map.put("issue",issueList.get("list"));
         map.put("calendar",calendarList.get("list"));
 //        map.put("hot",hotList.get("list"));
