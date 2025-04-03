@@ -234,6 +234,70 @@
         </where>
     </select>
 
+    <select id="getBoardContentListCntEn" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
+            resultType="java.lang.Integer">
+        SELECT count(*) FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and a.status = 'A'
+            and a.board_en_name IN ('notice_en','company_en')
+
+            <if test="boardEnName != null and boardEnName != ''">
+                AND a.board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+    </select>
+
+    <select id="getBoardContentListCntKr" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
+            resultType="java.lang.Integer">
+        SELECT count(*) FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and a.status = 'A'
+            and a.board_en_name NOT IN ('notice_en','company_en')
+
+            <if test="boardEnName != null and boardEnName != ''">
+                AND a.board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND a.${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+    </select>
+
     <select id="getBoardContentMain" resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
         SELECT * FROM board_content
         <where>
@@ -325,6 +389,156 @@
 
         )as m order by is_notice desc ,reg_date desc
 
+    </select>
+
+    <select id="getBoardContentListEn" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
+            resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+
+
+        select null as rownum, a.*, b.category_code_name, b.color, c.user_name
+        FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and a.board_en_name IN ('notice_en','company_en')
+            and is_notice = true
+            and a.status = 'A'
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        union all
+        select * from (SELECT ROW_NUMBER() OVER (ORDER BY a.reg_date) rownum,
+        a.*,
+        b.category_code_name,
+        b.color,
+        c.user_name
+        FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and board_en_name IN ('notice_en','company_en')
+            and is_notice = false
+            and a.status = 'A'
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+            order by rownum desc
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                limit #{startRowNo}, #{pageSize}
+            </if>
+        </where>
+
+        )as m order by is_notice desc ,reg_date desc
+    </select>
+
+    <select id="getBoardContentListKr" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardConfig"
+            resultType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent">
+
+
+        select null as rownum, a.*, b.category_code_name, b.color, c.user_name
+        FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and a.board_en_name NOT IN ('notice_en','company_en')
+            and is_notice = true
+            and a.status = 'A'
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+        </where>
+        union all
+        select * from (SELECT ROW_NUMBER() OVER (ORDER BY a.reg_date) rownum,
+        a.*,
+        b.category_code_name,
+        b.color,
+        c.user_name
+        FROM board_content AS a
+        left join board_category_code AS b
+        ON a.category_code_id = b.category_code_id
+        left join users AS c
+        ON a.writer_id = c.user_id
+        <where>
+            and board_en_name NOT IN ('notice_en','company_en')
+            and is_notice = false
+            and a.status = 'A'
+            <if test="boardEnName != null and boardEnName != ''">
+                AND board_en_name = #{boardEnName}
+            </if>
+            <if test="categoryId != null and categoryId != ''">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="categoryCodeId != null and categoryCodeId != ''">
+                AND b.category_code_id = #{categoryCodeId}
+            </if>
+            <if test="searchField != null and searchField != '' and searchValue != null and searchValue != ''">
+                AND ${searchField} like '%' #{searchValue} '%'
+            </if>
+            <if test="startDate != null">
+                AND <![CDATA[date(reg_date) >= #{startDate}]]>
+            </if>
+            <if test="endDate != null">
+                AND <![CDATA[date(reg_date) <= #{endDate}]]>
+            </if>
+            order by rownum desc
+            <if test="pageNo != null and pageNo !=-1 and pageNo != ''">
+                limit #{startRowNo}, #{pageSize}
+            </if>
+        </where>
+
+        )as m order by is_notice desc ,reg_date desc
     </select>
 
     <select id="getBoardContentPrev" parameterType="com.hanyang.startup.hanyangstartup.board.domain.BoardContent"

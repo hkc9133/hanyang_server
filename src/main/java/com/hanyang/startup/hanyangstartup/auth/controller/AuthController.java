@@ -281,11 +281,15 @@ public class AuthController {
 
             String apiResult = oAuthClient.api(at, "GET", "https://api.hanyang.ac.kr/rs/user/loginListMoreInfo1.json", null);
 
+            System.out.println("Hanyang API Response: " + apiResult);
+
             HanyangAPIResponse hanyangResponse = new Gson().fromJson(apiResult, HanyangAPIResponse.class);
 
             String uuid = hanyangResponse.getResponse().getList().get(0).getUuid();
             String userName = hanyangResponse.getResponse().getList().get(0).getUserNm();
             String email = hanyangResponse.getResponse().getList().get(0).getEmail();
+
+            System.out.println("Received userName: " + userName);
 
             socialData.setType(UserType.HANYANG);
             socialData.setId(uuid);

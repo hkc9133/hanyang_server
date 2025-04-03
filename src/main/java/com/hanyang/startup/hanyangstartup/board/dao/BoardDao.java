@@ -70,6 +70,14 @@ public class BoardDao {
         return sqlSession.selectList("board.getBoardContentList",boardConfig);
     }
 
+    public List<BoardContent> getBoardContentListEn(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardContentListEn",boardConfig);
+    }
+
+    public List<BoardContent> getBoardContentListKr(BoardConfig boardConfig){
+        return sqlSession.selectList("board.getBoardContentListKr",boardConfig);
+    }
+
     public BoardContent getBoardContentPrev(BoardContent boardContent){
         return sqlSession.selectOne("board.getBoardContentPrev",boardContent);
     }
@@ -80,6 +88,14 @@ public class BoardDao {
 
     public int getBoardContentListCnt(BoardConfig boardConfig){
         return sqlSession.selectOne("board.getBoardContentListCnt",boardConfig);
+    }
+
+    public int getBoardContentListCntEn(BoardConfig boardConfig){
+        return sqlSession.selectOne("board.getBoardContentListCntEn",boardConfig);
+    }
+
+    public int getBoardContentListCntKr(BoardConfig boardConfig){
+        return sqlSession.selectOne("board.getBoardContentListCntKr",boardConfig);
     }
 
     public void deleteBoardContent(BoardContent boardContent){

@@ -258,16 +258,17 @@ public class BoardService {
         return map;
     }
 
+    // Kr게시판 검색
     public Map<String, Object> getBoardContentSearch(BoardConfig boardConfig) {
         if(boardConfig.getSearchValue() != null && !boardConfig.getSearchValue().equals("")){
             Keyword keyword = new Keyword();
             keyword.setKeyword(boardConfig.getSearchValue());
             keywordService.updateKeywordSearch(keyword);
         }
-        boardConfig.setTotalCount(boardDao.getBoardContentListCnt(boardConfig));
+        boardConfig.setTotalCount(boardDao.getBoardContentListCntKr(boardConfig));
 
         Map<String, Object> map = new HashMap<>();
-        List<BoardContent> boardContentList = boardDao.getBoardContentList(boardConfig);
+        List<BoardContent> boardContentList = boardDao.getBoardContentListKr(boardConfig);
 //
 //        boardContentList.stream().map(boardContent -> {
 //            AttachFile attachFile = new AttachFile();
@@ -282,13 +283,55 @@ public class BoardService {
         BoardConfig cateBoardConfig = new BoardConfig();
         cateBoardConfig.setPageSize(100);
         cateBoardConfig.setPageNo(1);
-        map.put("boardList", this.getBoardList(cateBoardConfig).get("list"));
+
+        // 기존 리스트 가져오기
+        List<BoardConfig> fullBoardList = (List<BoardConfig>) this.getBoardList(cateBoardConfig).get("list");
+
+        // 필터링 적용 (notice_en, company_en **제외**)
+        List<BoardConfig> filteredBoardList = fullBoardList.stream()
+                .filter(board -> !board.getBoardEnName().equals("notice_en") && !board.getBoardEnName().equals("company_en")) // 제외 조건
+                .collect(Collectors.toList());
+
+        map.put("boardList", filteredBoardList); // 필터링된 리스트 적용
         map.put("page", boardConfig);
         map.put("list", boardContentList);
         map.put("cate", boardDao.getBoardCategoryCodeList(boardConfig));
 
         return map;
     }
+
+    // En게시판 검색
+    public Map<String, Object> getBoardContentSearchEn(BoardConfig boardConfig) {
+        if(boardConfig.getSearchValue() != null && !boardConfig.getSearchValue().equals("")){
+            Keyword keyword = new Keyword();
+            keyword.setKeyword(boardConfig.getSearchValue());
+            keywordService.updateKeywordSearch(keyword);
+        }
+        boardConfig.setTotalCount(boardDao.getBoardContentListCntEn(boardConfig));
+
+        Map<String, Object> map = new HashMap<>();
+        List<BoardContent> boardContentList = boardDao.getBoardContentListEn(boardConfig);
+
+        BoardConfig cateBoardConfig = new BoardConfig();
+        cateBoardConfig.setPageSize(100);
+        cateBoardConfig.setPageNo(1);
+
+        // 기존 리스트 가져오기
+        List<BoardConfig> fullBoardList = (List<BoardConfig>) this.getBoardList(cateBoardConfig).get("list");
+
+        // 필터링 적용 (notice_en, company_en만 남김)
+        List<BoardConfig> filteredBoardList = fullBoardList.stream()
+                .filter(board -> board.getBoardEnName().equals("notice_en") || board.getBoardEnName().equals("company_en"))
+                .collect(Collectors.toList());
+
+        map.put("boardList", filteredBoardList); // 필터링된 리스트 적용
+        map.put("page", boardConfig);
+        map.put("list", boardContentList);
+        map.put("cate", boardDao.getBoardCategoryCodeList(boardConfig));
+
+        return map;
+    }
+
 
     public void deleteBoardContent(BoardContent boardContent) {
         boardDao.deleteBoardContent(boardContent);

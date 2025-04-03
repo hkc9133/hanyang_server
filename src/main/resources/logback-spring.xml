@@ -7,10 +7,10 @@
             </layout>
         </appender>
         <!-- 로그를 찍고자하는 클래스정보를 넣어주면 된다 -->
-        <logger name="com.hanyang.startup" level="DEBUG"></logger>
+        <logger name="com.hanyang.startup" level="INFO"></logger>
         <!-- MyBatis의 Mapper.xml에 선언된 namespace명을 넣어주면 해당 쿼리가 로그에 남는다. -->
         <!-- ex> namespase가 "sql.testMapper.my" 인 경우 맨 앞에 sql만 사용하면 sql로 시작되는 모든 namespace mapper 쿼리가 표시됨  -->
-        <logger name="sql" level="DEBUG"></logger>
+        <logger name="sql" level="WARN"></logger>
     </springProfile>
     <springProfile name="prod">
         <appender name="INFO_FILE_POLICY" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -49,7 +49,7 @@
         </appender>
     </springProfile>
 
-    <root level="DEBUG">
+    <root level="WARN">
         <springProfile name="local">
             <appender-ref ref="LOCAL_CONSOLE_POLICY"/>
         </springProfile>
