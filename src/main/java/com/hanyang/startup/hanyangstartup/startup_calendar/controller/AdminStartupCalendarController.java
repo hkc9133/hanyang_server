@@ -107,7 +107,7 @@ public class AdminStartupCalendarController {
     }
 
     @GetMapping(value = "/list")
-    public ResponseEntity<Response> getStartupCalendarList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam("startDate") String startDate, @RequestParam("endDate") String endDate,@RequestParam("progressStatus") PROGRESS_STATUS progressStatus) {
+    public ResponseEntity<Response> getStartupCalendarList(@RequestParam(value = "page", defaultValue = "1") Integer page, @RequestParam(value = "pageSize",defaultValue = "0") Integer pageSize, @RequestParam(value = "categoryCodeId", required = false) Integer categoryCodeId, @RequestParam(value = "searchValue", required = false) String searchValue, @RequestParam(value = "searchField", required = false) String searchField, @RequestParam(value = "startDate", required = false) String startDate, @RequestParam(value = "endDate", required = false) String endDate,@RequestParam(value = "progressStatus", required = false) PROGRESS_STATUS progressStatus) {
 
 
         Response response;

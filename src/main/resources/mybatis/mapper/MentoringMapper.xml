@@ -360,8 +360,7 @@
                 </when>
 
                 <otherwise>
-                    assign_mentor_id = null,
-                    apply_status = 'APPLY'
+                    assign_mentor_id = null
                 </otherwise>
 
             </choose>
