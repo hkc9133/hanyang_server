@@ -93,4 +93,7 @@ public class FileSaveService {
     public void deleteAttachFile(List<AttachFile> attachFileList){
         fileSaveDao.deleteAttachFile(attachFileList);
     }
+    public void deleteAttachFileWithContentId(List<AttachFile> attachFileList){
+        fileSaveDao.deleteAttachFileWithContentId(attachFileList);
+    }
 }

@@ -399,10 +399,6 @@ public class MentoringService {
 
         mentoringDao.removeCounselFieldMentor(mentor);
 
-        System.out.println("====1");
-        System.out.println(mentor);
-        System.out.println("====1");
-
         if (mentor.getMentorFieldList().size() > 0) {
             mentoringDao.addCounselFieldMentor(mentor);
         }
@@ -413,10 +409,11 @@ public class MentoringService {
             //이미지가 없었다면
             if (mentor.getFileId() != null) {
                 AttachFile attachFile = new AttachFile();
-                attachFile.setFileId(mentor.getFileId());
+                attachFile.setContentId(mentor.getMentorId());
+                attachFile.setDivision(FILE_DIVISION.MENTOR_PROFILE_IMG);
                 attachFileList.add(attachFile);
 
-                fileSaveService.deleteAttachFile(attachFileList);
+                fileSaveService.deleteAttachFileWithContentId(attachFileList);
             }
 
             fileSaveService.fileSave(mentor.getProfileImg(), mentor.getMentorId(), FILE_DIVISION.MENTOR_PROFILE_IMG);

@@ -82,6 +82,11 @@
         <foreach collection="list" item="item" index="index" separator="," open="(" close=")">
               #{item.fileId}
         </foreach>
+    </update>
 
+    <update  id="deleteAttachFileWithContentId" parameterType="java.util.List">
+        UPDATE attach_file
+        SET status = 'D'
+        WHERE content_id = #{contentId} and division = #{division}
     </update>
 </mapper>

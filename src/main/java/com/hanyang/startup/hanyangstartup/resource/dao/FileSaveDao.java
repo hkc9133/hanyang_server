@@ -36,5 +36,8 @@ public class FileSaveDao {
     public void deleteAttachFile(List<AttachFile> attachFileList){
         sqlSession.update("attach_file.deleteAttachFile",attachFileList);
     }
+    public void deleteAttachFileWithContentId(List<AttachFile> attachFileList){
+        sqlSession.update("attach_file.deleteAttachFileWithContentId",attachFileList);
+    }
 
 }
